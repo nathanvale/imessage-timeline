@@ -3,6 +3,13 @@
   "version": "0.0.0",
   "description": "Extract, transform, and analyze iMessage conversations with AI-powered enrichment and timeline rendering.",
   "type": "module",
+  "imports": {
+    "#schema/*": "./src/schema/*",
+    "#ingest/*": "./src/ingest/*",
+    "#normalize/*": "./src/normalize/*",
+    "#enrich/*": "./src/enrich/*",
+    "#render/*": "./src/render/*"
+  },
   "bin": {
     "imessage-timeline": "./dist/cli.js"
   },
@@ -32,7 +39,9 @@
     "release": "changeset publish",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
+    "validate:json": "node .scripts/validate-json.mjs",
     "commitlint": "commitlint --edit $GIT_PARAMS || true",
     "quality-check": "quality-check",
     "quality-check:ci": "quality-check --since origin/main --safe --fix"
@@ -54,7 +63,17 @@
     "timeline",
     "ai-enrichment"
   ],
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@mendable/firecrawl-js": "^4.3.7",
+    "commander": "^14.0.1",
+    "csv-parse": "^5.6.0",
+    "csv-stringify": "^6.5.2",
+    "sharp": "^0.34.4",
+    "zod": "^3.23.8"
+  },
   "devDependencies": {
+    "better-sqlite3": "^12.4.1",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^9.38.0",

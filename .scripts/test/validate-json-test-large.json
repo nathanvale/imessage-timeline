@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "1.0.0",
+  "source": "merged",
+  "createdAt": "2025-10-17T12:00:00.000Z",
+  "messages": [
+    {
+      "guid": "msg-001",
+      "isFromMe": true,
+      "date": "2025-10-17T08:00:00.000Z",
+      "messageKind": "text",
+      "text": "Good morning!"
+    },
+    {
+      "guid": "msg-002",
+      "isFromMe": false,
+      "date": "2025-10-17T08:05:00.000Z",
+      "messageKind": "text",
+      "text": "Morning! How are you?"
+    },
+    {
+      "guid": "msg-003",
+      "isFromMe": true,
+      "date": "2025-10-17T08:10:00.000Z",
+      "messageKind": "media",
+      "media": {
+        "id": "media-001",
+        "filename": "sunrise.jpg",
+        "path": "/Users/test/photos/sunrise.jpg",
+        "size": 3145728,
+        "mimeType": "image/jpeg",
+        "mediaKind": "image"
+      }
+    },
+    {
+      "guid": "msg-004",
+      "isFromMe": false,
+      "date": "2025-10-17T08:12:00.000Z",
+      "messageKind": "tapback",
+      "tapback": {
+        "type": "loved",
+        "action": "added",
+        "targetMessageGuid": "msg-003",
+        "isMedia": true
+      }
+    },
+    {
+      "guid": "msg-005",
+      "isFromMe": false,
+      "date": "2025-10-17T08:15:00.000Z",
+      "messageKind": "text",
+      "text": "Beautiful photo!"
+    },
+    {
+      "guid": "msg-006",
+      "isFromMe": true,
+      "date": "2025-10-17T08:20:00.000Z",
+      "messageKind": "text",
+      "text": "Thanks! Took it this morning"
+    },
+    {
+      "guid": "msg-007",
+      "isFromMe": false,
+      "date": "2025-10-17T08:25:00.000Z",
+      "messageKind": "media",
+      "media": {
+        "id": "media-002",
+        "filename": "coffee.jpg",
+        "path": "/Users/test/photos/coffee.jpg",
+        "size": 2097152,
+        "mimeType": "image/jpeg",
+        "mediaKind": "image"
+      }
+    },
+    {
+      "guid": "msg-008",
+      "isFromMe": true,
+      "date": "2025-10-17T08:27:00.000Z",
+      "messageKind": "tapback",
+      "tapback": {
+        "type": "liked",
+        "action": "added",
+        "targetMessageGuid": "msg-007",
+        "isMedia": true
+      }
+    },
+    {
+      "guid": "msg-009",
+      "isFromMe": false,
+      "date": "2025-10-17T08:30:00.000Z",
+      "messageKind": "text",
+      "text": "Coffee time!"
+    },
+    {
+      "guid": "msg-010",
+      "isFromMe": true,
+      "date": "2025-10-17T08:35:00.000Z",
+      "messageKind": "notification",
+      "text": "You started sharing your location"
+    },
+    {
+      "guid": "msg-011",
+      "isFromMe": false,
+      "date": "2025-10-17T08:40:00.000Z",
+      "messageKind": "text",
+      "text": "See you soon!"
+    },
+    {
+      "guid": "msg-012",
+      "isFromMe": true,
+      "date": "2025-10-17T08:45:00.000Z",
+      "messageKind": "text",
+      "text": "On my way"
+    },
+    {
+      "guid": "msg-013",
+      "isFromMe": false,
+      "date": "2025-10-17T09:00:00.000Z",
+      "messageKind": "media",
+      "media": {
+        "id": "media-003",
+        "filename": "voice_memo.m4a",
+        "path": "/Users/test/audio/voice_memo.m4a",
+        "size": 524288,
+        "mimeType": "audio/m4a",
+        "mediaKind": "audio"
+      }
+    },
+    {
+      "guid": "msg-014",
+      "isFromMe": true,
+      "date": "2025-10-17T09:05:00.000Z",
+      "messageKind": "text",
+      "text": "Got it, thanks for the heads up"
+    },
+    {
+      "guid": "msg-015",
+      "isFromMe": false,
+      "date": "2025-10-17T09:10:00.000Z",
+      "messageKind": "tapback",
+      "tapback": {
+        "type": "emphasized",
+        "action": "added",
+        "targetMessageGuid": "msg-014"
+      }
+    }
+  ],
+  "meta": {
+    "testPurpose": "Large dataset with varied message kinds",
+    "totalMessages": 15
+  }
+}

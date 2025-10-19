@@ -2,8 +2,17 @@
   "compilerOptions": {
     "declaration": true,
     "outDir": "dist",
-    "sourceMap": true
+    "rootDir": "./src",
+    "sourceMap": true,
+    "paths": {
+      "#schema/*": ["./src/schema/*"],
+      "#ingest/*": ["./src/ingest/*"],
+      "#normalize/*": ["./src/normalize/*"],
+      "#enrich/*": ["./src/enrich/*"],
+      "#render/*": ["./src/render/*"]
+    }
   },
   "extends": "./tsconfig.base.json",
-  "include": ["src", "tests", "vitest.config.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"]
 }
