@@ -1,0 +1,60 @@
+name: Dependabot Auto-Merge
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  auto-merge:
+    if: github.actor == 'dependabot[bot]' && contains(github.event.pull_request.title, 'deps-dev')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check changed files for devDependencies only
+        uses: actions/github-script@v7
+        id: diff
+        with:
+          script: |
+            const pr = context.payload.pull_request
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            })
+            const filenames = files.map(f => f.filename)
+            const allowed = [
+              'package.json',
+              'pnpm-lock.yaml',
+              'package-lock.json',
+              'yarn.lock',
+            ]
+            const onlyAllowed = filenames.every(f => allowed.includes(f))
+            if (!onlyAllowed) {
+              core.setFailed('PR touches files outside dependency manifests')
+            }
+      - name: Verify devDependencies scope in package.json
+        if: steps.diff.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            })
+            const pkgChange = files.find(f => f.filename === 'package.json')
+            if (!pkgChange) return
+            // crude check: require title contains 'dev' when package.json changed
+            const title = pr.title.toLowerCase()
+            if (!title.includes('dev')) {
+              core.setFailed('package.json changed but PR title is not a dev dependency bump')
+            }
+      - name: Enable auto-merge for minor/patch dev dependency updates
+        if: steps.diff.outcome == 'success'
+        uses: fastify/github-action-merge-dependabot@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          target: minor

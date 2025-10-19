@@ -1,0 +1,76 @@
+{
+  "name": "modern-ts-cli-starter",
+  "version": "0.0.0",
+  "description": "Modern TypeScript CLI with tsc-only build, ESLint flat, Prettier, Changesets, Node 22.20.",
+  "type": "module",
+  "bin": {
+    "modern-cli": "./dist/cli.js",
+    "modern-ts-cli-starter": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/**",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist .tsbuildinfo 2>/dev/null || true",
+    "dev": "pnpm build && node --env-file=.env ./dist/cli.js",
+    "start": "node --env-file=.env ./dist/cli.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier -w .",
+    "prepare": "husky",
+    "version:gen": "changeset",
+    "release": "changeset publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "commitlint": "commitlint --edit $GIT_PARAMS || true",
+    "quality-check": "quality-check",
+    "quality-check:ci": "quality-check --since origin/main --safe --fix"
+  },
+  "engines": {
+    "node": ">=22.20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "cli",
+    "eslint-flat",
+    "prettier",
+    "changesets"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@eslint/js": "^9.38.0",
+    "@orchestr8/quality-check": "^1.0.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^24.8.1",
+    "@vitest/coverage-v8": "^3.2.4",
+    "changesets": "^1.0.2",
+    "eslint": "^9.38.0",
+    "husky": "^9.1.7",
+    "jsdom": "^27.0.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-sort-json": "^4.1.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.1",
+    "vitest": "^3.2.4"
+  }
+}

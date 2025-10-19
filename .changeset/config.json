@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config/schema.json",
+  "access": "public",
+  "baseBranch": "main",
+  "changelog": [
+    "@changesets/changelog-github",
+    {"repo": "nathanvale/modern-ts-cli-starter"}
+  ],
+  "commit": false,
+  "fixed": [],
+  "ignore": [],
+  "linked": [],
+  "updateInternalDependencies": "patch"
+}

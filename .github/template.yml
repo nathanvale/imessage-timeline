@@ -1,0 +1,23 @@
+# GitHub Template Configuration
+# This file allows users to customize repository creation from this template
+
+name: modern-ts-cli-starter
+description: A modern TypeScript CLI starter with best practices built-in
+
+# Files to exclude from template repositories
+# These are typically personal or example files
+exclude:
+  - .env
+  - dist/
+  - node_modules/
+  - coverage/
+  - .changeset/*.md
+
+# Template metadata
+labels:
+  - typescript
+  - cli
+  - template
+  - eslint
+  - prettier
+  - vitest
