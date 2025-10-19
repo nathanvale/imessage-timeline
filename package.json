@@ -1,11 +1,10 @@
 {
-  "name": "modern-ts-cli-starter",
+  "name": "imessage-timeline",
   "version": "0.0.0",
-  "description": "Modern TypeScript CLI with tsc-only build, ESLint flat, Prettier, Changesets, Node 22.20.",
+  "description": "Extract, transform, and analyze iMessage conversations with AI-powered enrichment and timeline rendering.",
   "type": "module",
   "bin": {
-    "modern-cli": "./dist/cli.js",
-    "modern-ts-cli-starter": "./dist/cli.js"
+    "imessage-timeline": "./dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -47,11 +46,13 @@
   },
   "license": "MIT",
   "keywords": [
+    "imessage",
     "typescript",
     "cli",
-    "eslint-flat",
-    "prettier",
-    "changesets"
+    "data-pipeline",
+    "message-analysis",
+    "timeline",
+    "ai-enrichment"
   ],
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
