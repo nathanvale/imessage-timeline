@@ -28,7 +28,7 @@ interface LinkContext {
   url: string
   title?: string
   description?: string
-  provider: string
+  provider: 'gemini' | 'firecrawl' | 'local' | 'youtube' | 'spotify' | 'twitter' | 'instagram' | 'generic'
   usedFallback?: boolean
   failedProviders?: string[]
 }
@@ -363,7 +363,11 @@ async function enrichUrl(
 
       const context = await provider.extract(url)
       log('info', `Link enrichment succeeded with ${provider.name}`, { url })
-      return { ...context, failedProviders: failedProviders.length > 0 ? failedProviders : undefined }
+      const result: LinkContext = { ...context }
+      if (failedProviders.length > 0) {
+        result.failedProviders = failedProviders
+      }
+      return result
     } catch (error) {
       failedProviders.push(provider.name)
       log('warn', `Provider ${provider.name} failed for ${url}`, {
@@ -408,6 +412,10 @@ export async function enrichLinkContext(
 
     // Process first URL found (could extend to handle multiple)
     const url = urls[0]
+    if (!url) {
+      log('debug', `URL array is empty`, { guid: message.guid })
+      return message
+    }
     const context = await enrichUrl(url, config)
 
     if (!context) {
@@ -416,17 +424,22 @@ export async function enrichLinkContext(
     }
 
     // AC06: Create enrichment entry with full provenance
+    const version = new Date().toISOString().split('T')[0]
+    if (!version) {
+      throw new Error('Failed to generate version string')
+    }
     const enrichment: MediaEnrichment = {
       kind: 'link_context',
       provider: context.provider,
       model: 'link-extractor',
-      version: new Date().toISOString().split('T')[0],
+      version,
       createdAt: new Date().toISOString(),
       url: context.url,
-      title: context.title,
-      summary: context.description, // Use summary field instead of description
-      usedFallback: context.usedFallback,
     }
+
+    if (context.title) enrichment.title = context.title
+    if (context.description) enrichment.summary = context.description
+    if (context.usedFallback) enrichment.usedFallback = context.usedFallback
 
     log('info', `Link enriched`, { url, provider: context.provider, guid: message.guid })
 

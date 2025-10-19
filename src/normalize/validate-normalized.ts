@@ -54,7 +54,7 @@ export function validateNormalizedMessages(messages: unknown[]): Message[] {
         message: formattedErrors,
       })
     } else {
-      validatedMessages.push(result.data)
+      validatedMessages.push(result.data as Message)
     }
   }
 

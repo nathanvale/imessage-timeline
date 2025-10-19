@@ -21,7 +21,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
     isFromMe: false,
     date: '2025-10-17T10:00:00.000Z',
     text,
-    ...(replyTo && { replyTo }),
+    ...(replyTo && { replyingTo: { targetMessageGuid: replyTo } }),
     ...(tapback && { tapback }),
   })
 
@@ -56,7 +56,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: false,
         date: '2025-10-17T10:01:00.000Z',
         text: 'This is a reply',
-        replyTo: 'parent',
+        replyingTo: { targetMessageGuid: 'parent' },
       }
 
       const rendered = renderReplyAsBlockquote(replyMsg, 0)
@@ -72,8 +72,8 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: false,
         date: '2025-10-17T10:01:00.000Z',
         text: 'Reply text',
-        sender: 'Alice',
-        replyTo: 'parent',
+        handle: 'Alice',
+        replyingTo: { targetMessageGuid: 'parent' },
       }
 
       const rendered = renderReplyAsBlockquote(replyMsg, 0)
@@ -89,7 +89,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: false,
         date: '2025-10-17T10:01:00.000Z',
         text: 'Reply with no sender',
-        replyTo: 'parent',
+        replyingTo: { targetMessageGuid: 'parent' },
       }
 
       const rendered = renderReplyAsBlockquote(replyMsg, 0)
@@ -138,16 +138,14 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           messageKind: 'tapback',
           isFromMe: false,
           date: '2025-10-17T10:01:00.000Z',
-          tapback: { type: 'liked', action: 'added' },
-          replyTo: 'parent',
+          tapback: { type: 'liked', action: 'added', targetMessageGuid: 'parent' },
         },
         {
           guid: 'tapback-2',
           messageKind: 'tapback',
           isFromMe: false,
           date: '2025-10-17T10:02:00.000Z',
-          tapback: { type: 'laughed', action: 'added' },
-          replyTo: 'parent',
+          tapback: { type: 'laughed', action: 'added', targetMessageGuid: 'parent' },
         },
       ]
 
@@ -319,7 +317,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: false,
         date: '2025-10-17T10:01:00.000Z',
         text: 'Reply message',
-        sender: 'Alice',
+        handle: 'Alice',
       }
 
       const rendered = renderReplyAsBlockquote(replyMsg, 0)
@@ -335,7 +333,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: false,
         date: '2025-10-17T10:01:00.000Z',
         text: 'Reply message',
-        sender: 'Bob',
+        handle: 'Bob',
       }
 
       const rendered = renderReplyAsBlockquote(replyMsg, 0)
@@ -352,8 +350,8 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:01:00.000Z',
           text: 'First reply',
-          sender: 'Alice',
-          replyTo: 'parent',
+          handle: 'Alice',
+          replyingTo: { targetMessageGuid: 'parent' },
         },
         {
           guid: 'reply2',
@@ -361,8 +359,8 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:02:00.000Z',
           text: 'Reply to first reply',
-          sender: 'Bob',
-          replyTo: 'reply1',
+          handle: 'Bob',
+          replyingTo: { targetMessageGuid: 'reply1' },
         },
         {
           guid: 'reply3',
@@ -370,8 +368,8 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:03:00.000Z',
           text: 'Reply to second reply',
-          sender: 'Charlie',
-          replyTo: 'reply2',
+          handle: 'Charlie',
+          replyingTo: { targetMessageGuid: 'reply2' },
         },
       ]
 
@@ -406,7 +404,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: true,
         date: '2025-10-17T10:01:00.000Z',
         text: 'My reply',
-        sender: 'Me',
+        handle: 'Me',
       }
 
       const theirReply: Message = {
@@ -415,7 +413,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: false,
         date: '2025-10-17T10:02:00.000Z',
         text: 'Their reply',
-        sender: 'Alice',
+        handle: 'Alice',
       }
 
       const myRendered = renderReplyAsBlockquote(myReply, 0)
@@ -454,12 +452,12 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
       ]
 
       const tapbacks = findTapbacksForMessage('parent', messages)
-      expect(tapbacks).toHaveLength(0) // No replyTo set
+      expect(tapbacks).toHaveLength(0) // No targetMessageGuid set
 
-      // Test with replyTo
-      messages[1].replyTo = 'parent'
-      const tapbacksWithReply = findTapbacksForMessage('parent', messages)
-      expect(tapbacksWithReply).toHaveLength(1)
+      // Test with targetMessageGuid
+      messages[1].tapback = { type: 'liked', action: 'added', targetMessageGuid: 'parent' }
+      const tapbacksWithTarget = findTapbacksForMessage('parent', messages)
+      expect(tapbacksWithTarget).toHaveLength(1)
     })
 
     it('should group tapbacks by type', () => {
@@ -470,24 +468,21 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           messageKind: 'tapback',
           isFromMe: false,
           date: '2025-10-17T10:01:00.000Z',
-          tapback: { type: 'liked', action: 'added' },
-          replyTo: 'parent',
+          tapback: { type: 'liked', action: 'added', targetMessageGuid: 'parent' },
         },
         {
           guid: 'tap2',
           messageKind: 'tapback',
           isFromMe: false,
           date: '2025-10-17T10:02:00.000Z',
-          tapback: { type: 'liked', action: 'added' },
-          replyTo: 'parent',
+          tapback: { type: 'liked', action: 'added', targetMessageGuid: 'parent' },
         },
         {
           guid: 'tap3',
           messageKind: 'tapback',
           isFromMe: false,
           date: '2025-10-17T10:03:00.000Z',
-          tapback: { type: 'laughed', action: 'added' },
-          replyTo: 'parent',
+          tapback: { type: 'laughed', action: 'added', targetMessageGuid: 'parent' },
         },
       ]
 
@@ -503,7 +498,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:00:00.000Z',
           text: 'Original message',
-          sender: 'Alice',
+          handle: 'Alice',
         },
         {
           guid: 'msg-1',
@@ -511,8 +506,8 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: true,
           date: '2025-10-17T10:01:00.000Z',
           text: 'My response',
-          sender: 'Me',
-          replyTo: 'msg-0',
+          handle: 'Me',
+          replyingTo: { targetMessageGuid: 'msg-0' },
         },
         {
           guid: 'msg-2',
@@ -520,8 +515,8 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:02:00.000Z',
           text: 'Alice responds to my response',
-          sender: 'Alice',
-          replyTo: 'msg-1',
+          handle: 'Alice',
+          replyingTo: { targetMessageGuid: 'msg-1' },
         },
         {
           guid: 'msg-3',
@@ -529,16 +524,15 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: true,
           date: '2025-10-17T10:03:00.000Z',
           text: 'My response to Alice',
-          sender: 'Me',
-          replyTo: 'msg-2',
+          handle: 'Me',
+          replyingTo: { targetMessageGuid: 'msg-2' },
         },
         {
           guid: 'tap-1',
           messageKind: 'tapback',
           isFromMe: false,
           date: '2025-10-17T10:04:00.000Z',
-          tapback: { type: 'liked', action: 'added' },
-          replyTo: 'msg-3',
+          tapback: { type: 'liked', action: 'added', targetMessageGuid: 'msg-3' },
         },
       ]
 
@@ -564,7 +558,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:01:00.000Z',
           text: 'Reply to non-existent parent',
-          replyTo: 'non-existent-parent',
+          replyingTo: { targetMessageGuid: 'non-existent-parent' },
         },
       ]
 
@@ -584,7 +578,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:00:00.000Z',
           text: 'Msg 1',
-          replyTo: 'msg-2',
+          replyingTo: { targetMessageGuid: 'msg-2' },
         },
         {
           guid: 'msg-2',
@@ -592,7 +586,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
           isFromMe: false,
           date: '2025-10-17T10:01:00.000Z',
           text: 'Msg 2',
-          replyTo: 'msg-1',
+          replyingTo: { targetMessageGuid: 'msg-1' },
         },
       ]
 
@@ -613,7 +607,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
         isFromMe: false,
         date: '2025-10-17T10:01:00.000Z',
         text: 'Reply',
-        sender: undefined,
+        handle: undefined,
       }
 
       const rendered = renderReplyAsBlockquote(replyMsg, 0)

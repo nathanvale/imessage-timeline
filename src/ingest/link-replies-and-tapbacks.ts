@@ -1,4 +1,4 @@
-import type { Message } from '#lib/schema/message'
+import type { Message } from '#schema/message'
 
 /**
  * Reply and tapback linking for NORMALIZE--T03
@@ -93,6 +93,9 @@ export function linkRepliesToParents(
     candidates.sort((a, b) => b.score - a.score)
 
     const topCandidate = candidates[0]
+    if (!topCandidate) {
+      return msg // Should never happen since we checked length > 0
+    }
     const topScore = topCandidate.score
 
     // Check for ties
@@ -100,13 +103,16 @@ export function linkRepliesToParents(
     const isTie = tiedCandidates.length > 1
 
     if (isTie && trackAmbiguous) {
-      ambiguousLinks.push({
-        messageGuid: msg.guid,
-        selectedTarget: tiedCandidates[0].message.guid,
-        candidates: tiedCandidates,
-        tieCount: tiedCandidates.length,
-        confidenceScore: topScore,
-      })
+      const firstTied = tiedCandidates[0]
+      if (firstTied) {
+        ambiguousLinks.push({
+          messageGuid: msg.guid,
+          selectedTarget: firstTied.message.guid,
+          candidates: tiedCandidates,
+          tieCount: tiedCandidates.length,
+          confidenceScore: topScore,
+        })
+      }
     }
 
     // Link to best candidate
@@ -171,22 +177,32 @@ export function linkTapbacksToParents(
     candidates.sort((a, b) => b.score - a.score)
 
     const topCandidate = candidates[0]
+    if (!topCandidate) {
+      return msg // Should never happen since we checked length > 0
+    }
     const topScore = topCandidate.score
 
     // Check for ties
     const tiedCandidates = candidates.filter((c) => c.score === topScore)
 
     if (tiedCandidates.length > 1 && trackAmbiguous) {
-      ambiguousLinks.push({
-        messageGuid: msg.guid,
-        selectedTarget: tiedCandidates[0].message.guid,
-        candidates: tiedCandidates,
-        tieCount: tiedCandidates.length,
-        confidenceScore: topScore,
-      })
+      const firstTied = tiedCandidates[0]
+      if (firstTied) {
+        ambiguousLinks.push({
+          messageGuid: msg.guid,
+          selectedTarget: firstTied.message.guid,
+          candidates: tiedCandidates,
+          tieCount: tiedCandidates.length,
+          confidenceScore: topScore,
+        })
+      }
     }
 
     // Link to best candidate
+    if (!msg.tapback) {
+      return msg // Shouldn't happen for tapback messages
+    }
+
     return {
       ...msg,
       tapback: {
@@ -301,8 +317,8 @@ function findReplyParentCandidates(
         hasContentMatch = true
         // Prefer lower timestamp_index (earlier part)
         const indexMatch = candidate.guid.match(/p:(\d+)\//)
-        if (indexMatch) {
-          score += 10 - parseInt(indexMatch[1])
+        if (indexMatch?.[1]) {
+          score += 10 - parseInt(indexMatch[1], 10)
           reasons.push(`index_preference(${indexMatch[1]})`)
         }
       }

@@ -54,12 +54,14 @@ export function splitDBMessage(dbMessage: DBMessage, lineNumber: number, options
   const baseMessage: Partial<Message> = {
     isFromMe,
     date,
-    handle: dbMessage.handle || undefined,
-    chatId: dbMessage.chat_id || undefined,
     groupGuid: originalGuid,
-    service: dbMessage.service || undefined,
-    subject: dbMessage.subject || undefined,
   }
+
+  // Conditionally add optional fields to satisfy exactOptionalPropertyTypes
+  if (dbMessage.handle) baseMessage.handle = dbMessage.handle
+  if (dbMessage.chat_id) baseMessage.chatId = dbMessage.chat_id
+  if (dbMessage.service) baseMessage.service = dbMessage.service
+  if (dbMessage.subject) baseMessage.subject = dbMessage.subject
 
   // Part index counter (0 = text, 1+ = media)
   let partIndex = 0

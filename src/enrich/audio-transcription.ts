@@ -270,11 +270,12 @@ export async function transcribeAudio(audioPath: string, config: Partial<AudioTr
 
     // AC04: Create enrichment entry with full provenance
     const modelName = config.geminiModel || 'gemini-1.5-pro'
+    const version = new Date().toISOString().split('T')[0] || 'unknown'
     const enrichment: MediaEnrichment = {
       kind: 'transcription',
       provider: 'gemini',
       model: modelName,
-      version: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      version, // YYYY-MM-DD
       createdAt: new Date().toISOString(),
       transcription: transcriptionData.transcription,
       speakers: transcriptionData.speakers,

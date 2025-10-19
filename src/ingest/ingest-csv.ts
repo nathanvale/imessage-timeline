@@ -74,15 +74,21 @@ export function parseCSVRow(row: CSVRow, lineNumber: number, options: IngestOpti
   const baseMessage: Partial<Message> = {
     isFromMe,
     date,
-    handle: senderName || senderID || undefined,
-    service: service || undefined,
-    subject: subject || undefined,
-    dateRead: readDate ? convertToISO8601(readDate) : undefined,
-    dateDelivered: deliveredDate ? convertToISO8601(deliveredDate) : undefined,
-    dateEdited: editedDate ? convertToISO8601(editedDate) : undefined,
-    isRead: status === 'Read' ? true : status === 'Unread' ? false : undefined,
-    isEdited: editedDate ? true : undefined,
   }
+
+  // Conditionally add optional fields to satisfy exactOptionalPropertyTypes
+  const handle = senderName || senderID
+  if (handle) baseMessage.handle = handle
+  if (service) baseMessage.service = service
+  if (subject) baseMessage.subject = subject
+  if (readDate) baseMessage.dateRead = convertToISO8601(readDate)
+  if (deliveredDate) baseMessage.dateDelivered = convertToISO8601(deliveredDate)
+  if (editedDate) {
+    baseMessage.dateEdited = convertToISO8601(editedDate)
+    baseMessage.isEdited = true
+  }
+  if (status === 'Read') baseMessage.isRead = true
+  else if (status === 'Unread') baseMessage.isRead = false
 
   // AC05: Preserve row metadata (source, line number) for provenance
   const baseExportMetadata = {

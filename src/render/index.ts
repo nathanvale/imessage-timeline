@@ -31,9 +31,12 @@ export function renderMessages(messages: Message[]): Map<string, string> {
   const dates = getDatesSorted(grouped)
 
   for (const date of dates) {
-    const markdown = renderDateSection(date, grouped[date], sorted)
-    if (markdown) {
-      output.set(date, markdown)
+    const dayGroup = grouped[date]
+    if (dayGroup) {
+      const markdown = renderDateSection(date, dayGroup, sorted)
+      if (markdown) {
+        output.set(date, markdown)
+      }
     }
   }
 
@@ -115,7 +118,7 @@ function renderSingleMessage(message: Message, allMessages: Message[]): string {
     hour12: false,
   })
 
-  const header = `${anchor} **${message.sender || 'Unknown'}** [${time}]`
+  const header = `${anchor} **${message.handle || 'Unknown'}** [${time}]`
   parts.push(header)
 
   // Message text
@@ -223,6 +226,16 @@ export function verifyDeterminism(
 
   // Check if all outputs are identical
   const firstOutput = outputs[0]
+  if (!firstOutput) {
+    return {
+      isDeterministic: false,
+      runsCount,
+      hashesAreIdentical,
+      outputsAreIdentical: false,
+      hashes,
+    }
+  }
+
   const outputsAreIdentical = outputs.every((output) => {
     if (output.size !== firstOutput.size) return false
 

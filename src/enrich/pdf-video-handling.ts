@@ -128,11 +128,12 @@ export async function analyzePdf(
     const summary = responseText.trim()
 
     // AC01: Create enrichment entry with full provenance
+    const version = new Date().toISOString().split('T')[0] || 'unknown'
     const enrichment: MediaEnrichment = {
       kind: 'pdf_summary',
       provider: 'gemini',
       model: modelName,
-      version: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      version, // YYYY-MM-DD
       createdAt: new Date().toISOString(),
       pdfSummary: summary,
     }
@@ -155,11 +156,12 @@ export async function handleVideo(videoPath: string, config: Partial<PdfVideoCon
 
     // AC02: Create video metadata enrichment
     // provider: 'local' since we're not calling any API
+    const version = new Date().toISOString().split('T')[0] || 'unknown'
     const enrichment: MediaEnrichment = {
       kind: 'video_metadata',
       provider: 'local',
       model: 'metadata-extractor',
-      version: new Date().toISOString().split('T')[0],
+      version,
       createdAt: new Date().toISOString(),
       videoMetadata: {
         filename: path.basename(videoPath),
@@ -242,11 +244,12 @@ export async function analyzePdfOrVideo(
         error: error instanceof Error ? error.message : String(error),
       })
 
+      const version = new Date().toISOString().split('T')[0] || 'unknown'
       const fallbackEnrichment: MediaEnrichment = {
         kind: 'pdf_summary',
         provider: 'gemini',
         model: config.geminiModel || 'gemini-1.5-pro',
-        version: new Date().toISOString().split('T')[0],
+        version,
         createdAt: new Date().toISOString(),
         pdfSummary: filename, // Fallback to filename
         error: error instanceof Error ? error.message : String(error),
@@ -317,7 +320,7 @@ export async function analyzePdfsOrVideos(
   let successCount = 0
   let skipCount = 0
   let errorCount = 0
-  const formatStats: Record<string, FormatStats> = {
+  const formatStats: { supported: FormatStats; unsupported: FormatStats } = {
     supported: {},
     unsupported: {},
   }

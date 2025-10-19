@@ -110,9 +110,12 @@ export function groupMessagesByDateAndTimeOfDay(messages: Message[]): GroupedMes
 
   // Second pass: sort each time-of-day group chronologically
   for (const date in grouped) {
-    grouped[date].morning = sortByTimestamp(grouped[date].morning)
-    grouped[date].afternoon = sortByTimestamp(grouped[date].afternoon)
-    grouped[date].evening = sortByTimestamp(grouped[date].evening)
+    const dayGroup = grouped[date]
+    if (dayGroup) {
+      dayGroup.morning = sortByTimestamp(dayGroup.morning)
+      dayGroup.afternoon = sortByTimestamp(dayGroup.afternoon)
+      dayGroup.evening = sortByTimestamp(dayGroup.evening)
+    }
   }
 
   return grouped

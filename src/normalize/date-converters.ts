@@ -154,13 +154,16 @@ export function roundTripDateValidation(dateString: string): {
     // Step 1: Validate original format
     const formatValidation = validateDateFormat(dateString)
     if (!formatValidation.valid) {
-      return {
+      const result: { valid: boolean; driftDetected: boolean; input: string; normalized: string; error?: string } = {
         valid: false,
         driftDetected: false,
         input: dateString,
         normalized: '',
-        error: formatValidation.error,
       }
+      if (formatValidation.error) {
+        result.error = formatValidation.error
+      }
+      return result
     }
 
     // Step 2: Normalize (re-parse to ensure consistent formatting)

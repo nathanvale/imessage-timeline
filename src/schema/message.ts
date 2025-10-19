@@ -15,7 +15,7 @@ export type ChatId = string
 export type MediaKind = 'image' | 'audio' | 'video' | 'pdf' | 'unknown'
 
 export interface MediaEnrichment {
-  kind: MediaKind | 'link' | 'transcription' | 'pdf_summary' | 'video_metadata' | 'link_context'
+  kind: MediaKind | 'link' | 'transcription' | 'pdf_summary' | 'video_metadata' | 'link_context' | 'image_analysis'
   model?: string
   createdAt: string
   // image
@@ -155,7 +155,7 @@ export interface ExportEnvelope {
 
 // Media Enrichment Schema
 export const MediaEnrichmentSchema = z.object({
-  kind: z.enum(['image', 'audio', 'link', 'video', 'pdf', 'unknown', 'transcription', 'pdf_summary', 'video_metadata', 'link_context']),
+  kind: z.enum(['image', 'audio', 'link', 'video', 'pdf', 'unknown', 'transcription', 'pdf_summary', 'video_metadata', 'link_context', 'image_analysis']),
   model: z.string().optional(),
   createdAt: z.string().datetime(),
   visionSummary: z.string().optional(),

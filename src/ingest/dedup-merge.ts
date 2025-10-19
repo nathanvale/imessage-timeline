@@ -1,4 +1,4 @@
-import type { Message } from '#lib/schema/message'
+import type { Message } from '#schema/message'
 
 /**
  * Deduplication and merge logic for NORMALIZE--T04

@@ -53,14 +53,14 @@ export function getTapbackEmoji(tapbackType: string): string {
  * AC01: Find all replies to a specific message
  */
 export function findRepliesForMessage(parentGuid: string, messages: Message[]): Message[] {
-  return messages.filter((msg) => msg.replyTo === parentGuid)
+  return messages.filter((msg) => msg.replyingTo?.targetMessageGuid === parentGuid)
 }
 
 /**
  * AC02: Find all tapbacks for a specific message
  */
 export function findTapbacksForMessage(parentGuid: string, messages: Message[]): Message[] {
-  return messages.filter((msg) => msg.messageKind === 'tapback' && msg.replyTo === parentGuid)
+  return messages.filter((msg) => msg.messageKind === 'tapback' && msg.tapback?.targetMessageGuid === parentGuid)
 }
 
 /**
@@ -70,22 +70,22 @@ export function calculateIndentationLevel(messageGuid: string, messages: Message
   const messageMap = new Map(messages.map((m) => [m.guid, m]))
   const message = messageMap.get(messageGuid)
 
-  if (!message || !message.replyTo) {
+  if (!message || !message.replyingTo) {
     return 0
   }
 
   let level = 1
-  let currentGuid = message.replyTo
+  let currentGuid = message.replyingTo?.targetMessageGuid
   const visited = new Set<string>([messageGuid]) // Prevent infinite loops
 
   while (currentGuid && !visited.has(currentGuid)) {
     const parent = messageMap.get(currentGuid)
-    if (!parent || !parent.replyTo) {
+    if (!parent || !parent.replyingTo?.targetMessageGuid) {
       break
     }
 
     visited.add(currentGuid)
-    currentGuid = parent.replyTo
+    currentGuid = parent.replyingTo.targetMessageGuid
     level++
   }
 
@@ -115,8 +115,8 @@ export function renderReplyAsBlockquote(message: Message, level: number): string
 
   // Build sender attribution
   let senderLine = ''
-  if (message.sender) {
-    senderLine = `${indent}${blockquotePrefix} **${message.sender}**: `
+  if (message.handle) {
+    senderLine = `${indent}${blockquotePrefix} **${message.handle}**: `
   } else {
     senderLine = `${indent}${blockquotePrefix} `
   }
@@ -219,7 +219,7 @@ export function getReplyChain(
 
     chain.unshift(msg) // Add to beginning
     visited.add(currentGuid)
-    currentGuid = msg.replyTo
+    currentGuid = msg.replyingTo?.targetMessageGuid
   }
 
   return chain

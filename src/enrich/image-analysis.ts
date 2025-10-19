@@ -173,11 +173,12 @@ export async function analyzeImageWithGemini(
     const shortDescription = shortDescriptionMatch?.[1]?.trim() || 'Image'
 
     // AC06: Create enrichment entry with full provenance
+    const version = new Date().toISOString().split('T')[0] || 'unknown'
     const enrichment: MediaEnrichment = {
       kind: 'image_analysis',
       provider: 'gemini',
       model: modelName,
-      version: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      version, // YYYY-MM-DD
       createdAt: new Date().toISOString(),
       visionSummary,
       shortDescription,

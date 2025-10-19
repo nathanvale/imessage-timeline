@@ -34,8 +34,9 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       guid,
       messageKind: 'text',
       date: timestamp,
-      sender: 'Test User',
+      handle: 'Test User',
       text: 'Test message',
+      isFromMe: false,
       ...overrides,
     }
   }

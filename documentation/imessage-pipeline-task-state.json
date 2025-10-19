@@ -1,6 +1,6 @@
 {
   "manifest_hash": "b8g3f2c0d9e1a8b5c7d6e9f1a3b5c8d0e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b",
-  "last_updated": "2025-10-17T21:29:15.896Z",
+  "last_updated": "2025-10-19T09:17:33.019Z",
   "metadata": {
     "spec_source": "documentation/imessage-pipeline-tech-spec.md",
     "total_tasks": 30,
@@ -699,8 +699,8 @@
       "notes": "Completed determinism test suite with TDD using Wallaby. Created src/render/__tests__/determinism.test.ts with 31 comprehensive tests (all passing) and src/render/index.ts with full render pipeline integration. Implements: (AC01) 6 snapshot tests verifying identical output across multiple runs for datasets of 10, 100, 500 messages with SHA-256 hashing, (AC02) network isolation verification with fetch mocking (no network calls), (AC03) deterministic GUID-based sorting for same-timestamp messages with 4 tests for ordering consistency, (AC04) markdown structure reproducibility with 5 tests verifying format consistency and anchor preservation, (AC05) performance validation: 10ms for 10 msgs, 3ms for 100 msgs, 25ms for 500 msgs, 69ms for 1000 msgs (all well under 10s requirement). Core functions: renderMessages, sortMessagesByTimestamp, getMessageHash, verifyDeterminism, validateMarkdownStructure. Branch coverage: 74.28% for index.ts (exceeds 70% requirement). All 821 tests passing."
     },
     "CI--T01": {
-      "status": "pending",
-      "started_at": null,
+      "status": "in_progress",
+      "started_at": "2025-10-19T09:17:33.018Z",
       "completed_at": null,
       "epic": "E5-CI-Testing-Tooling",
       "title": "Configure Vitest with proper settings",
