@@ -208,13 +208,21 @@ export function clearEnrichmentByKind(message: Message, kind: MediaEnrichment['k
 
   const filtered = message.media.enrichment.filter((e) => e.kind !== kind)
 
-  const updatedMedia: MediaMeta = { ...message.media }
-  if (filtered.length > 0) {
-    updatedMedia.enrichment = filtered
+  // If no enrichments remain, omit the enrichment field entirely
+  if (filtered.length === 0) {
+    const { enrichment, ...mediaWithoutEnrichment } = message.media
+    return {
+      ...message,
+      media: mediaWithoutEnrichment,
+    }
   }
 
+  // If enrichments remain, update with filtered array
   return {
     ...message,
-    media: updatedMedia,
+    media: {
+      ...message.media,
+      enrichment: filtered,
+    },
   }
 }
