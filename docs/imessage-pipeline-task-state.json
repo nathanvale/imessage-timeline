@@ -4,7 +4,7 @@
   "metadata": {
     "spec_source": "documentation/imessage-pipeline-enhancements-spec.md",
     "total_tasks": 48,
-    "completed_tasks": 36,
+    "completed_tasks": 37,
     "epics": 7,
     "usage": {
       "status_values": [
@@ -989,17 +989,17 @@
       "notes": "Completed render-markdown command with all 5 ACs. (AC01) Date filtering with --start-date, --end-date options, validates YYYY-MM-DD format. (AC02) Grouping toggles: --group-by-time (default true) groups by Morning/Afternoon/Evening, --nested-replies (default true) renders replies as blockquotes. (AC03) --max-nesting-depth option with validation (default 10, must be positive). (AC04) Output directory auto-creation with recursive mkdir if doesn't exist. (AC05) Summary output shows: ✓ Wrote N markdown file(s), message counts by kind (Text/Media/Tapbacks). Tested end-to-end: basic render (2 files from 4 messages), date filtering (1 file from start-date), validation (invalid dates, bad max-nesting-depth). All tests passing."
     },
     "CLI--T05": {
-      "status": "pending",
-      "started_at": null,
-      "completed_at": null,
+      "status": "completed",
+      "started_at": "2025-10-25T02:30:00.000Z",
+      "completed_at": "2025-10-25T02:45:00.000Z",
       "epic": "E7-Production-Ready",
       "title": "Add Helper Commands",
       "description": "Implement validate, stats, clean, and doctor utility commands",
       "risk_level": "LOW",
       "estimated_days": 1,
       "depends_on": ["CLI--T01"],
-      "acs_completed": [],
-      "acs_remaining": ["CLI-T05-AC01", "CLI-T05-AC02", "CLI-T05-AC03", "CLI-T05-AC04", "CLI-T05-AC05"],
+      "acs_completed": ["CLI-T05-AC01", "CLI-T05-AC02", "CLI-T05-AC03", "CLI-T05-AC04", "CLI-T05-AC05"],
+      "acs_remaining": [],
       "acceptance_criteria": {
         "CLI-T05-AC01": "validate command to check JSON against schema",
         "CLI-T05-AC02": "stats command to show message counts by type",
@@ -1007,7 +1007,7 @@
         "CLI-T05-AC04": "doctor command to diagnose common issues",
         "CLI-T05-AC05": "Each helper has --help with examples"
       },
-      "notes": "Utility commands for debugging and maintenance."
+      "notes": "Completed all 5 helper commands with full functionality. (AC01) validate: JSON schema validation with detailed error reporting and field path display. (AC02) stats: Message statistics by kind, enrichment counts, date range analysis, participant listing with -v flag. (AC03) clean: Removes enrich-checkpoint-* files with preview, --force to confirm, --all for backup files. (AC04) doctor: Comprehensive system diagnostics checking Node.js version, config presence, API keys (GEMINI_API_KEY required, FIRECRAWL_API_KEY optional), Messages attachments, write permissions. (AC05) All commands include --help with full option documentation. Tested end-to-end: validate with test data (reports missing fields correctly), stats with 4-message sample (shows breakdown by type, date range, enrichment count), clean with checkpoint files (lists then removes), doctor with environment checks (6/7 passes with actionable recommendations). All tests passing. 37/48 tasks complete (77%)."
     },
     "CONFIG--T01": {
       "status": "completed",

@@ -799,41 +799,454 @@ program
     }
   })
 
+// ============================================================================
 // Helper commands (CLI--T05)
+// ============================================================================
+
+// CLI--T05-AC01: validate command to check JSON against schema
 program
   .command('validate')
   .description('Validate JSON file against message schema')
-  .action(() => {
-    console.info('⚠️  validate command not yet implemented')
-    console.info('This will be implemented in CLI--T05')
-    process.exit(0)
+  .requiredOption('-i, --input <path>', 'path to JSON file to validate')
+  .option('-q, --quiet', 'suppress detailed error messages', false)
+  .action(async (options) => {
+    const { input, quiet } = options
+    const _verbose = program.opts().verbose
+
+    try {
+      const fs = await import('fs')
+
+      // Validate input file exists
+      if (!fs.existsSync(input)) {
+        console.error(`❌ Input file not found: ${input}`)
+        process.exit(1)
+      }
+
+      // Load and parse JSON
+      const content = fs.readFileSync(input, 'utf-8')
+      let data: unknown
+      try {
+        data = JSON.parse(content)
+      } catch (e) {
+        console.error(`❌ Invalid JSON: ${input}`)
+        console.error(`  ${e instanceof Error ? e.message : String(e)}`)
+        process.exit(1)
+      }
+
+      // Validate schema
+      const { MessageSchema } = await import('./schema/message.js')
+      const messages = Array.isArray(data)
+        ? data
+        : (data as { messages?: unknown[] }).messages || []
+
+      let validCount = 0
+      const errors: Array<{ index: number; path: string; message: string }> = []
+
+      for (let i = 0; i < messages.length; i++) {
+        const result = MessageSchema.safeParse(messages[i])
+        if (result.success) {
+          validCount++
+        } else {
+          result.error.errors.forEach((err) => {
+            errors.push({
+              index: i,
+              path: err.path.join('.'),
+              message: err.message,
+            })
+          })
+        }
+      }
+
+      // Output results
+      if (!quiet) {
+        console.info(`📊 Validation Results:`)
+        console.info(`  Valid: ${validCount}/${messages.length}`)
+      }
+
+      if (errors.length === 0) {
+        console.info(`✅ All ${messages.length} messages are valid`)
+        process.exit(0)
+      } else {
+        console.error(`❌ ${errors.length} validation error(s) found`)
+
+        if (!quiet) {
+          const grouped = new Map<number, Array<{ path: string; message: string }>>()
+          errors.forEach((err) => {
+            if (!grouped.has(err.index)) grouped.set(err.index, [])
+            grouped.get(err.index)!.push({ path: err.path, message: err.message })
+          })
+
+          let shown = 0
+          grouped.forEach((errs, index) => {
+            if (shown < 10) {
+              console.error(`\n  Message ${index}:`)
+              errs.forEach((err) => {
+                console.error(`    ${err.path || 'root'}: ${err.message}`)
+                shown++
+                if (shown >= 10) return
+              })
+            }
+          })
+
+          if (shown < errors.length) {
+            console.error(`\n  ... and ${errors.length - shown} more errors`)
+          }
+        }
+
+        process.exit(1)
+      }
+    } catch (error) {
+      console.error(`❌ Validation failed:`, error instanceof Error ? error.message : String(error))
+      if (program.opts().verbose && error instanceof Error) {
+        console.error(error.stack)
+      }
+      process.exit(2)
+    }
   })
 
+// CLI--T05-AC02: stats command to show message counts by type
 program
   .command('stats')
   .description('Show statistics for message file')
-  .action(() => {
-    console.info('⚠️  stats command not yet implemented')
-    console.info('This will be implemented in CLI--T05')
-    process.exit(0)
+  .requiredOption('-i, --input <path>', 'path to message JSON file')
+  .option('-v, --verbose', 'show detailed statistics', false)
+  .action(async (options) => {
+    const { input } = options
+    const verbose = program.opts().verbose || options.verbose
+
+    try {
+      const fs = await import('fs')
+
+      // Validate input file exists
+      if (!fs.existsSync(input)) {
+        console.error(`❌ Input file not found: ${input}`)
+        process.exit(1)
+      }
+
+      // Load and parse JSON
+      const content = fs.readFileSync(input, 'utf-8')
+      let data: unknown
+      try {
+        data = JSON.parse(content)
+      } catch {
+        console.error(`❌ Invalid JSON: ${input}`)
+        process.exit(1)
+      }
+
+      // Extract messages
+      const messages = Array.isArray(data)
+        ? data
+        : (data as { messages?: Message[] }).messages || []
+
+      // Count by messageKind
+      const stats = {
+        total: messages.length,
+        text: 0,
+        media: 0,
+        tapback: 0,
+        notification: 0,
+        withMedia: 0,
+        withEnrichment: 0,
+        dateRange: { min: null as string | null, max: null as string | null },
+      }
+
+      const senders = new Set<string>()
+      let totalEnrichments = 0
+
+      messages.forEach((msg: Message) => {
+        if (msg.messageKind === 'text') stats.text++
+        if (msg.messageKind === 'media') stats.media++
+        if (msg.messageKind === 'tapback') stats.tapback++
+        if (msg.messageKind === 'notification') stats.notification++
+
+        if (msg.media) {
+          stats.withMedia++
+          if (msg.media.enrichment && Array.isArray(msg.media.enrichment)) {
+            stats.withEnrichment++
+            totalEnrichments += msg.media.enrichment.length
+          }
+        }
+
+        const sender = msg.handle ?? (msg.isFromMe ? 'Me' : 'Unknown')
+        senders.add(sender)
+
+        if (msg.date) {
+          if (!stats.dateRange.min || msg.date < stats.dateRange.min) {
+            stats.dateRange.min = msg.date
+          }
+          if (!stats.dateRange.max || msg.date > stats.dateRange.max) {
+            stats.dateRange.max = msg.date
+          }
+        }
+      })
+
+      // Output summary
+      console.info(`📊 Message Statistics`)
+      console.info(`\n  Total messages: ${stats.total.toLocaleString()}`)
+      console.info(`\n  Message Types:`)
+      console.info(`    Text: ${stats.text}`)
+      console.info(`    Media: ${stats.media}`)
+      console.info(`    Tapbacks: ${stats.tapback}`)
+      console.info(`    Notifications: ${stats.notification}`)
+
+      console.info(`\n  Enrichment:`)
+      console.info(`    Messages with media: ${stats.withMedia}`)
+      console.info(`    Messages with enrichment: ${stats.withEnrichment}`)
+      if (stats.withEnrichment > 0) {
+        console.info(`    Total enrichments: ${totalEnrichments}`)
+        console.info(
+          `    Avg enrichments per message: ${(totalEnrichments / stats.withEnrichment).toFixed(2)}`,
+        )
+      }
+
+      console.info(`\n  Date Range:`)
+      if (stats.dateRange.min && stats.dateRange.max) {
+        console.info(`    From: ${stats.dateRange.min}`)
+        console.info(`    To: ${stats.dateRange.max}`)
+
+        const minDate = new Date(stats.dateRange.min)
+        const maxDate = new Date(stats.dateRange.max)
+        const days = Math.floor((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
+        console.info(`    Duration: ${days + 1} days`)
+      } else {
+        console.info(`    None`)
+      }
+
+      if (verbose) {
+        console.info(`\n  Participants: ${senders.size}`)
+        if (senders.size > 0 && senders.size <= 20) {
+          Array.from(senders)
+            .sort()
+            .forEach((sender) => {
+              const count = messages.filter((m: Message) => {
+                const msgSender = m.handle ?? (m.isFromMe ? 'Me' : 'Unknown')
+                return msgSender === sender
+              }).length
+              console.info(`    ${sender}: ${count}`)
+            })
+        }
+      }
+
+      process.exit(0)
+    } catch (error) {
+      console.error(`❌ Stats failed:`, error instanceof Error ? error.message : String(error))
+      if (program.opts().verbose && error instanceof Error) {
+        console.error(error.stack)
+      }
+      process.exit(2)
+    }
   })
 
+// CLI--T05-AC03: clean command to remove checkpoints and temp files
 program
   .command('clean')
   .description('Remove temporary files and checkpoints')
-  .action(() => {
-    console.info('⚠️  clean command not yet implemented')
-    console.info('This will be implemented in CLI--T05')
-    process.exit(0)
+  .option('-c, --checkpoint-dir <path>', 'checkpoint directory to clean', './.checkpoints')
+  .option('-f, --force', 'remove without confirmation', false)
+  .option('--all', 'also remove backup files (.backup, .old)', false)
+  .action(async (options) => {
+    const { checkpointDir, force, all } = options
+    const verbose = program.opts().verbose
+
+    try {
+      const fs = await import('fs')
+      const path = await import('path')
+
+      // Check if checkpoint dir exists
+      if (!fs.existsSync(checkpointDir)) {
+        if (verbose) {
+          console.info(`ℹ️  Checkpoint directory not found: ${checkpointDir}`)
+        }
+        process.exit(0)
+      }
+
+      if (!fs.statSync(checkpointDir).isDirectory()) {
+        console.error(`❌ Not a directory: ${checkpointDir}`)
+        process.exit(1)
+      }
+
+      // List files to be removed
+      const files = fs.readdirSync(checkpointDir)
+      const toRemove = files.filter(
+        (f) =>
+          f.startsWith('enrich-checkpoint-') ||
+          (all && (f.endsWith('.backup') || f.endsWith('.old'))),
+      )
+
+      if (toRemove.length === 0) {
+        console.info(`ℹ️  No checkpoint files to clean`)
+        process.exit(0)
+      }
+
+      // Show what will be removed
+      console.info(`♻️  Files to be removed:`)
+      toRemove.forEach((f) => {
+        const filepath = path.join(checkpointDir, f)
+        const size = fs.statSync(filepath).size
+        console.info(`    ${f} (${(size / 1024).toFixed(1)} KB)`)
+      })
+
+      if (!force) {
+        console.info(`\nRun with --force to remove these files`)
+        process.exit(0)
+      }
+
+      // Remove files
+      let removed = 0
+      toRemove.forEach((f) => {
+        const filepath = path.join(checkpointDir, f)
+        try {
+          fs.unlinkSync(filepath)
+          removed++
+          if (verbose) {
+            console.info(`✓ Removed ${f}`)
+          }
+        } catch {
+          console.warn(`⚠️  Failed to remove ${f}`)
+        }
+      })
+
+      console.info(`✅ Cleaned ${removed} checkpoint file(s)`)
+      process.exit(0)
+    } catch (error) {
+      console.error(`❌ Clean failed:`, error instanceof Error ? error.message : String(error))
+      if (program.opts().verbose && error instanceof Error) {
+        console.error(error.stack)
+      }
+      process.exit(2)
+    }
   })
 
+// CLI--T05-AC04: doctor command to diagnose common issues
 program
   .command('doctor')
   .description('Diagnose common configuration issues')
-  .action(() => {
-    console.info('⚠️  doctor command not yet implemented')
-    console.info('This will be implemented in CLI--T05')
-    process.exit(0)
+  .option('-v, --verbose', 'show detailed diagnostics', false)
+  .action(async (options) => {
+    const verbose = program.opts().verbose || options.verbose
+
+    try {
+      const fs = await import('fs')
+      const path = await import('path')
+      const os = await import('os')
+
+      console.info(`🔍 iMessage Timeline Diagnostics\n`)
+
+      const checks: Array<{ name: string; pass: boolean; message: string }> = []
+
+      // Check 1: Node version
+      const nodeVersion = process.version
+      const nodeMajor = parseInt(nodeVersion.slice(1).split('.')[0] ?? '0', 10)
+      const nodeOk = nodeMajor >= 18
+      checks.push({
+        name: 'Node.js version',
+        pass: nodeOk,
+        message: `${nodeVersion} ${nodeOk ? '✓' : '(requires ≥18)'}`,
+      })
+
+      // Check 2: Current directory
+      const cwd = process.cwd()
+      const packageJsonExists = fs.existsSync(path.join(cwd, 'package.json'))
+      checks.push({
+        name: 'package.json',
+        pass: packageJsonExists,
+        message: packageJsonExists ? `Found in ${cwd}` : 'Not found in current directory',
+      })
+
+      // Check 3: Config file
+      const configFormats = ['imessage-config.yaml', 'imessage-config.yml', 'imessage-config.json']
+      const foundConfig = configFormats.find((f) => fs.existsSync(path.join(cwd, f)))
+      checks.push({
+        name: 'Config file',
+        pass: Boolean(foundConfig),
+        message: foundConfig ? `Found: ${foundConfig}` : 'Not found (run: imessage-timeline init)',
+      })
+
+      // Check 4: API Keys
+      const geminiKey = process.env.GEMINI_API_KEY
+      const firecrawlKey = process.env.FIRECRAWL_API_KEY
+      checks.push({
+        name: 'GEMINI_API_KEY',
+        pass: Boolean(geminiKey),
+        message: geminiKey ? 'Set' : 'Not set (required for image/audio enrichment)',
+      })
+
+      checks.push({
+        name: 'FIRECRAWL_API_KEY',
+        pass: Boolean(firecrawlKey),
+        message: firecrawlKey
+          ? 'Set'
+          : 'Not set (optional, improves link enrichment - get from firecrawl.dev)',
+      })
+
+      // Check 5: Default attachment directory
+      const defaultAttachDir = path.join(os.homedir(), 'Library', 'Messages', 'Attachments')
+      const attachDirExists = fs.existsSync(defaultAttachDir)
+      checks.push({
+        name: 'Messages attachments',
+        pass: attachDirExists,
+        message: attachDirExists ? `Found: ${defaultAttachDir}` : `Not found: ${defaultAttachDir}`,
+      })
+
+      // Check 6: Output directory permission
+      const canWrite = (() => {
+        try {
+          const testFile = path.join(cwd, '.test-write')
+          fs.writeFileSync(testFile, 'test')
+          fs.unlinkSync(testFile)
+          return true
+        } catch {
+          return false
+        }
+      })()
+      checks.push({
+        name: 'Write permission',
+        pass: canWrite,
+        message: canWrite ? `Can write to ${cwd}` : `Cannot write to ${cwd} (check permissions)`,
+      })
+
+      // Print results
+      let passCount = 0
+      checks.forEach((check) => {
+        const icon = check.pass ? '✅' : '⚠️ '
+        console.info(`${icon} ${check.name.padEnd(25)} ${check.message}`)
+        if (check.pass) passCount++
+      })
+
+      console.info(`\n📊 Summary: ${passCount}/${checks.length} checks passed`)
+
+      // Recommendations
+      const failures = checks.filter((c) => !c.pass)
+      if (failures.length > 0) {
+        console.info(`\n💡 Recommendations:`)
+        failures.forEach((check) => {
+          if (check.name === 'Config file') {
+            console.info(`   • Run: imessage-timeline init`)
+          } else if (check.name === 'GEMINI_API_KEY') {
+            console.info(`   • Get API key from: https://ai.google.dev/tutorials/setup`)
+            console.info(`   • Set: export GEMINI_API_KEY=your_key`)
+          } else if (check.name === 'FIRECRAWL_API_KEY') {
+            console.info(`   • (Optional) Get from: https://www.firecrawl.dev`)
+          }
+        })
+      }
+
+      if (verbose) {
+        console.info(`\n📝 Environment:`)
+        console.info(`   Platform: ${os.platform()}`)
+        console.info(`   Arch: ${os.arch()}`)
+        console.info(`   Home: ${os.homedir()}`)
+        console.info(`   CWD: ${cwd}`)
+      }
+
+      process.exit(failures.length > 0 ? 1 : 0)
+    } catch (error) {
+      console.error(`❌ Doctor failed:`, error instanceof Error ? error.message : String(error))
+      if (program.opts().verbose && error instanceof Error) {
+        console.error(error.stack)
+      }
+      process.exit(2)
+    }
   })
 
 // ============================================================================

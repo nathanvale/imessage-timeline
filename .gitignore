@@ -1,7 +1,7 @@
 dist
 node_modules
 coverage
-*.log
+*.logs
 *.tsbuildinfo
 .env
 .vault-id
