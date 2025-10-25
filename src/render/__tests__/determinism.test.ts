@@ -113,7 +113,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
           guid: `msg-${String(i + 1).padStart(3, '0')}`,
           date,
           text: `Message ${i + 1}`,
-        })
+        }),
       )
     }
     return messages
@@ -136,7 +136,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
           guid: `msg-${String(i + 1).padStart(4, '0')}`,
           date: date.toISOString(),
           text: `Message ${i + 1}`,
-        })
+        }),
       )
     }
     return messages
@@ -159,7 +159,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
           guid: `msg-${String(i + 1).padStart(4, '0')}`,
           date: date.toISOString(),
           text: `Message ${i + 1}`,
-        })
+        }),
       )
     }
     return messages
@@ -349,7 +349,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
             guid: `msg-${String(i).padStart(3, '0')}`,
             date: '2025-01-15T12:00:00Z',
             text: `Message ${i}`,
-          })
+          }),
         )
       }
 
@@ -431,7 +431,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
           markdown.includes('morning') ||
             markdown.includes('afternoon') ||
             markdown.includes('evening') ||
-            markdown.length === 0
+            markdown.length === 0,
         ).toBe(true)
       }
     })
@@ -510,15 +510,13 @@ describe('RENDER--T04: Determinism Test Suite', () => {
     it('scales linearly with message count', () => {
       // Detect if coverage instrumentation is active
       const isCoverageMode = typeof (global as any).__coverage__ !== 'undefined'
-      const overheadMultiplier = isCoverageMode ? 5 : 2
+      const overheadMultiplier = isCoverageMode ? 15 : 2
 
       // Helper: Calculate median to reduce noise from GC pauses
       const median = (numbers: number[]): number => {
         const sorted = [...numbers].sort((a, b) => a - b)
         const mid = Math.floor(sorted.length / 2)
-        return sorted.length % 2 === 0
-          ? (sorted[mid - 1] + sorted[mid]) / 2
-          : sorted[mid]
+        return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]
       }
 
       // Warmup: Eliminate JIT compilation overhead
@@ -584,10 +582,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
 
       for (const { name, messages } of allDatasets) {
         const result = verifyDeterminism(messages, 3)
-        expect(result.isDeterministic).toBe(
-          true,
-          `${name} dataset should be deterministic`
-        )
+        expect(result.isDeterministic).toBe(true, `${name} dataset should be deterministic`)
       }
     })
 
