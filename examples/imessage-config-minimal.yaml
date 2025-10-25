@@ -1,0 +1,12 @@
+# Minimal iMessage Timeline Configuration
+# Only required fields - all other settings use defaults
+
+version: "1.0"
+
+gemini:
+  apiKey: ${GEMINI_API_KEY}
+
+# All other settings will use defaults:
+# - attachmentRoots: ["~/Library/Messages/Attachments"]
+# - enrichment: all features enabled, checkpoint every 100 messages
+# - render: time grouping, nested replies, tapback emojis, max depth 10

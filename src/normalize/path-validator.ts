@@ -1,14 +1,16 @@
 import { existsSync } from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { Message, MediaProvenance } from '../schema/message'
+import type { Message, MediaProvenance } from '../schema/message'
 
-export interface PathValidationConfig {
+type MessageWithMetadata = Message & { exportMetadata?: { source?: string } }
+
+export type PathValidationConfig = {
   attachmentRoots: string[]
   source: 'csv' | 'db' | 'merged'
 }
 
-export interface PathValidationStats {
+export type PathValidationStats = {
   total: number
   found: number
   missing: number
@@ -20,7 +22,7 @@ export interface PathValidationStats {
   }>
 }
 
-export interface PathValidationResult {
+export type PathValidationResult = {
   messages: Message[]
   stats: PathValidationStats
 }
@@ -118,10 +120,11 @@ export function inferSource(
   }
 
   // Check if there's explicit metadata
-  if ((message as any).exportMetadata?.source === 'csv') {
+  const msgWithMeta = message as MessageWithMetadata
+  if (msgWithMeta.exportMetadata?.source === 'csv') {
     return 'csv'
   }
-  if ((message as any).exportMetadata?.source === 'db') {
+  if (msgWithMeta.exportMetadata?.source === 'db') {
     return 'db'
   }
 
@@ -239,7 +242,7 @@ export function validateAndEnforcePaths(
     }
 
     // AC02: Add provenance metadata
-    const source = inferSource(message, config.source)
+    const _source = inferSource(message, config.source)
     media.provenance = createProvenance(message, config.source)
 
     updatedMessage.media = media

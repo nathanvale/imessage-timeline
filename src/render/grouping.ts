@@ -19,7 +19,7 @@ export type TimeOfDay = 'morning' | 'afternoon' | 'evening'
 /**
  * Group structure for a single time-of-day period
  */
-export interface TimeOfDayGroup {
+export type TimeOfDayGroup = {
   morning: Message[]
   afternoon: Message[]
   evening: Message[]
@@ -29,7 +29,7 @@ export interface TimeOfDayGroup {
  * Grouped messages by date and time-of-day
  * Key: YYYY-MM-DD
  */
-export interface GroupedMessages {
+export type GroupedMessages = {
   [date: string]: TimeOfDayGroup
 }
 

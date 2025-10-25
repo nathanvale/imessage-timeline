@@ -8,7 +8,7 @@ import {
   isAbsolutePath,
   PathValidationStats,
 } from '../path-validator'
-import { Message } from '../../schema/message'
+import type { Message } from '../../schema/message'
 
 describe('path-validator', () => {
   let tempDir: string

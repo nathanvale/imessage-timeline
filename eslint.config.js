@@ -15,7 +15,7 @@ export default tseslint.config(
     files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     ...tseslint.configs.recommendedTypeChecked[0],
     languageOptions: {
-      parserOptions: { project: ['./tsconfig.json'] },
+      parserOptions: { project: ['./tsconfig.eslint.json'] },
     },
   },
 
@@ -45,6 +45,18 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
       // Typed rules like no-floating-promises can be enabled with type-aware mode above
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
+  },
+
+  // Relax rules for test files
+  {
+    name: 'project/tests',
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/__tests__/**/*.ts', '__tests__/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/consistent-type-definitions': 'off',
     },
   },
 

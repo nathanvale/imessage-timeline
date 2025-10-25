@@ -1,0 +1,39 @@
+# iMessage Timeline Configuration (YAML format)
+# CONFIG-T01-AC02: Example YAML configuration file
+
+version: "1.0"
+
+# Directories to search for iMessage attachments
+# Supports multiple roots for different backup locations
+attachmentRoots:
+  - ~/Library/Messages/Attachments
+  - /Volumes/Backup/old-attachments
+
+# Gemini AI configuration for enrichment
+gemini:
+  # CONFIG-T01-AC03: Environment variable interpolation
+  apiKey: ${GEMINI_API_KEY}
+  model: gemini-1.5-pro
+  rateLimitDelay: 1000  # milliseconds between API calls
+  maxRetries: 3         # retry attempts for failed API calls
+
+# Firecrawl configuration for link enrichment (optional)
+firecrawl:
+  apiKey: ${FIRECRAWL_API_KEY}
+  enabled: true
+
+# Enrichment pipeline settings
+enrichment:
+  enableVisionAnalysis: true       # HEIC/TIFF image analysis
+  enableAudioTranscription: true   # Audio file transcription
+  enableLinkEnrichment: true       # URL context extraction
+  imageCacheDir: ./.cache/images   # Preview cache location
+  checkpointInterval: 100          # Save checkpoint every N messages
+  forceRefresh: false              # Re-enrich existing enrichments
+
+# Markdown rendering settings
+render:
+  groupByTimeOfDay: true           # Morning/Afternoon/Evening grouping
+  renderRepliesAsNested: true      # Nested blockquotes for replies
+  renderTapbacksAsEmoji: true      # ❤️😍😂 instead of "loved", "liked"
+  maxNestingDepth: 10              # Maximum reply nesting depth

@@ -19,21 +19,21 @@
 // Types and Interfaces
 // ============================================================================
 
-export interface RateLimitConfig {
+export type RateLimitConfig = {
   rateLimitDelay: number // ms between API calls (default 1000)
   maxRetries: number // max retry attempts for 5xx (default 3)
   circuitBreakerThreshold: number // consecutive failures before open (default 5)
   circuitBreakerResetMs: number // timeout to reset circuit (default 60000ms)
 }
 
-export interface RateLimitState {
+export type RateLimitState = {
   consecutiveFailures: number
   circuitOpen: boolean
   circuitOpenedAt: number | null
   lastCallTime: number | null
 }
 
-export interface ApiResponse {
+export type ApiResponse = {
   status: number
   headers?: Record<string, string | number | undefined>
 }

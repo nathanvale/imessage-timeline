@@ -21,12 +21,11 @@
  * - Pipeline never crashes on enrichment errors
  */
 
-import path from 'path'
 import { access, stat } from 'fs/promises'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Message, MediaMeta, MediaEnrichment } from '#schema/message'
 
-interface AudioTranscriptionConfig {
+type AudioTranscriptionConfig = {
   enableAudioTranscription: boolean
   geminiApiKey: string
   geminiModel?: string
@@ -35,7 +34,7 @@ interface AudioTranscriptionConfig {
   maxRetries?: number
 }
 
-interface TranscriptionData {
+type TranscriptionData = {
   transcription: string
   speakers: string[]
   timestamps: Array<{ time: string; speaker: string; content: string }>

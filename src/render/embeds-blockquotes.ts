@@ -191,7 +191,7 @@ export function getPdfSummaries(message: Message): MediaEnrichment[] {
 /**
  * Render all blockquotes for a message's enrichments
  */
-export interface RenderedEnrichments {
+export type RenderedEnrichments = {
   embeds: string[]
   transcriptions: string[]
   linkContexts: string[]

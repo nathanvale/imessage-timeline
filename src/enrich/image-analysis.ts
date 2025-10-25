@@ -27,7 +27,7 @@ import sharp from 'sharp'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Message, MediaMeta, MediaEnrichment } from '#schema/message'
 
-interface ImageAnalysisConfig {
+type ImageAnalysisConfig = {
   enableVisionAnalysis: boolean
   geminiApiKey: string
   geminiModel?: string
@@ -234,9 +234,9 @@ export async function analyzeImage(
     const imageCacheDir = config.imageCacheDir || '/tmp/image-cache'
 
     // AC01-AC03: Generate preview (cached)
-    let previewPath: string | undefined
+    let _previewPath: string | undefined
     try {
-      previewPath = await convertToJpgPreview(message.media.path, imageCacheDir, 90)
+      _previewPath = await convertToJpgPreview(message.media.path, imageCacheDir, 90)
     } catch (err) {
       log('warn', `Failed to create preview - continuing with Gemini analysis`, {
         filename: message.media.filename,

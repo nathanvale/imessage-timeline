@@ -15,13 +15,13 @@ const REPLY_WINDOW_SECONDS = 30 // AC02: <30s proximity threshold
 const REPLY_SEARCH_WINDOW_MINUTES = 5 // Expand to ±5 minutes if needed
 const TAPBACK_WINDOW_SECONDS = 30 // Tapbacks within 30s of parent
 
-interface ScoredCandidate {
+type ScoredCandidate = {
   message: Message
   score: number
   reasons: string[]
 }
 
-interface AmbiguousLink {
+type AmbiguousLink = {
   messageGuid: string
   selectedTarget: string
   candidates: ScoredCandidate[]
@@ -29,12 +29,12 @@ interface AmbiguousLink {
   confidenceScore: number
 }
 
-interface LinkingOptions {
+type LinkingOptions = {
   trackAmbiguous?: boolean
   minConfidenceThreshold?: number
 }
 
-interface LinkingResult {
+type LinkingResult = {
   messages: Message[]
   ambiguousLinks?: AmbiguousLink[]
 }
@@ -49,7 +49,7 @@ export function linkRepliesToParents(
   messages: Message[],
   options: LinkingOptions = {}
 ): Message[] | LinkingResult {
-  const { trackAmbiguous = false, minConfidenceThreshold = 0.7 } = options
+  const { trackAmbiguous = false, minConfidenceThreshold: _minConfidenceThreshold = 0.7 } = options
 
   // Build indices for fast lookup
   const byGuid = new Map<string, Message>()
@@ -253,8 +253,8 @@ export function detectAmbiguousLinks(messages: Message[]) {
 function findReplyParentCandidates(
   reply: Message,
   allMessages: Message[],
-  byGuid: Map<string, Message>,
-  byTimestamp: Map<string, Message[]>
+  _byGuid: Map<string, Message>,
+  _byTimestamp: Map<string, Message[]>
 ): ScoredCandidate[] {
   const replyDate = new Date(reply.date).getTime()
   const candidates: ScoredCandidate[] = []
@@ -369,8 +369,8 @@ function findReplyParentCandidates(
 function findTapbackParentCandidates(
   tapback: Message,
   allMessages: Message[],
-  byGuid: Map<string, Message>,
-  byTimestamp: Map<string, Message[]>
+  _byGuid: Map<string, Message>,
+  _byTimestamp: Map<string, Message[]>
 ): ScoredCandidate[] {
   const tapbackDate = new Date(tapback.date).getTime()
   const candidates: ScoredCandidate[] = []

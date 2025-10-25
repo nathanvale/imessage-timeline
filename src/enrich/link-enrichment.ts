@@ -24,7 +24,7 @@
 
 import type { Message, MediaEnrichment } from '#schema/message'
 
-interface LinkContext {
+type LinkContext = {
   url: string
   title?: string
   description?: string
@@ -33,7 +33,7 @@ interface LinkContext {
   failedProviders?: string[]
 }
 
-interface LinkEnrichmentConfig {
+type LinkEnrichmentConfig = {
   enableLinkAnalysis: boolean
   firecrawlApiKey?: string
   youtubeApiKey?: string
@@ -68,11 +68,11 @@ const URL_PATTERNS = {
 /**
  * Provider interface for cascading fallbacks
  */
-interface Provider {
+type Provider = {
   name: string
   priority: number
-  detect(url: string): boolean
-  extract(url: string): Promise<LinkContext>
+  detect: (url: string) => boolean
+  extract: (url: string) => Promise<LinkContext>
 }
 
 /**
@@ -87,7 +87,7 @@ class FirecrawlProvider implements Provider {
     this.apiKey = apiKey
   }
 
-  detect(url: string): boolean {
+  detect(_url: string): boolean {
     // Firecrawl can handle any URL
     return true
   }
@@ -285,7 +285,7 @@ class GenericProvider implements Provider {
   name = 'generic'
   priority = 5
 
-  detect(url: string): boolean {
+  detect(_url: string): boolean {
     return true
   }
 
@@ -466,7 +466,7 @@ export async function enrichLinksContext(
 ): Promise<Message[]> {
   const results: Message[] = []
   let enrichedCount = 0
-  let skippedCount = 0
+  const skippedCount = 0
   let failedCount = 0
   const providerStats: Record<string, number> = {}
 

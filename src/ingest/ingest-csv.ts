@@ -1,15 +1,16 @@
-import { readFileSync, existsSync } from 'fs'
+import { readFileSync, existsSync, readdirSync } from 'fs'
 import { parse } from 'csv-parse/sync'
-import { Message, ExportEnvelope, MessageSchema, ExportEnvelopeSchema } from '../schema/message'
+import type { Message, ExportEnvelope} from '../schema/message.js';
+import { MessageSchema } from '../schema/message.js'
 import * as path from 'path'
 import * as os from 'os'
 
-export interface IngestOptions {
+export type IngestOptions = {
   attachmentRoots: string[]
   messageDate?: string
 }
 
-export interface CSVRow {
+export type CSVRow = {
   [key: string]: string | undefined
 }
 
@@ -209,11 +210,17 @@ export function convertToISO8601(csvDate: string): string | null {
   }
 }
 
+type AttachmentRecord = {
+  copied_path?: string
+  filename?: string
+  senderName?: string
+}
+
 /**
  * Resolve attachment path to absolute path when file exists
  */
 export function resolveAttachmentPath(
-  attachment: any,
+  attachment: AttachmentRecord | null | undefined,
   options: IngestOptions & { messageDate?: string }
 ): string | null {
   if (!attachment) return null
@@ -253,11 +260,11 @@ export function resolveAttachmentPath(
       // Try wildcard pattern if sender name unknown
       if (senderName === '*' && existsSync(root)) {
         try {
-          const files = require('fs').readdirSync(root).filter((f: string) => {
+          const files = readdirSync(root).filter((f) => {
             return f.includes(dateStr) && f.endsWith(filename)
           })
 
-          if (files.length > 0) {
+          if (files.length > 0 && files[0]) {
             return path.join(root, files[0])
           }
         } catch {
@@ -317,18 +324,27 @@ export function createExportEnvelope(messages: Message[]): ExportEnvelope {
   }
 }
 
+type ValidationError = {
+  index: number
+  message: Message
+  issues: unknown[]
+}
+
 /**
  * Validate all messages pass schema validation
  */
-export function validateMessages(messages: Message[]): { valid: boolean; errors: any[] } {
-  const errors: any[] = []
+export function validateMessages(messages: Message[]): { valid: boolean; errors: ValidationError[] } {
+  const errors: ValidationError[] = []
 
   for (let i = 0; i < messages.length; i++) {
-    const result = MessageSchema.safeParse(messages[i])
+    const message = messages[i]
+    if (!message) continue
+
+    const result = MessageSchema.safeParse(message)
     if (!result.success) {
       errors.push({
         index: i,
-        message: messages[i],
+        message,
         issues: result.error.issues,
       })
     }

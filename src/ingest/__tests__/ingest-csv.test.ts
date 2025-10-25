@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
-import { ingestCSV, parseCSVRow, convertToISO8601, validateMessages, CSVRow } from '../ingest-csv'
+import type { CSVRow } from '../ingest-csv';
+import { ingestCSV, parseCSVRow, convertToISO8601, validateMessages } from '../ingest-csv'
 import * as path from 'path'
 import { readFileSync } from 'fs'
 

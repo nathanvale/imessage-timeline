@@ -33,10 +33,14 @@ Short Description: Two people have a brief conversation about a topic.`
 })
 
 // Mock fs promises
-vi.mock('fs/promises', () => ({
-  access: vi.fn(),
-  stat: vi.fn().mockResolvedValue({ size: 1024000 }), // ~1MB file
-}))
+vi.mock('fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs/promises')>()
+  return {
+    ...actual,
+    access: vi.fn().mockResolvedValue(undefined),
+    stat: vi.fn().mockResolvedValue({ size: 1024000 }), // ~1MB file
+  }
+})
 
 describe('Audio Transcription (ENRICH--T02)', () => {
   const testTempDir = '/tmp/enrich-test'

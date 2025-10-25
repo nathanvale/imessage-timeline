@@ -285,10 +285,10 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
       expect(formatted0).toMatch(/^>/)
 
       // Level 1: > > (2 space indent)
-      expect(formatted1).toMatch(/^  >/)
+      expect(formatted1).toMatch(/^ {2}>/)
 
       // Level 2: > > > (4 space indent)
-      expect(formatted2).toMatch(/^    >/)
+      expect(formatted2).toMatch(/^ {4}>/)
     })
 
     it('should maintain 2-space indentation consistently', () => {

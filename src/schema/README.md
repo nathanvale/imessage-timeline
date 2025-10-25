@@ -187,7 +187,7 @@ All acceptance criteria for SCHEMA-T01 have been implemented:
 Run the verification script to test the schema:
 
 ```bash
-node .scripts/verify-schema.mjs
+node scripts/verify-schema.mjs
 ```
 
 This script validates:

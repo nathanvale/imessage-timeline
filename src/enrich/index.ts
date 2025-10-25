@@ -25,7 +25,7 @@ import {
   deduplicateEnrichmentByKind,
 } from './idempotency'
 
-interface EnrichmentConfig {
+type EnrichmentConfig = {
   enableVisionAnalysis?: boolean
   enableLinkAnalysis?: boolean
   geminiApiKey?: string

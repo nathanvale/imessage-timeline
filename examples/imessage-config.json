@@ -1,0 +1,31 @@
+{
+  "$schema": "../src/config/schema.ts",
+  "version": "1.0",
+  "attachmentRoots": [
+    "~/Library/Messages/Attachments"
+  ],
+  "gemini": {
+    "apiKey": "${GEMINI_API_KEY}",
+    "model": "gemini-1.5-pro",
+    "rateLimitDelay": 1000,
+    "maxRetries": 3
+  },
+  "firecrawl": {
+    "apiKey": "${FIRECRAWL_API_KEY}",
+    "enabled": true
+  },
+  "enrichment": {
+    "enableVisionAnalysis": true,
+    "enableAudioTranscription": true,
+    "enableLinkEnrichment": true,
+    "imageCacheDir": "./.cache/images",
+    "checkpointInterval": 100,
+    "forceRefresh": false
+  },
+  "render": {
+    "groupByTimeOfDay": true,
+    "renderRepliesAsNested": true,
+    "renderTapbacksAsEmoji": true,
+    "maxNestingDepth": 10
+  }
+}

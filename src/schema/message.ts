@@ -14,7 +14,7 @@ export type ChatId = string
 
 export type MediaKind = 'image' | 'audio' | 'video' | 'pdf' | 'unknown'
 
-export interface MediaEnrichment {
+export type MediaEnrichment = {
   kind: MediaKind | 'link' | 'transcription' | 'pdf_summary' | 'video_metadata' | 'link_context' | 'image_analysis'
   model?: string
   createdAt: string
@@ -47,13 +47,13 @@ export interface MediaEnrichment {
   version: string
 }
 
-export interface MediaProvenance {
+export type MediaProvenance = {
   source: 'csv' | 'db' | 'merged'
   lastSeen: string // ISO 8601 timestamp
   resolvedAt: string // ISO 8601 timestamp when path validation occurred
 }
 
-export interface MediaMeta {
+export type MediaMeta = {
   // Represents the single media item carried by a media message
   id: string
   filename: string
@@ -72,14 +72,14 @@ export interface MediaMeta {
 // Reply and Tapback Types
 // ============================================================================
 
-export interface ReplyInfo {
+export type ReplyInfo = {
   sender?: string
   date?: string // ISO 8601
   text?: string
   targetMessageGuid?: MessageGUID
 }
 
-export interface TapbackInfo {
+export type TapbackInfo = {
   type: 'loved' | 'liked' | 'disliked' | 'laughed' | 'emphasized' | 'questioned' | 'emoji'
   action: 'added' | 'removed'
   targetMessageGuid?: MessageGUID
@@ -93,7 +93,7 @@ export interface TapbackInfo {
 // Message Types
 // ============================================================================
 
-export interface MessageCore {
+export type MessageCore = {
   guid: MessageGUID
   rowid?: number
   chatId?: ChatId | null
@@ -122,7 +122,7 @@ export interface MessageCore {
   deletedFrom?: number | null
 }
 
-export interface Message extends MessageCore {
+export type Message = {
   messageKind: 'text' | 'media' | 'tapback' | 'notification'
   text?: string | null
   tapback?: TapbackInfo | null
@@ -135,13 +135,13 @@ export interface Message extends MessageCore {
   exportVersion?: string
   isUnsent?: boolean
   isEdited?: boolean
-}
+} & MessageCore
 
 // ============================================================================
 // Export Envelope
 // ============================================================================
 
-export interface ExportEnvelope {
+export type ExportEnvelope = {
   schemaVersion: string
   source: 'csv' | 'db' | 'merged'
   createdAt: string

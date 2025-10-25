@@ -11,9 +11,9 @@
 
 import { createHash } from 'crypto'
 import type { Message } from '#schema/message'
-import { groupMessagesByDateAndTimeOfDay, getDatesSorted } from './grouping'
-import { formatReplyThread } from './reply-rendering'
-import { renderAllEnrichments } from './embeds-blockquotes'
+import { groupMessagesByDateAndTimeOfDay, getDatesSorted } from './grouping.js'
+import { formatReplyThread } from './reply-rendering.js'
+import { renderAllEnrichments } from './embeds-blockquotes.js'
 
 /**
  * Main render function: Convert messages to markdown files
@@ -53,7 +53,7 @@ function renderDateSection(
     afternoon: Message[]
     evening: Message[]
   },
-  allMessages: Message[]
+  allMessages: Message[],
 ): string {
   const sections: string[] = []
 
@@ -197,7 +197,7 @@ export function getMessageHash(messages: Message[]): string {
 /**
  * Verify determinism by rendering multiple times and comparing
  */
-export interface DeterminismResult {
+export type DeterminismResult = {
   isDeterministic: boolean
   runsCount: number
   hashesAreIdentical: boolean
@@ -205,10 +205,7 @@ export interface DeterminismResult {
   hashes: string[]
 }
 
-export function verifyDeterminism(
-  messages: Message[],
-  runsCount: number = 5
-): DeterminismResult {
+export function verifyDeterminism(messages: Message[], runsCount: number = 5): DeterminismResult {
   const outputs: Map<string, string>[] = []
   const hashes: string[] = []
 
@@ -265,10 +262,14 @@ export function validateMarkdownStructure(markdown: string): void {
   }
 
   // Check for basic markdown structure
-  const hasHeader = /^#\s+/m.test(markdown)
-  const hasSections = /^##\s+/m.test(markdown)
+  const _hasHeader = /^#\s+/m.test(markdown)
+  const _hasSections = /^##\s+/m.test(markdown)
 
-  if (markdown.includes('Morning') || markdown.includes('Afternoon') || markdown.includes('Evening')) {
+  if (
+    markdown.includes('Morning') ||
+    markdown.includes('Afternoon') ||
+    markdown.includes('Evening')
+  ) {
     // Should have at least basic structure
     if (markdown.length > 100) {
       // Don't require headers for very small content

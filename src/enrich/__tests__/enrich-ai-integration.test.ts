@@ -19,25 +19,25 @@ import path from 'path'
 // Mock Provider Types and Interfaces
 // ============================================================================
 
-interface MockImageAnalysisResult {
+type MockImageAnalysisResult = {
   captions: string[]
   summary: string
   previewPath?: string
 }
 
-interface MockTranscriptionResult {
+type MockTranscriptionResult = {
   text: string
   speakers: string[]
   duration: number
 }
 
-interface MockLinkContextResult {
+type MockLinkContextResult = {
   title: string
   summary: string
   provider: string
 }
 
-interface EnrichmentConfig {
+type EnrichmentConfig = {
   rateLimitDelay: number
   maxRetries: number
   enableImageAnalysis: boolean
@@ -45,7 +45,7 @@ interface EnrichmentConfig {
   enableLinkAnalysis: boolean
 }
 
-interface EnrichmentState {
+type EnrichmentState = {
   processedCount: number
   failedCount: number
   enrichmentsByKind: Record<string, number>
@@ -291,7 +291,7 @@ describe('AC02: Idempotency - No Duplicate Enrichments', () => {
 // ============================================================================
 
 describe('AC03: Checkpoint Resume - State Restoration', () => {
-  interface Checkpoint {
+  type Checkpoint = {
     lastProcessedIndex: number
     totalProcessed: number
     totalFailed: number

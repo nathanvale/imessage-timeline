@@ -24,7 +24,7 @@ import { access, stat } from 'fs/promises'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Message, MediaMeta, MediaEnrichment } from '#schema/message'
 
-interface PdfVideoConfig {
+type PdfVideoConfig = {
   enablePdfVideoAnalysis: boolean
   geminiApiKey: string
   geminiModel?: string
@@ -33,7 +33,7 @@ interface PdfVideoConfig {
   maxRetries?: number
 }
 
-interface FormatStats {
+type FormatStats = {
   [format: string]: number
 }
 
@@ -149,7 +149,7 @@ export async function analyzePdf(
 /**
  * AC02: Extract video metadata (no transcription - out of scope)
  */
-export async function handleVideo(videoPath: string, config: Partial<PdfVideoConfig>): Promise<MediaEnrichment> {
+export async function handleVideo(videoPath: string, _config: Partial<PdfVideoConfig>): Promise<MediaEnrichment> {
   try {
     // Extract video metadata from file stats
     const fileStats = await stat(videoPath)

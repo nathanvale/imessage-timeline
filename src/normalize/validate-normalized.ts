@@ -2,9 +2,11 @@
 // Zod validation layer for normalized messages
 // Spec §4.3, §9: Schema validation with comprehensive error reporting
 
-import { Message, MessageSchema } from '../schema/message'
+import type { Message } from '../schema/message'
+import { MessageSchema } from '../schema/message'
+import type { ZodIssue } from 'zod'
 
-export interface ValidationError {
+export type ValidationError = {
   index: number
   fieldPath: string
   message: string
@@ -76,7 +78,7 @@ export function validateNormalizedMessages(messages: unknown[]): Message[] {
  * @param zodErrors - Zod validation errors
  * @returns Formatted error message string
  */
-export function formatValidationErrors(messageIndex: number, zodErrors: any[]): string {
+export function formatValidationErrors(messageIndex: number, zodErrors: ZodIssue[]): string {
   if (!Array.isArray(zodErrors) || zodErrors.length === 0) {
     return 'Unknown validation error'
   }
@@ -99,19 +101,22 @@ export function formatValidationErrors(messageIndex: number, zodErrors: any[]): 
  * @param obj - Object to check
  * @returns true if any snake_case fields found
  */
-export function hasSnakeCaseFields(obj: any, depth = 0): boolean {
+export function hasSnakeCaseFields(obj: unknown, depth = 0): boolean {
   if (depth > 10) return false // Prevent infinite recursion
   if (typeof obj !== 'object' || obj === null) return false
 
-  for (const key of Object.keys(obj)) {
+  const record = obj as Record<string, unknown>
+
+  for (const key of Object.keys(record)) {
     // Check if key contains underscore (snake_case indicator)
     if (key.includes('_') && !key.startsWith('__')) {
       return true
     }
 
     // Recursively check nested objects
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      if (hasSnakeCaseFields(obj[key], depth + 1)) {
+    const value = record[key]
+    if (typeof value === 'object' && value !== null) {
+      if (hasSnakeCaseFields(value, depth + 1)) {
         return true
       }
     }
@@ -125,13 +130,14 @@ export function hasSnakeCaseFields(obj: any, depth = 0): boolean {
  * @param obj - Object to check
  * @returns Array of field names that use snake_case
  */
-export function getSnakeCaseFields(obj: any, prefix = '', depth = 0): string[] {
+export function getSnakeCaseFields(obj: unknown, prefix = '', depth = 0): string[] {
   if (depth > 10) return [] // Prevent infinite recursion
   if (typeof obj !== 'object' || obj === null) return []
 
   const snakeCaseFields: string[] = []
+  const record = obj as Record<string, unknown>
 
-  for (const key of Object.keys(obj)) {
+  for (const key of Object.keys(record)) {
     const fullPath = prefix ? `${prefix}.${key}` : key
 
     // Check if key contains underscore (snake_case indicator)
@@ -140,8 +146,9 @@ export function getSnakeCaseFields(obj: any, prefix = '', depth = 0): string[] {
     }
 
     // Recursively check nested objects
-    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-      snakeCaseFields.push(...getSnakeCaseFields(obj[key], fullPath, depth + 1))
+    const value = record[key]
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      snakeCaseFields.push(...getSnakeCaseFields(value, fullPath, depth + 1))
     }
   }
 

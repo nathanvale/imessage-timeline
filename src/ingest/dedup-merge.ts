@@ -11,7 +11,7 @@ import type { Message } from '#schema/message'
  * AC05: Deterministic GUID assignment
  */
 
-export interface MergeStats {
+export type MergeStats = {
   csvCount: number
   dbCount: number
   outputCount: number
@@ -21,13 +21,13 @@ export interface MergeStats {
   noMatches: number
 }
 
-export interface ContentMatch {
+export type ContentMatch = {
   message: Message
   confidence: number
   reasons: string[]
 }
 
-export interface MergeResult {
+export type MergeResult = {
   messages: Message[]
   stats: MergeStats
   conflicts?: Array<{ csvMsg: Message; dbMsg: Message; confidence: number }>

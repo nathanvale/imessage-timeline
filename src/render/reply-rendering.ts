@@ -14,7 +14,7 @@ import type { Message } from '#schema/message'
 /**
  * Reply context for rendering
  */
-export interface ReplyContext {
+export type ReplyContext = {
   message: Message
   parentGuid: string
   depth: number
@@ -24,7 +24,7 @@ export interface ReplyContext {
 /**
  * Tapback context for rendering
  */
-export interface TapbackContext {
+export type TapbackContext = {
   message: Message
   parentGuid: string
   type: string
@@ -149,7 +149,7 @@ export function renderTapbackAsEmoji(message: Message): string {
 /**
  * AC03: Build reply tree structure for a message
  */
-export interface ReplyTree {
+export type ReplyTree = {
   message: Message
   guid: string
   children: ReplyTree[]
@@ -228,7 +228,7 @@ export function getReplyChain(
 /**
  * Format complete reply thread for rendering
  */
-export interface FormattedReplyThread {
+export type FormattedReplyThread = {
   parentMessage: Message
   replies: Array<{
     message: Message

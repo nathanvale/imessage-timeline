@@ -3,7 +3,7 @@
 // Integration tests for split, linking, dedup, dates, and paths with >70% coverage
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { Message } from '../../schema/message'
+import type { Message } from '../../schema/message'
 import { validateNormalizedMessages } from '../../normalize/validate-normalized'
 
 /**

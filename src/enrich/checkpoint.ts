@@ -26,20 +26,20 @@ import crypto from 'crypto'
 // Types
 // ============================================================================
 
-export interface FailedItem {
+export type FailedItem = {
   index: number
   guid: string
   kind: string
   error: string
 }
 
-export interface CheckpointStats {
+export type CheckpointStats = {
   processedCount: number
   failedCount: number
   enrichmentsByKind: Record<string, number>
 }
 
-export interface EnrichCheckpoint {
+export type EnrichCheckpoint = {
   version: string
   configHash: string
   lastProcessedIndex: number
@@ -50,7 +50,7 @@ export interface EnrichCheckpoint {
   createdAt: string
 }
 
-export interface CheckpointInput {
+export type CheckpointInput = {
   lastProcessedIndex: number
   totalProcessed: number
   totalFailed: number
@@ -213,7 +213,7 @@ export function verifyConfigHash(checkpointHash: string, currentHash: string): b
 // Integration: Checkpoint State
 // ============================================================================
 
-export interface CheckpointState {
+export type CheckpointState = {
   isResuming: boolean
   lastCheckpointIndex: number
   configHash: string

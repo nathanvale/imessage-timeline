@@ -1,6 +1,6 @@
-import { Message, ExportEnvelope } from '../schema/message'
+import type { Message, ExportEnvelope } from '../schema/message.js'
 
-export interface DBMessage {
+export type DBMessage = {
   guid: string
   rowid?: number
   text?: string | null
@@ -11,20 +11,20 @@ export interface DBMessage {
   service?: string
   subject?: string | null
   attachments?: DBAttachment[]
-  [key: string]: any
+  [key: string]: unknown
 }
 
-export interface DBAttachment {
+export type DBAttachment = {
   id: string
   filename: string
   mime_type?: string
   uti?: string | null
   copied_path?: string
   total_bytes?: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
-export interface IngestOptions {
+export type IngestOptions = {
   attachmentRoots: string[]
 }
 
@@ -41,7 +41,7 @@ const APPLE_EPOCH_OFFSET = 978307200
  * - N media messages (one per attachment)
  * All parts share same groupGuid (original DB guid) and timestamps
  */
-export function splitDBMessage(dbMessage: DBMessage, lineNumber: number, options: IngestOptions): Message[] {
+export function splitDBMessage(dbMessage: DBMessage, lineNumber: number, _options: IngestOptions): Message[] {
   const messages: Message[] = []
   const originalGuid = dbMessage.guid
   const attachments = dbMessage.attachments || []

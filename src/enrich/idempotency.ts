@@ -13,9 +13,9 @@
  * - Force-refresh bypasses idempotency checks
  */
 
-import type { Message, MediaEnrichment, MediaMeta } from '#schema/message'
+import type { Message, MediaEnrichment } from '#schema/message'
 
-interface IdempotencyOptions {
+type IdempotencyOptions = {
   forceRefresh?: boolean
 }
 
@@ -210,7 +210,7 @@ export function clearEnrichmentByKind(message: Message, kind: MediaEnrichment['k
 
   // If no enrichments remain, omit the enrichment field entirely
   if (filtered.length === 0) {
-    const { enrichment, ...mediaWithoutEnrichment } = message.media
+    const { enrichment: _enrichment, ...mediaWithoutEnrichment } = message.media
     return {
       ...message,
       media: mediaWithoutEnrichment,

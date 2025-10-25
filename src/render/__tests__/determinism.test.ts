@@ -508,8 +508,26 @@ describe('RENDER--T04: Determinism Test Suite', () => {
     })
 
     it('scales linearly with message count', () => {
-      const times: { count: number; duration: number }[] = []
+      // Detect if coverage instrumentation is active
+      const isCoverageMode = typeof (global as any).__coverage__ !== 'undefined'
+      const overheadMultiplier = isCoverageMode ? 5 : 2
 
+      // Helper: Calculate median to reduce noise from GC pauses
+      const median = (numbers: number[]): number => {
+        const sorted = [...numbers].sort((a, b) => a - b)
+        const mid = Math.floor(sorted.length / 2)
+        return sorted.length % 2 === 0
+          ? (sorted[mid - 1] + sorted[mid]) / 2
+          : sorted[mid]
+      }
+
+      // Warmup: Eliminate JIT compilation overhead
+      const warmupDataset = createSmallDataset()
+      for (let i = 0; i < 3; i++) {
+        renderMessages(warmupDataset)
+      }
+
+      const times: { count: number; duration: number }[] = []
       const datasets = [
         { count: 10, messages: createSmallDataset() },
         { count: 100, messages: createMediumDataset() },
@@ -517,18 +535,26 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       ]
 
       for (const { count, messages } of datasets) {
-        const start = performance.now()
-        renderMessages(messages)
-        const duration = performance.now() - start
-        times.push({ count, duration })
+        // Run each measurement 5 times to get stable median
+        const measurements: number[] = []
+        for (let run = 0; run < 5; run++) {
+          const start = performance.now()
+          renderMessages(messages)
+          const duration = performance.now() - start
+          measurements.push(duration)
+        }
+
+        const medianDuration = median(measurements)
+        times.push({ count, duration: medianDuration })
       }
 
-      // Verify roughly linear scaling (allow 2x multiplier for overhead)
+      // Verify roughly linear scaling with adjusted tolerance
       for (let i = 1; i < times.length; i++) {
-        const ratio = (times[i].count / times[i - 1].count) * 2 // 2x buffer for overhead
+        const countRatio = times[i].count / times[i - 1].count
+        const ratio = countRatio * overheadMultiplier // 2x normal, 5x coverage
         const durationRatio = times[i].duration / times[i - 1].duration
 
-        expect(durationRatio).toBeLessThan(ratio)
+        expect(durationRatio).toBeLessThan(ratio) // Adjusted for coverage overhead
       }
     })
   })
@@ -676,7 +702,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
  * Helper: Extract anchor IDs from markdown
  */
 function extractAnchors(markdown: string): string[] {
-  const anchorRegex = /#msg-[a-zA-Z0-9\-]+/g
+  const anchorRegex = /#msg-[a-zA-Z0-9-]+/g
   const matches = markdown.match(anchorRegex)
   return matches || []
 }

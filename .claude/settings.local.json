@@ -1,4 +1,23 @@
 {
+  "permissions": {
+    "allow": [
+      "Read(//Users/nathanvale/code/capture-bridge/**)",
+      "Bash(rm .prettierrc.json)",
+      "Bash(npm run format)",
+      "Bash(/Users/nathanvale/code/imessage-timeline/node_modules/.bin/prettier --write src/cli.ts)",
+      "Bash(/Users/nathanvale/code/imessage-timeline/node_modules/.bin/tsc:*)",
+      "Bash(/Users/nathanvale/code/imessage-timeline/node_modules/.bin/eslint:*)",
+      "Bash(/Users/nathanvale/code/imessage-timeline/node_modules/.bin/quality-check-claude-hook:*)",
+      "Bash(pnpm exec eslint:*)",
+      "Bash(pnpm exec prettier:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm cli:*)",
+      "Bash(pnpm start normalize-link --help)",
+      "Bash(node ./dist/cli.js:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "wallaby",
     "mcp-server-firecrawl",
@@ -7,12 +26,5 @@
     "context7",
     "tavily-mcp",
     "puppeteer"
-  ],
-  "permissions": {
-    "allow": [
-      "Read(//Users/nathanvale/code/capture-bridge/**)",
-      "Bash(rm .prettierrc.json)",
-      "Bash(npm run format)"
-    ]
-  }
+  ]
 }

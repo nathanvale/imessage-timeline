@@ -1,6 +1,16 @@
 import { defineConfig } from 'vitest/config'
+import { resolve } from 'path'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '#schema': resolve(__dirname, './src/schema'),
+      '#ingest': resolve(__dirname, './src/ingest'),
+      '#normalize': resolve(__dirname, './src/normalize'),
+      '#enrich': resolve(__dirname, './src/enrich'),
+      '#render': resolve(__dirname, './src/render'),
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
