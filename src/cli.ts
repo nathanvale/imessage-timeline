@@ -440,6 +440,7 @@ program
   .option('-o, --output <path>', 'output JSON file path', './messages.enriched.json')
   .option('-c, --checkpoint-dir <path>', 'checkpoint directory', './.checkpoints')
   .option('--resume', 'resume from last checkpoint', false)
+  .option('--incremental', 'only enrich messages new since last enrichment run', false)
   .option('--force-refresh', 'force re-enrichment even if already done', false)
   .option('--rate-limit <ms>', 'delay between API calls (milliseconds)', '1000')
   .option('--max-retries <n>', 'max retries on API errors', '3')
@@ -453,6 +454,7 @@ program
       output,
       checkpointDir,
       resume,
+      incremental,
       forceRefresh: _forceRefresh,
       rateLimitMs,
       maxRetries,
@@ -499,6 +501,7 @@ program
         console.info(`🖼️  Vision: ${enableVision ? 'enabled' : 'disabled'}`)
         console.info(`🎵 Audio: ${enableAudio ? 'enabled' : 'disabled'}`)
         console.info(`🔗 Links: ${enableLinks ? 'enabled' : 'disabled'}`)
+        console.info(`♻️  Incremental mode: ${incremental ? 'enabled' : 'disabled'}`)
       }
 
       // Create checkpoint directory if needed
