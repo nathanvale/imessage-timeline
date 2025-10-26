@@ -29,8 +29,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rimraf dist .tsbuildinfo 2>/dev/null || true",
-    "dev": "pnpm build && node --env-file=.env ./dist/cli.js",
-    "start": "node --env-file=.env ./dist/cli.js",
+    "dev": "pnpm build && node ./dist/cli.js",
+    "cli": "node ./dist/cli.js",
+    "start": "node ./dist/cli.js",
+    "watch": "tsc -p tsconfig.json --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier -w .",
