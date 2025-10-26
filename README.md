@@ -30,9 +30,85 @@ Perfect for creating browsable conversation archives, enriched research notes, o
 - **Conversation Threading**: Nested replies and tapbacks rendered as readable blockquotes
 - **Type-Safe**: 100% TypeScript with Zod schema validation
 
-## Quick Start
+## For End Users
 
-### Installation
+### Installation & Setup
+
+#### Prerequisites
+
+- **Node.js** 22.20+
+- **macOS** (for database export; CSV import works on any OS)
+- **Gemini API Key** (for AI enrichment, get free at https://aistudio.google.com)
+- **Firecrawl API Key** (optional, for link enrichment, get at https://www.firecrawl.dev)
+
+#### Install Global CLI
+
+```bash
+npm install -g imessage-timeline
+```
+
+This installs the `imessage-timeline` command globally, available from any directory.
+
+#### Environment Setup
+
+Create a `.env` file in your working directory:
+
+```bash
+GEMINI_API_KEY=your-api-key-here
+FIRECRAWL_API_KEY=your-api-key-here
+```
+
+Or export them in your shell:
+
+```bash
+export GEMINI_API_KEY=your-api-key-here
+export FIRECRAWL_API_KEY=your-api-key-here
+```
+
+#### Verify Installation
+
+```bash
+imessage-timeline doctor
+```
+
+Should show all checks passing.
+
+### Quick Start (Consumer)
+
+```bash
+# Initialize config (creates imessage-config.yaml)
+imessage-timeline init
+
+# Ingest CSV export from iMazing
+imessage-timeline ingest-csv -i messages.csv -o messages.csv.ingested.json
+
+# Ingest from macOS Messages.app database
+imessage-timeline ingest-db -i db-export.json -o messages.db.ingested.json
+
+# Normalize and link messages (merge sources, deduplicate, link replies)
+imessage-timeline normalize-link \
+  -i messages.csv.ingested.json messages.db.ingested.json \
+  -o messages.normalized.json
+
+# Enrich with AI (images, audio, links)
+imessage-timeline enrich-ai \
+  -i messages.normalized.json \
+  -o messages.enriched.json \
+  --enable-vision --enable-audio --enable-links
+
+# Render to markdown
+imessage-timeline render-markdown \
+  -i messages.enriched.json \
+  -o ./timeline
+```
+
+Output: A `timeline/` directory with daily markdown files, one per date.
+
+## For Developers
+
+### Development Setup
+
+#### Clone & Install
 
 ```bash
 # Clone the repository
@@ -44,48 +120,54 @@ pnpm install
 
 # Build TypeScript
 pnpm build
-
-# (Optional) Link for global CLI access
-pnpm link
 ```
 
-### Prerequisites
+#### Local CLI Development
 
-- **Node.js** 22.20+
-- **macOS** (for database export; CSV import works on any OS)
-- **Gemini API Key** (for AI enrichment, set via `GEMINI_API_KEY` env var)
-- **Firecrawl API Key** (optional, for link enrichment; set via `FIRECRAWL_API_KEY`)
-
-### Basic Usage
+During development, use `pnpm cli` to run commands with the latest code:
 
 ```bash
-# Initialize config (creates imessage-config.yaml)
-pnpm cli init
+# Build and run in one go
+pnpm dev
 
-# Ingest CSV export from iMazing
-pnpm cli ingest-csv -i messages.csv -o messages.csv.ingested.json
+# Or build, then run individual commands
+pnpm build
+pnpm cli doctor
+pnpm cli ingest-csv -i messages.csv -o output.json
 
-# Ingest from macOS Messages.app database
-pnpm cli ingest-db -i db-export.json -o messages.db.ingested.json
-
-# Normalize and link messages (merge sources, deduplicate, link replies)
-pnpm cli normalize-link \
-  -i messages.csv.ingested.json messages.db.ingested.json \
-  -o messages.normalized.json
-
-# Enrich with AI (images, audio, links)
-pnpm cli enrich-ai \
-  -i messages.normalized.json \
-  -o messages.enriched.json \
-  --enable-vision --enable-audio --enable-links
-
-# Render to markdown
-pnpm cli render-markdown \
-  -i messages.enriched.json \
-  -o ./timeline
+# Watch mode for development
+pnpm watch
 ```
 
-Output: A `timeline/` directory with daily markdown files, one per date.
+#### Running Tests
+
+```bash
+# Run all tests
+pnpm test
+
+# Watch mode
+pnpm test:watch
+
+# With UI
+pnpm test:ui
+
+# Coverage report
+pnpm coverage
+```
+
+#### Code Quality
+
+```bash
+# Lint code
+pnpm lint
+pnpm lint:fix
+
+# Format code
+pnpm format
+
+# Run quality checks (pre-commit hook)
+pnpm quality-check
+```
 
 ## Architecture
 
@@ -482,114 +564,6 @@ render:
 - Looks for `imessage-config.yaml` or `imessage-config.json` in current directory
 - Supports environment variable expansion: `${VARIABLE_NAME}`
 - CLI `--config` flag overrides default path
-
-## Environment Setup for AI Enrichment
-
-To enable AI-powered enrichment (image analysis, audio transcription, link context), you need API keys from Google Gemini and Firecrawl. Follow these steps:
-
-### Step 1: Get API Keys
-
-**Google Gemini API Key** (required for image/audio enrichment):
-1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Click "Get API Key" → "Create API Key in new project"
-3. Copy the generated API key
-
-**Firecrawl API Key** (optional, for link context extraction):
-1. Sign up at [Firecrawl](https://www.firecrawl.dev/)
-2. Navigate to your dashboard → API keys
-3. Copy your API key
-
-### Step 2: Create .env File
-
-Create a `.env` file in the project root with your API keys:
-
-```bash
-cat > .env << 'EOF'
-GEMINI_API_KEY=your-gemini-api-key-here
-FIRECRAWL_API_KEY=your-firecrawl-api-key-here
-EOF
-```
-
-> **Note:** Never commit the `.env` file. It's already in `.gitignore`.
-
-### Step 3: Verify Setup
-
-```bash
-# Run diagnostics to verify keys are loaded
-pnpm cli doctor -v
-
-# Expected output:
-# ✓ Node.js version: 22.20+
-# ✓ Dependencies: installed
-# ✓ Config file: found
-# ✓ API keys: GEMINI_API_KEY loaded, FIRECRAWL_API_KEY loaded
-# ✓ Attachment directories: accessible
-# ✓ Write permissions: OK
-```
-
-### Step 4: Run Enrichment
-
-Once environment is set up, use enrichment flags:
-
-```bash
-# Enrich with image analysis (Gemini Vision)
-pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
-  --enable-vision
-
-# Enrich with audio transcription
-pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
-  --enable-audio
-
-# Enrich with link context (uses Firecrawl if key present)
-pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
-  --enable-links
-
-# Enrich with all features
-pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
-  --enable-vision --enable-audio --enable-links
-```
-
-### Environment Variable Reference
-
-| Variable | Required | Purpose | How to Get |
-|----------|----------|---------|-----------|
-| `GEMINI_API_KEY` | Yes (for enrichment) | Google Gemini API for image/audio analysis | [Google AI Studio](https://aistudio.google.com/app/apikey) |
-| `FIRECRAWL_API_KEY` | No | Web scraping for link context (fallback: heuristics) | [Firecrawl Dashboard](https://www.firecrawl.dev/) |
-| `TF_BUILD` | No | CI/CD environment marker (set by GitHub Actions) | Automatic in CI |
-
-### Security Best Practices
-
-- ✅ **Do:** Store keys in `.env` file (git-ignored)
-- ✅ **Do:** Use environment variables in config: `apiKey: ${GEMINI_API_KEY}`
-- ✅ **Do:** Keep `.env` in `.gitignore` (already configured)
-- ❌ **Don't:** Commit `.env` to version control
-- ❌ **Don't:** Paste keys in config files or shell history
-- ❌ **Don't:** Share `.env` file with others
-
-### Troubleshooting
-
-**"API key not found" error:**
-```bash
-# Check if .env exists
-test -f .env && echo "✓ .env file found" || echo "✗ .env file missing"
-
-# Check if GEMINI_API_KEY is set
-echo $GEMINI_API_KEY
-
-# If empty, reload shell or run:
-export GEMINI_API_KEY=$(grep GEMINI_API_KEY .env | cut -d= -f2)
-```
-
-**"Invalid API key" error:**
-- Verify key is correct in `.env`
-- Check for extra whitespace (keys should be clean strings)
-- Ensure key is still valid (hasn't been revoked)
-
-**"Quota exceeded" error:**
-- Gemini API has free quota limits
-- Upgrade to Gemini API paid plan if needed
-- Use `--rate-limit 2000` to slow down requests
-- Use incremental mode to process only new messages
 
 ## Data Flows & Examples
 
