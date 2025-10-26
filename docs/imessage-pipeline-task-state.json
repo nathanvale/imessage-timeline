@@ -914,7 +914,13 @@
       "risk_level": "LOW",
       "estimated_days": 1,
       "depends_on": [],
-      "acs_completed": ["CLI-T01-AC01", "CLI-T01-AC02", "CLI-T01-AC03", "CLI-T01-AC04", "CLI-T01-AC05"],
+      "acs_completed": [
+        "CLI-T01-AC01",
+        "CLI-T01-AC02",
+        "CLI-T01-AC03",
+        "CLI-T01-AC04",
+        "CLI-T01-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CLI-T01-AC01": "Install commander.js and @types/commander",
@@ -934,8 +940,16 @@
       "description": "Create ingest-csv and ingest-db subcommands with validation",
       "risk_level": "MEDIUM",
       "estimated_days": 2,
-      "depends_on": ["CLI--T01"],
-      "acs_completed": ["CLI-T02-AC01", "CLI-T02-AC02", "CLI-T02-AC03", "CLI-T02-AC04", "CLI-T02-AC05"],
+      "depends_on": [
+        "CLI--T01"
+      ],
+      "acs_completed": [
+        "CLI-T02-AC01",
+        "CLI-T02-AC02",
+        "CLI-T02-AC03",
+        "CLI-T02-AC04",
+        "CLI-T02-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CLI-T02-AC01": "ingest-csv command with all options from usage guide",
@@ -955,8 +969,16 @@
       "description": "Create normalize-link and enrich-ai subcommands with checkpoint/resume support",
       "risk_level": "HIGH",
       "estimated_days": 3,
-      "depends_on": ["CLI--T01"],
-      "acs_completed": ["CLI-T03-AC01", "CLI-T03-AC02", "CLI-T03-AC03", "CLI-T03-AC04", "CLI-T03-AC05"],
+      "depends_on": [
+        "CLI--T01"
+      ],
+      "acs_completed": [
+        "CLI-T03-AC01",
+        "CLI-T03-AC02",
+        "CLI-T03-AC03",
+        "CLI-T03-AC04",
+        "CLI-T03-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CLI-T03-AC01": "normalize-link with merge mode support",
@@ -976,8 +998,16 @@
       "description": "Create render-markdown subcommand with grouping options",
       "risk_level": "LOW",
       "estimated_days": 1,
-      "depends_on": ["CLI--T01"],
-      "acs_completed": ["CLI-T04-AC01", "CLI-T04-AC02", "CLI-T04-AC03", "CLI-T04-AC04", "CLI-T04-AC05"],
+      "depends_on": [
+        "CLI--T01"
+      ],
+      "acs_completed": [
+        "CLI-T04-AC01",
+        "CLI-T04-AC02",
+        "CLI-T04-AC03",
+        "CLI-T04-AC04",
+        "CLI-T04-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CLI-T04-AC01": "render-markdown with date filtering options",
@@ -997,8 +1027,16 @@
       "description": "Implement validate, stats, clean, and doctor utility commands",
       "risk_level": "LOW",
       "estimated_days": 1,
-      "depends_on": ["CLI--T01"],
-      "acs_completed": ["CLI-T05-AC01", "CLI-T05-AC02", "CLI-T05-AC03", "CLI-T05-AC04", "CLI-T05-AC05"],
+      "depends_on": [
+        "CLI--T01"
+      ],
+      "acs_completed": [
+        "CLI-T05-AC01",
+        "CLI-T05-AC02",
+        "CLI-T05-AC03",
+        "CLI-T05-AC04",
+        "CLI-T05-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CLI-T05-AC01": "validate command to check JSON against schema",
@@ -1019,7 +1057,13 @@
       "risk_level": "LOW",
       "estimated_days": 1,
       "depends_on": [],
-      "acs_completed": ["CONFIG-T01-AC01", "CONFIG-T01-AC02", "CONFIG-T01-AC03", "CONFIG-T01-AC04", "CONFIG-T01-AC05"],
+      "acs_completed": [
+        "CONFIG-T01-AC01",
+        "CONFIG-T01-AC02",
+        "CONFIG-T01-AC03",
+        "CONFIG-T01-AC04",
+        "CONFIG-T01-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CONFIG-T01-AC01": "Config schema with Zod validation",
@@ -1039,8 +1083,16 @@
       "description": "Create config loading with precedence (CLI > env > file > defaults) and validation",
       "risk_level": "MEDIUM",
       "estimated_days": 2,
-      "depends_on": ["CONFIG--T01"],
-      "acs_completed": ["CONFIG-T02-AC01", "CONFIG-T02-AC02", "CONFIG-T02-AC03", "CONFIG-T02-AC04", "CONFIG-T02-AC05"],
+      "depends_on": [
+        "CONFIG--T01"
+      ],
+      "acs_completed": [
+        "CONFIG-T02-AC01",
+        "CONFIG-T02-AC02",
+        "CONFIG-T02-AC03",
+        "CONFIG-T02-AC04",
+        "CONFIG-T02-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CONFIG-T02-AC01": "Load config from file with YAML/JSON auto-detection",
@@ -1060,8 +1112,17 @@
       "description": "Generate starter config files with comments and format selection",
       "risk_level": "LOW",
       "estimated_days": 1,
-      "depends_on": ["CONFIG--T02", "CLI--T01"],
-      "acs_completed": ["CONFIG-T03-AC01", "CONFIG-T03-AC02", "CONFIG-T03-AC03", "CONFIG-T03-AC04", "CONFIG-T03-AC05"],
+      "depends_on": [
+        "CONFIG--T02",
+        "CLI--T01"
+      ],
+      "acs_completed": [
+        "CONFIG-T03-AC01",
+        "CONFIG-T03-AC02",
+        "CONFIG-T03-AC03",
+        "CONFIG-T03-AC04",
+        "CONFIG-T03-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "CONFIG-T03-AC01": "init command to generate config file",
@@ -1082,7 +1143,13 @@
       "risk_level": "LOW",
       "estimated_days": 1,
       "depends_on": [],
-      "acs_completed": ["PROGRESS-T01-AC01", "PROGRESS-T01-AC02", "PROGRESS-T01-AC03", "PROGRESS-T01-AC04", "PROGRESS-T01-AC05"],
+      "acs_completed": [
+        "PROGRESS-T01-AC01",
+        "PROGRESS-T01-AC02",
+        "PROGRESS-T01-AC03",
+        "PROGRESS-T01-AC04",
+        "PROGRESS-T01-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "PROGRESS-T01-AC01": "Install cli-progress and @types/cli-progress",
@@ -1102,8 +1169,16 @@
       "description": "Add multi-bar progress indicators to enrich-ai stage with ETA",
       "risk_level": "MEDIUM",
       "estimated_days": 2,
-      "depends_on": ["PROGRESS--T01"],
-      "acs_completed": ["PROGRESS-T02-AC01", "PROGRESS-T02-AC02", "PROGRESS-T02-AC03", "PROGRESS-T02-AC04", "PROGRESS-T02-AC05"],
+      "depends_on": [
+        "PROGRESS--T01"
+      ],
+      "acs_completed": [
+        "PROGRESS-T02-AC01",
+        "PROGRESS-T02-AC02",
+        "PROGRESS-T02-AC03",
+        "PROGRESS-T02-AC04",
+        "PROGRESS-T02-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "PROGRESS-T02-AC01": "Overall enrichment progress (total messages)",
@@ -1123,8 +1198,16 @@
       "description": "Add progress bars and spinners to ingest, normalize, render stages",
       "risk_level": "LOW",
       "estimated_days": 1,
-      "depends_on": ["PROGRESS--T01"],
-      "acs_completed": ["PROGRESS-T03-AC01", "PROGRESS-T03-AC02", "PROGRESS-T03-AC03", "PROGRESS-T03-AC04", "PROGRESS-T03-AC05"],
+      "depends_on": [
+        "PROGRESS--T01"
+      ],
+      "acs_completed": [
+        "PROGRESS-T03-AC01",
+        "PROGRESS-T03-AC02",
+        "PROGRESS-T03-AC03",
+        "PROGRESS-T03-AC04",
+        "PROGRESS-T03-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "PROGRESS-T03-AC01": "Ingest progress: Parsing CSV rows...",
@@ -1145,7 +1228,13 @@
       "risk_level": "HIGH",
       "estimated_days": 3,
       "depends_on": [],
-      "acs_completed": ["INCREMENTAL-T01-AC01", "INCREMENTAL-T01-AC02", "INCREMENTAL-T01-AC03", "INCREMENTAL-T01-AC04", "INCREMENTAL-T01-AC05"],
+      "acs_completed": [
+        "INCREMENTAL-T01-AC01",
+        "INCREMENTAL-T01-AC02",
+        "INCREMENTAL-T01-AC03",
+        "INCREMENTAL-T01-AC04",
+        "INCREMENTAL-T01-AC05"
+      ],
       "acs_remaining": [],
       "acceptance_criteria": {
         "INCREMENTAL-T01-AC01": "State file: .imessage-state.json with last run metadata",
@@ -1157,17 +1246,25 @@
       "notes": "Completed 2025-10-25T05:15:00Z. INCREMENTAL--T01 fully implemented using TDD with Wallaby. Created src/utils/incremental-state.ts (290 lines) with comprehensive state management: (AC01) State schema with version/metadata/GUID tracking, (AC02) Config hash verification with API key presence detection, (AC03) O(n) GUID delta detection using Set, (AC04) Atomic writes with temp+rename pattern, (AC05) --incremental CLI flag integration. Test coverage: 35 tests (all passing), including atomic write crash scenarios, large GUID sets (10k+), config hash mismatches, corrupted JSON handling. Total project tests: 975 passing."
     },
     "INCREMENTAL--T02": {
-      "status": "pending",
-      "started_at": null,
-      "completed_at": null,
+      "status": "completed",
+      "started_at": "2025-10-26T15:45:00.000Z",
+      "completed_at": "2025-10-26T04:42:36.610Z",
       "epic": "E7-Production-Ready",
       "title": "Implement Delta Detection",
       "description": "Compare current messages with state to identify new messages for enrichment",
       "risk_level": "MEDIUM",
       "estimated_days": 2,
-      "depends_on": ["INCREMENTAL--T01"],
-      "acs_completed": [],
-      "acs_remaining": ["INCREMENTAL-T02-AC01", "INCREMENTAL-T02-AC02", "INCREMENTAL-T02-AC03", "INCREMENTAL-T02-AC04", "INCREMENTAL-T02-AC05"],
+      "depends_on": [
+        "INCREMENTAL--T01"
+      ],
+      "acs_completed": [
+        "INCREMENTAL-T02-AC01",
+        "INCREMENTAL-T02-AC02",
+        "INCREMENTAL-T02-AC03",
+        "INCREMENTAL-T02-AC04",
+        "INCREMENTAL-T02-AC05"
+      ],
+      "acs_remaining": [],
       "acceptance_criteria": {
         "INCREMENTAL-T02-AC01": "Load previous state from .imessage-state.json",
         "INCREMENTAL-T02-AC02": "Diff normalized messages against enrichedGuids",
@@ -1175,7 +1272,7 @@
         "INCREMENTAL-T02-AC04": "Handle state file missing (treat as first run)",
         "INCREMENTAL-T02-AC05": "Log delta summary: Found 142 new messages to enrich"
       },
-      "notes": "Core delta logic with GUID set comparison."
+      "notes": "Completed. INCREMENTAL--T02 fully implemented using TDD. Created src/utils/delta-detection.ts (165 lines) with comprehensive delta detection: (AC01) Load previous state from .imessage-state.json with safe handling, (AC02) Diff normalized messages against enrichedGuids using Set-based O(n) comparison, (AC03) Return only new GUIDs for enrichment, (AC04) Handle state file missing (treat as first run), (AC05) Log delta summary with new message count and percentages. Created 24 comprehensive tests in src/__tests__/delta-detection.test.ts covering: extractGuidsFromMessages, detectDelta with first-run detection, state loading/persistence, corrupted state handling, version compatibility, large GUID sets (50k), special GUID formats (part GUIDs), multiple enrichment cycles, state preservation. All 24 tests passing. Total project tests: 999 passing."
     },
     "INCREMENTAL--T03": {
       "status": "pending",
@@ -1186,9 +1283,17 @@
       "description": "Merge new enrichments with existing enriched.json without overwrites",
       "risk_level": "HIGH",
       "estimated_days": 2,
-      "depends_on": ["INCREMENTAL--T01"],
+      "depends_on": [
+        "INCREMENTAL--T01"
+      ],
       "acs_completed": [],
-      "acs_remaining": ["INCREMENTAL-T03-AC01", "INCREMENTAL-T03-AC02", "INCREMENTAL-T03-AC03", "INCREMENTAL-T03-AC04", "INCREMENTAL-T03-AC05"],
+      "acs_remaining": [
+        "INCREMENTAL-T03-AC01",
+        "INCREMENTAL-T03-AC02",
+        "INCREMENTAL-T03-AC03",
+        "INCREMENTAL-T03-AC04",
+        "INCREMENTAL-T03-AC05"
+      ],
       "acceptance_criteria": {
         "INCREMENTAL-T03-AC01": "Load existing enriched.json if exists",
         "INCREMENTAL-T03-AC02": "Merge new enrichments by GUID (new messages + updates)",
@@ -1207,9 +1312,18 @@
       "description": "Integrate incremental mode into enrich-ai CLI command",
       "risk_level": "LOW",
       "estimated_days": 1,
-      "depends_on": ["CLI--T03", "INCREMENTAL--T03"],
+      "depends_on": [
+        "CLI--T03",
+        "INCREMENTAL--T03"
+      ],
       "acs_completed": [],
-      "acs_remaining": ["INCREMENTAL-T04-AC01", "INCREMENTAL-T04-AC02", "INCREMENTAL-T04-AC03", "INCREMENTAL-T04-AC04", "INCREMENTAL-T04-AC05"],
+      "acs_remaining": [
+        "INCREMENTAL-T04-AC01",
+        "INCREMENTAL-T04-AC02",
+        "INCREMENTAL-T04-AC03",
+        "INCREMENTAL-T04-AC04",
+        "INCREMENTAL-T04-AC05"
+      ],
       "acceptance_criteria": {
         "INCREMENTAL-T04-AC01": "--incremental flag on enrich-ai command",
         "INCREMENTAL-T04-AC02": "Auto-detect state file in current directory",
