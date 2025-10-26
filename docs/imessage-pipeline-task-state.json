@@ -1304,9 +1304,9 @@
       "notes": "Completed. INCREMENTAL--T03 fully implemented using TDD with Wallaby. Created src/utils/enrichment-merge.ts (235 lines) with comprehensive merge strategy: (AC01) Load existing enriched.json safely with error handling, (AC02) Merge new enrichments by GUID with deduplication, (AC03) Preserve existing enrichments (append new kinds, skip duplicates unless --force-refresh), (AC04) Calculate merge statistics with percentages, (AC05) Atomic backup of prior enriched.json. Created 25 comprehensive tests in src/__tests__/enrichment-merge.test.ts covering: loading existing files, merging with GUID deduplication, preservation logic, force-refresh override, backup creation, large datasets (1000+ messages), edge cases (null enrichments, empty arrays, message removal). All 25 tests passing. Total project tests: 1024 passing."
     },
     "INCREMENTAL--T04": {
-      "status": "pending",
-      "started_at": null,
-      "completed_at": null,
+      "status": "completed",
+      "started_at": "2025-10-26T00:00:00.000Z",
+      "completed_at": "2025-10-26T00:30:00.000Z",
       "epic": "E7-Production-Ready",
       "title": "Add CLI Integration",
       "description": "Integrate incremental mode into enrich-ai CLI command",
@@ -1316,14 +1316,14 @@
         "CLI--T03",
         "INCREMENTAL--T03"
       ],
-      "acs_completed": [],
-      "acs_remaining": [
+      "acs_completed": [
         "INCREMENTAL-T04-AC01",
         "INCREMENTAL-T04-AC02",
         "INCREMENTAL-T04-AC03",
         "INCREMENTAL-T04-AC04",
         "INCREMENTAL-T04-AC05"
       ],
+      "acs_remaining": [],
       "acceptance_criteria": {
         "INCREMENTAL-T04-AC01": "--incremental flag on enrich-ai command",
         "INCREMENTAL-T04-AC02": "Auto-detect state file in current directory",
@@ -1331,7 +1331,7 @@
         "INCREMENTAL-T04-AC04": "--reset-state to clear state and enrich all",
         "INCREMENTAL-T04-AC05": "Progress shows: Enriching 142 new messages (3098 total)"
       },
-      "notes": "Final integration of incremental mode into CLI workflow."
+      "notes": "Completed CLI integration for incremental mode. Implemented: (AC01) --incremental flag, (AC02) auto-detect .imessage-state.json, (AC03) --state-file <path> override, (AC04) --reset-state flag, (AC05) progress shows N new (total). All flags integrated with IncrementalState.detectNewMessages()."
     }
   }
 }

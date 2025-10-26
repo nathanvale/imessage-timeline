@@ -441,6 +441,11 @@ program
   .option('-c, --checkpoint-dir <path>', 'checkpoint directory', './.checkpoints')
   .option('--resume', 'resume from last checkpoint', false)
   .option('--incremental', 'only enrich messages new since last enrichment run', false)
+  .option(
+    '--state-file <path>',
+    'path to incremental state file (auto-detects .imessage-state.json by default)',
+  )
+  .option('--reset-state', 'clear incremental state and enrich all messages', false)
   .option('--force-refresh', 'force re-enrichment even if already done', false)
   .option('--rate-limit <ms>', 'delay between API calls (milliseconds)', '1000')
   .option('--max-retries <n>', 'max retries on API errors', '3')
@@ -455,6 +460,8 @@ program
       checkpointDir,
       resume,
       incremental,
+      stateFile: userProvidedStateFile,
+      resetState,
       forceRefresh: _forceRefresh,
       rateLimitMs,
       maxRetries,
@@ -532,6 +539,53 @@ program
       const configHash = computeConfigHash(enrichConfig)
       const checkpointPath = `${checkpointDir}/enrich-checkpoint-${configHash}.json`
 
+      // INCREMENTAL--T04-AC02/AC03: Handle incremental state file
+      const stateFilePath = userProvidedStateFile || '.imessage-state.json'
+      const stateFileExists = fs.existsSync(stateFilePath)
+
+      // INCREMENTAL--T04-AC04: Handle --reset-state flag
+      if (resetState && stateFileExists) {
+        fs.unlinkSync(stateFilePath)
+        if (verbose) {
+          console.info(`🗑️  Reset incremental state file: ${stateFilePath}`)
+        }
+      }
+
+      // Import incremental state module for AC02, AC03, AC04, AC05
+      const { loadIncrementalState, detectNewMessages } = await import(
+        './utils/incremental-state.js'
+      )
+
+      // INCREMENTAL--T04-AC02: Auto-detect state file and load previous state
+      let previousState: Awaited<ReturnType<typeof loadIncrementalState>> | null = null
+      let newMessageGuids: string[] = []
+      let newMessageCount = messages.length
+
+      if (incremental && stateFileExists && !resetState) {
+        previousState = await loadIncrementalState(stateFilePath)
+        if (previousState) {
+          // Detect new messages using GUID comparison
+          const currentGuids = new Set(
+            (messages as Message[])
+              .map((m: Message) => m.guid)
+              .filter((g: string | undefined): g is string => Boolean(g)),
+          )
+          newMessageGuids = detectNewMessages(currentGuids, previousState)
+          newMessageCount = newMessageGuids.length
+          if (verbose) {
+            console.info(
+              `♻️  Incremental mode: detected ${newMessageCount.toLocaleString()} new messages`,
+            )
+            console.info(`   Total messages: ${messages.length.toLocaleString()}`)
+          }
+        }
+      } else if (incremental && !stateFileExists && !resetState) {
+        if (verbose) {
+          console.info(`♻️  Incremental mode enabled but no state file found: ${stateFilePath}`)
+          console.info(`   Enriching all ${messages.length.toLocaleString()} messages`)
+        }
+      }
+
       // AC05: Load checkpoint and verify config hash
       let startIndex = 0
       if (resume) {
@@ -557,7 +611,12 @@ program
       let totalFailed = 0
       const failedItems: Array<{ index: number; guid: string; kind: string; error: string }> = []
 
-      console.info(`\n🚀 Starting enrichment (${messages.length - startIndex} messages remaining)`)
+      // INCREMENTAL--T04-AC05: Show progress with new message count
+      const progressMsg =
+        incremental && newMessageCount < messages.length
+          ? `Enriching ${newMessageCount.toLocaleString()} new messages (${messages.length.toLocaleString()} total)`
+          : `Processing ${messages.length.toLocaleString()} messages`
+      console.info(`\n🚀 Starting enrichment: ${progressMsg}`)
 
       for (let i = startIndex; i < messages.length; i++) {
         const message = messages[i]
