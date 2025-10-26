@@ -483,6 +483,128 @@ render:
 - Supports environment variable expansion: `${VARIABLE_NAME}`
 - CLI `--config` flag overrides default path
 
+## Environment Setup for AI Enrichment
+
+To enable AI-powered enrichment (image analysis, audio transcription, link context), you need API keys from Google Gemini and Firecrawl. Follow these steps:
+
+### Step 1: Get API Keys
+
+**Google Gemini API Key** (required for image/audio enrichment):
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Click "Get API Key" → "Create API Key in new project"
+3. Copy the generated API key
+
+**Firecrawl API Key** (optional, for link context extraction):
+1. Sign up at [Firecrawl](https://www.firecrawl.dev/)
+2. Navigate to your dashboard → API keys
+3. Copy your API key
+
+> **💡 Tip:** Check your second brain repo (`~/code/my-second-brain/.env`) for existing keys if you've already set this up elsewhere.
+
+### Step 2: Create .env File
+
+Create a `.env` file in the project root:
+
+```bash
+# Copy from second brain if available
+cp ~/code/my-second-brain/.env .env
+
+# OR manually create with your keys:
+cat > .env << 'EOF'
+GEMINI_API_KEY=your-gemini-api-key-here
+FIRECRAWL_API_KEY=your-firecrawl-api-key-here
+EOF
+```
+
+### Step 3: Verify Setup
+
+```bash
+# Run diagnostics to verify keys are loaded
+pnpm cli doctor -v
+
+# Expected output:
+# ✓ Node.js version: 22.20+
+# ✓ Dependencies: installed
+# ✓ Config file: found
+# ✓ API keys: GEMINI_API_KEY loaded, FIRECRAWL_API_KEY loaded
+# ✓ Attachment directories: accessible
+# ✓ Write permissions: OK
+```
+
+### Step 4: Run Enrichment
+
+Once environment is set up, use enrichment flags:
+
+```bash
+# Enrich with image analysis (Gemini Vision)
+pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
+  --enable-vision
+
+# Enrich with audio transcription
+pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
+  --enable-audio
+
+# Enrich with link context (uses Firecrawl if key present)
+pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
+  --enable-links
+
+# Enrich with all features
+pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
+  --enable-vision --enable-audio --enable-links
+```
+
+### Environment Variable Reference
+
+| Variable | Required | Purpose | How to Get |
+|----------|----------|---------|-----------|
+| `GEMINI_API_KEY` | Yes (for enrichment) | Google Gemini API for image/audio analysis | [Google AI Studio](https://aistudio.google.com/app/apikey) |
+| `FIRECRAWL_API_KEY` | No | Web scraping for link context (fallback: heuristics) | [Firecrawl Dashboard](https://www.firecrawl.dev/) |
+| `TF_BUILD` | No | CI/CD environment marker (set by GitHub Actions) | Automatic in CI |
+
+### Alternative: Load from Second Brain
+
+If you've already set up enrichment in your second brain project, copy the keys:
+
+```bash
+# Quick setup from second brain
+cp ~/code/my-second-brain/.env .
+pnpm cli doctor -v
+```
+
+### Security Best Practices
+
+- ✅ **Do:** Store keys in `.env` file (git-ignored)
+- ✅ **Do:** Use environment variables in config: `apiKey: ${GEMINI_API_KEY}`
+- ✅ **Do:** Keep `.env` in `.gitignore` (already configured)
+- ❌ **Don't:** Commit `.env` to version control
+- ❌ **Don't:** Paste keys in config files or shell history
+- ❌ **Don't:** Share `.env` file with others
+
+### Troubleshooting
+
+**"API key not found" error:**
+```bash
+# Check if .env exists
+test -f .env && echo "✓ .env file found" || echo "✗ .env file missing"
+
+# Check if GEMINI_API_KEY is set
+echo $GEMINI_API_KEY
+
+# If empty, reload shell or run:
+export GEMINI_API_KEY=$(grep GEMINI_API_KEY .env | cut -d= -f2)
+```
+
+**"Invalid API key" error:**
+- Verify key is correct in `.env`
+- Check for extra whitespace (keys should be clean strings)
+- Ensure key is still valid (hasn't been revoked)
+
+**"Quota exceeded" error:**
+- Gemini API has free quota limits
+- Upgrade to Gemini API paid plan if needed
+- Use `--rate-limit 2000` to slow down requests
+- Use incremental mode to process only new messages
+
 ## Data Flows & Examples
 
 ### Example 1: Single Source (CSV Only)
