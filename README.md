@@ -499,22 +499,18 @@ To enable AI-powered enrichment (image analysis, audio transcription, link conte
 2. Navigate to your dashboard → API keys
 3. Copy your API key
 
-> **💡 Tip:** Check your second brain repo (`~/code/my-second-brain/.env`) for existing keys if you've already set this up elsewhere.
-
 ### Step 2: Create .env File
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root with your API keys:
 
 ```bash
-# Copy from second brain if available
-cp ~/code/my-second-brain/.env .env
-
-# OR manually create with your keys:
 cat > .env << 'EOF'
 GEMINI_API_KEY=your-gemini-api-key-here
 FIRECRAWL_API_KEY=your-firecrawl-api-key-here
 EOF
 ```
+
+> **Note:** Never commit the `.env` file. It's already in `.gitignore`.
 
 ### Step 3: Verify Setup
 
@@ -560,16 +556,6 @@ pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
 | `GEMINI_API_KEY` | Yes (for enrichment) | Google Gemini API for image/audio analysis | [Google AI Studio](https://aistudio.google.com/app/apikey) |
 | `FIRECRAWL_API_KEY` | No | Web scraping for link context (fallback: heuristics) | [Firecrawl Dashboard](https://www.firecrawl.dev/) |
 | `TF_BUILD` | No | CI/CD environment marker (set by GitHub Actions) | Automatic in CI |
-
-### Alternative: Load from Second Brain
-
-If you've already set up enrichment in your second brain project, copy the keys:
-
-```bash
-# Quick setup from second brain
-cp ~/code/my-second-brain/.env .
-pnpm cli doctor -v
-```
 
 ### Security Best Practices
 
