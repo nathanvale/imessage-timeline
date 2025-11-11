@@ -1,5 +1,10 @@
 export default {
   extends: ['@commitlint/config-conventional'],
+  rules: {
+    // Remove hard line-length limits in commit body/footer to reduce friction
+    'body-max-line-length': [0, 'always'],
+    'footer-max-line-length': [0, 'always'],
+  },
   // Ignore commits that pre-date this setup
   ignores: [
     (message) => message.includes('[skip ci]'),

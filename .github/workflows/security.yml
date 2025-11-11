@@ -3,8 +3,6 @@ name: Security Scans
 on:
   schedule:
     - cron: '0 6 * * 1' # Mondays at 06:00 UTC
-  push:
-    branches: [main]
   workflow_dispatch: {}
 
 permissions:
