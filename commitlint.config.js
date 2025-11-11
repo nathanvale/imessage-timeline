@@ -11,5 +11,7 @@ export default {
     (message) => message.startsWith('Initial commit'),
     (message) => message.startsWith('feat: migrate'),
     (message) => message.startsWith('invalid commit'),
+    // Ignore Dependabot-style commits like "Bump X from Y to Z"
+    (message) => /^bump\s/i.test(message),
   ],
 }
