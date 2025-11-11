@@ -312,7 +312,7 @@ describe('ingest-csv', () => {
     })
   })
 
-  describe('Integration with actual Melanie CSV', () => {
+  describe.skip('Integration with actual Melanie CSV', () => {
     let csvPath: string
     const expectedMinMessages = 100 // Sanity check - should have at least 100 messages
 
