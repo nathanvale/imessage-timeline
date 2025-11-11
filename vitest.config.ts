@@ -30,7 +30,6 @@ export default defineConfig({
       : {}),
     isolate: true,
     pool: 'threads',
-    poolOptions: { threads: { maxThreads: 8, minThreads: 1 } },
     allowOnly: false,
     snapshotFormat: {
       // Stabilize Map/Set and plain object printing in snapshots
@@ -45,7 +44,6 @@ export default defineConfig({
     },
     coverage: {
       provider: 'v8',
-      all: true,
       reporter: process.env.TF_BUILD
         ? ['text-summary', 'html', 'lcov']
         : ['text-summary', 'html'],

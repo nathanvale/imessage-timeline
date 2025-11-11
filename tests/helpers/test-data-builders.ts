@@ -376,13 +376,8 @@ export function dailyMessagePattern(date: string | Date): Message[] {
     const time = new Date(baseDate)
     time.setHours(8 + i, Math.floor(Math.random() * 60))
     const method: 'fromMe' | 'fromThem' = i % 2 === 0 ? 'fromMe' : 'fromThem'
-    messages.push(
-      messageBuilder()
-        .text(`Morning message ${i + 1}`)
-        [method]()
-        .date(time.toISOString())
-        .build(),
-    )
+    const builder = messageBuilder().text(`Morning message ${i + 1}`)
+    messages.push(builder[method]().date(time.toISOString()).build())
   }
 
   // Afternoon: 12pm-5pm (8 messages)
@@ -390,13 +385,8 @@ export function dailyMessagePattern(date: string | Date): Message[] {
     const time = new Date(baseDate)
     time.setHours(12 + i, Math.floor(Math.random() * 60))
     const method: 'fromMe' | 'fromThem' = i % 2 === 0 ? 'fromMe' : 'fromThem'
-    messages.push(
-      messageBuilder()
-        .text(`Afternoon message ${i + 1}`)
-        [method]()
-        .date(time.toISOString())
-        .build(),
-    )
+    const builder = messageBuilder().text(`Afternoon message ${i + 1}`)
+    messages.push(builder[method]().date(time.toISOString()).build())
   }
 
   // Evening: 6pm-10pm (7 messages)
@@ -404,13 +394,8 @@ export function dailyMessagePattern(date: string | Date): Message[] {
     const time = new Date(baseDate)
     time.setHours(18 + i, Math.floor(Math.random() * 60))
     const method: 'fromMe' | 'fromThem' = i % 2 === 0 ? 'fromMe' : 'fromThem'
-    messages.push(
-      messageBuilder()
-        .text(`Evening message ${i + 1}`)
-        [method]()
-        .date(time.toISOString())
-        .build(),
-    )
+    const builder = messageBuilder().text(`Evening message ${i + 1}`)
+    messages.push(builder[method]().date(time.toISOString()).build())
   }
 
   return messages
