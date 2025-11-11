@@ -1,6 +1,8 @@
 # iMessage Timeline
 
-> Extract, enrich, and render your iMessage conversations into beautiful, AI-powered markdown timelines with full conversation threading and deep media analysis.
+> Extract, enrich, and render your iMessage conversations into beautiful,
+> AI-powered markdown timelines with full conversation threading and deep media
+> analysis.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=nodedotjs)](https://nodejs.org/)
@@ -10,24 +12,53 @@
 
 ## Overview
 
-**iMessage Timeline** is a sophisticated data pipeline that transforms your iMessage conversations into searchable, enriched markdown timelines. It intelligently extracts messages from multiple sources (iMazing CSV exports, macOS Messages.app SQLite database), deduplicates and links replies/reactions, enriches with AI-powered analysis (image descriptions, audio transcription, link summaries), and generates deterministic markdown files organized by date and time-of-day.
+**iMessage Timeline** is a sophisticated data pipeline that transforms your
+iMessage conversations into searchable, enriched markdown timelines. It
+intelligently extracts messages from multiple sources (iMazing CSV exports,
+macOS Messages.app SQLite database), deduplicates and links replies/reactions,
+enriches with AI-powered analysis (image descriptions, audio transcription, link
+summaries), and generates deterministic markdown files organized by date and
+time-of-day.
 
-Perfect for creating browsable conversation archives, enriched research notes, or personal history exports.
+Perfect for creating browsable conversation archives, enriched research notes,
+or personal history exports.
+
+## CLI
+
+The project publishes a CLI executable `imessage-timeline` and provides a fast
+Bun-powered development loop.
+
+- Dev (TypeScript direct): `pnpm dev -- --help`
+- Built dist run: `pnpm cli -- --help`
+- Installed (after publish): `imessage-timeline --help`
+
+Docs:
+
+- Detailed usage: `docs/cli-usage.md`
+- Bun script rationale: `docs/bun-script-best-practices.md`
+
+Pass arguments after `--` when using `pnpm dev` or `pnpm cli`.
 
 ### Key Features
 
-- **Multiple Sources**: Ingest from iMazing CSV exports and macOS Messages.app database
-- **Intelligent Linking**: Automatically link replies to parents and associate emoji reactions (tapbacks)
-- **Smart Deduplication**: Merge CSV/DB sources with GUID matching and content equivalence detection
+- **Multiple Sources**: Ingest from iMazing CSV exports and macOS Messages.app
+  database
+- **Intelligent Linking**: Automatically link replies to parents and associate
+  emoji reactions (tapbacks)
+- **Smart Deduplication**: Merge CSV/DB sources with GUID matching and content
+  equivalence detection
 - **AI Enrichment**:
   - Image analysis (HEIC/TIFF→JPG previews + Gemini Vision captions)
   - Audio transcription (with speaker labels and timestamps)
   - PDF summarization
   - Link context extraction (Firecrawl + provider fallbacks)
-- **Resumable Processing**: Checkpoint support for crash recovery and incremental enrichment for processing only new messages
-- **Deterministic Output**: Identical input always produces identical markdown (reproducible pipelines)
+- **Resumable Processing**: Checkpoint support for crash recovery and
+  incremental enrichment for processing only new messages
+- **Deterministic Output**: Identical input always produces identical markdown
+  (reproducible pipelines)
 - **Privacy-First**: Local-only mode, no API key persistence, full data control
-- **Conversation Threading**: Nested replies and tapbacks rendered as readable blockquotes
+- **Conversation Threading**: Nested replies and tapbacks rendered as readable
+  blockquotes
 - **Type-Safe**: 100% TypeScript with Zod schema validation
 
 ## For End Users
@@ -38,8 +69,10 @@ Perfect for creating browsable conversation archives, enriched research notes, o
 
 - **Node.js** 22.20+
 - **macOS** (for database export; CSV import works on any OS)
-- **Gemini API Key** (for AI enrichment, get free at https://aistudio.google.com)
-- **Firecrawl API Key** (optional, for link enrichment, get at https://www.firecrawl.dev)
+- **Gemini API Key** (for AI enrichment, get free at
+  https://aistudio.google.com)
+- **Firecrawl API Key** (optional, for link enrichment, get at
+  https://www.firecrawl.dev)
 
 #### Install Global CLI
 
@@ -47,7 +80,8 @@ Perfect for creating browsable conversation archives, enriched research notes, o
 npm install -g imessage-timeline
 ```
 
-This installs the `imessage-timeline` command globally, available from any directory.
+This installs the `imessage-timeline` command globally, available from any
+directory.
 
 #### Environment Setup
 
@@ -104,6 +138,252 @@ imessage-timeline render-markdown \
 
 Output: A `timeline/` directory with daily markdown files, one per date.
 
+## Library Usage (Programmatic API)
+
+### Installation as Dependency
+
+Install as a library in your Node.js/TypeScript project:
+
+```bash
+npm install imessage-timeline
+# or
+pnpm add imessage-timeline
+# or
+yarn add imessage-timeline
+```
+
+### TypeScript/JavaScript Import
+
+```typescript
+import {
+  // Config Management
+  loadConfig,
+  generateConfigContent,
+  validateConfig,
+
+  // Ingest Functions
+  ingestCSV,
+  dedupAndMerge,
+
+  // Utilities
+  detectDelta,
+  mergeEnrichments,
+
+  // Rate Limiting
+  createRateLimiter,
+
+  // Types
+  type Message,
+  type Config,
+  type DeltaResult,
+} from "imessage-timeline"
+```
+
+### Example: Load and Validate Config
+
+```typescript
+import { loadConfig, validateConfig } from "imessage-timeline"
+
+// Load config with auto-discovery (looks for imessage-config.yaml/json)
+const config = await loadConfig()
+
+// Load specific config file
+const config = await loadConfig({ configPath: "./custom-config.yaml" })
+
+// Validate existing config object
+const validated = validateConfig({
+  gemini: { apiKey: "your-key" },
+  inputs: { csv: ["messages.csv"] },
+})
+```
+
+### Example: Ingest Messages from CSV
+
+```typescript
+import { ingestCSV, createExportEnvelope } from "imessage-timeline"
+import type { Message, IngestOptions } from "imessage-timeline"
+
+const options: IngestOptions = {
+  attachmentDir: "/path/to/attachments",
+  strictMode: false,
+}
+
+const messages: Message[] = ingestCSV("./messages.csv", options)
+
+// Wrap in export envelope
+const envelope = createExportEnvelope(messages)
+console.log(`Ingested ${envelope.totalMessages} messages`)
+```
+
+### Example: Deduplicate and Merge Sources
+
+```typescript
+import { dedupAndMerge } from "imessage-timeline"
+import type { Message } from "imessage-timeline"
+
+const csvMessages: Message[] = ingestCSV("./messages.csv", options)
+const dbMessages: Message[] = JSON.parse(
+  fs.readFileSync("./db-export.json", "utf-8"),
+)
+
+const result = dedupAndMerge(csvMessages, dbMessages)
+
+console.log(`Merged ${result.mergedCount} messages`)
+console.log(`Found ${result.stats.exactMatches} exact matches`)
+console.log(`Deduped ${result.stats.duplicatesRemoved} duplicates`)
+```
+
+### Example: Detect New Messages (Incremental Processing)
+
+```typescript
+import { detectDelta, extractGuidsFromMessages } from "imessage-timeline"
+import type { Message, DeltaResult } from "imessage-timeline"
+
+const currentMessages: Message[] = loadCurrentMessages()
+const previousMessages: Message[] = loadPreviousCheckpoint()
+
+const delta: DeltaResult = detectDelta(currentMessages, previousMessages)
+
+console.log(`New messages: ${delta.new.length}`)
+console.log(`Modified messages: ${delta.changed.length}`)
+console.log(`Removed messages: ${delta.removed.length}`)
+
+// Process only new messages
+const newGuids = extractGuidsFromMessages(delta.new)
+await enrichOnlyNew(newGuids)
+```
+
+### Example: Rate Limiting for API Calls
+
+```typescript
+import { createRateLimiter } from "imessage-timeline"
+import type { RateLimitConfig } from "imessage-timeline"
+
+const limiter = createRateLimiter({
+  requestsPerSecond: 10,
+  maxRetries: 3,
+  retryDelayMs: 1000,
+})
+
+// Use with fetch or any async API call
+const response = await limiter.execute(async () => {
+  return fetch("https://api.example.com/data")
+})
+
+console.log(`Status: ${response.status}`)
+```
+
+### Example: Generate Config Programmatically
+
+```typescript
+import { generateConfigContent, getDefaultConfigPath } from "imessage-timeline"
+import fs from "node:fs/promises"
+
+// Generate YAML config with defaults
+const yamlContent = generateConfigContent("yaml")
+const configPath = getDefaultConfigPath("yaml")
+
+await fs.writeFile(configPath, yamlContent, "utf-8")
+console.log(`Config written to ${configPath}`)
+
+// Generate JSON config
+const jsonContent = generateConfigContent("json")
+await fs.writeFile("./imessage-config.json", jsonContent, "utf-8")
+```
+
+### TypeScript Type Definitions
+
+The package includes full TypeScript definitions for all exports:
+
+```typescript
+import type {
+  // Core message types
+  Message,
+  MessageCore,
+  MediaMeta,
+  MediaEnrichment,
+  ReplyInfo,
+  TapbackInfo,
+
+  // Config types
+  Config,
+  ConfigFormat,
+
+  // Utility types
+  DeltaResult,
+  MergeStats,
+  IngestMergeResult,
+  EnrichmentMergeResult,
+
+  // Rate limiting types
+  RateLimitConfig,
+  RateLimitState,
+  ApiResponse,
+} from "imessage-timeline"
+```
+
+### Advanced: Custom Pipeline
+
+```typescript
+import {
+  loadConfig,
+  ingestCSV,
+  dedupAndMerge,
+  detectDelta,
+  mergeEnrichments,
+  createRateLimiter,
+} from "imessage-timeline"
+import type { Message, Config } from "imessage-timeline"
+
+async function runCustomPipeline() {
+  // 1. Load configuration
+  const config: Config = await loadConfig()
+
+  // 2. Ingest from multiple sources
+  const csvMessages = ingestCSV(config.inputs.csv[0], {
+    attachmentDir: config.paths?.attachmentRoot,
+    strictMode: false,
+  })
+
+  const dbMessages = JSON.parse(await fs.readFile(config.inputs.db, "utf-8"))
+
+  // 3. Merge and deduplicate
+  const merged = dedupAndMerge(csvMessages, dbMessages)
+  console.log(`Merged to ${merged.mergedCount} unique messages`)
+
+  // 4. Detect changes since last run
+  const previous = await loadPreviousState()
+  const delta = detectDelta(merged.messages, previous)
+
+  // 5. Enrich only new messages with rate limiting
+  const limiter = createRateLimiter({ requestsPerSecond: 5 })
+
+  for (const message of delta.new) {
+    if (message.media?.kind === "image") {
+      const enrichment = await limiter.execute(() =>
+        enrichImageWithGemini(message),
+      )
+      message.media.enrichment = enrichment
+    }
+  }
+
+  // 6. Merge enrichments back into full dataset
+  const enriched = mergeEnrichments(merged.messages, delta.new)
+
+  // 7. Save checkpoint
+  await saveState(enriched.messages)
+
+  return enriched
+}
+```
+
+### See Also
+
+- **CLI Usage**: See `docs/cli-usage.md` for command-line interface examples
+- **Dual Distribution**: See `docs/dual-mode-distribution-best-practices.md` for
+  packaging details
+- **API Documentation**: See generated TypeDoc output (coming soon)
+
 ## For Developers
 
 ### Development Setup
@@ -124,18 +404,20 @@ pnpm build
 
 #### Local CLI Development
 
-During development, use `pnpm cli` to run commands with the latest code:
+During development, run the CLI directly from TypeScript via Bun, or run from
+the built `dist` output:
 
 ```bash
-# Build and run in one go
-pnpm dev
+# Fast dev (TypeScript direct via Bun)
+pnpm dev -- --help
+pnpm dev -- --config examples/imessage-config.yaml
 
-# Or build, then run individual commands
+# Or build, then run individual commands from dist
 pnpm build
 pnpm cli doctor
 pnpm cli ingest-csv -i messages.csv -o output.json
 
-# Watch mode for development
+# Watch mode for development (typecheck/build)
 pnpm watch
 ```
 
@@ -169,9 +451,28 @@ pnpm format
 pnpm quality-check
 ```
 
+### Bun-powered dev and tooling
+
+This project keeps pnpm as the package manager and Vitest on Node for stable
+tests, while using Bun for fast local development and tooling:
+
+- Primary (CI/stable): `pnpm build`, `pnpm test`, `pnpm test:ci`
+- Local convenience (Bun):
+  - `pnpm dev` – run the CLI from TypeScript via Bun
+  - `pnpm typecheck` – no-emit typechecking via `bunx tsc`
+  - `pnpm lint` / `pnpm lint:fix` – via `bunx eslint`
+  - `pnpm format` – via `bunx prettier`
+
+Notes:
+
+- Native addons (sharp, better-sqlite3) may build from source under Bun; Node
+  remains the primary test substrate.
+- Firecrawl SDK is compatible with Bun; the MCP server and tests remain on Node.
+
 ## Architecture
 
-The pipeline follows a strict **4-stage architecture** with clear separation of concerns:
+The pipeline follows a strict **4-stage architecture** with clear separation of
+concerns:
 
 ```
 CSV/DB Exports
@@ -208,44 +509,52 @@ CSV/DB Exports
 
 ### Stage 1: Ingest
 
-Extracts messages from CSV or SQLite database and normalizes to a unified schema.
+Extracts messages from CSV or SQLite database and normalizes to a unified
+schema.
 
 **Responsibilities:**
+
 - Parse rows with field mapping (handle CSV/DB dialect differences)
 - Convert dates (CSV UTC → ISO 8601, Apple epoch → ISO 8601)
 - Split rows into `text`/`media`/`notification`/`tapback` messages
 - Resolve attachment paths to absolute paths when possible
-- Create stable part GUIDs for multi-attachment DB messages: `p:<index>/<original_guid>`
+- Create stable part GUIDs for multi-attachment DB messages:
+  `p:<index>/<original_guid>`
 - Preserve source metadata (CSV vs DB origin)
 
-**Input:** iMazing CSV or Messages.app SQLite database
-**Output:** Normalized `Message[]` in JSON envelope with metadata
+**Input:** iMazing CSV or Messages.app SQLite database **Output:** Normalized
+`Message[]` in JSON envelope with metadata
 
 ### Stage 2: Normalize-Link
 
-Merges multiple sources, deduplicates, links replies/tapbacks, and validates schema.
+Merges multiple sources, deduplicates, links replies/tapbacks, and validates
+schema.
 
 **Responsibilities:**
+
 - Link replies to parents:
   - Primary: DB `association_guid` (database-native association)
-  - Fallback: Heuristics (±30s timestamp proximity, text similarity, sender difference)
+  - Fallback: Heuristics (±30s timestamp proximity, text similarity, sender
+    difference)
 - Link tapbacks (emoji reactions) to message parts
 - Deduplicate across CSV/DB sources:
   - Exact GUID matching (primary)
   - Content equivalence (fuzzy text match, same sender, same timestamp)
-- Prefer DB-sourced data in conflicts (DB is authoritative for timestamps, handles, etc.)
+- Prefer DB-sourced data in conflicts (DB is authoritative for timestamps,
+  handles, etc.)
 - Enforce schema via Zod validation (camelCase, type correctness)
 
 **Algorithm Complexity:** O(n log n) for deduplication with GUID indexing
 
-**Input:** One or both ingest outputs
-**Output:** Merged, deduplicated, linked `messages.normalized.json`
+**Input:** One or both ingest outputs **Output:** Merged, deduplicated, linked
+`messages.normalized.json`
 
 ### Stage 3: Enrich-AI
 
 Augments messages with AI-powered analysis. Fully resumable and idempotent.
 
 **Responsibilities:**
+
 - Image analysis:
   - Convert HEIC/TIFF to JPG preview (cached by filename)
   - Gemini Vision API: structured prompt for caption + summary
@@ -274,46 +583,51 @@ Augments messages with AI-powered analysis. Fully resumable and idempotent.
 Generates deterministic daily markdown files organized by date and time-of-day.
 
 **Responsibilities:**
+
 - Group messages by calendar date
-- Sub-group by time-of-day sections (Morning 00:00-11:59, Afternoon 12:00-17:59, Evening 18:00-23:59)
+- Sub-group by time-of-day sections (Morning 00:00-11:59, Afternoon 12:00-17:59,
+  Evening 18:00-23:59)
 - Render each message with:
   - Timestamp anchor for deep linking
   - Sender name / "Me" indicator
   - Message text or media preview
-  - Enrichments (image captions, transcriptions, link contexts) as formatted blockquotes
+  - Enrichments (image captions, transcriptions, link contexts) as formatted
+    blockquotes
 - Render replies as nested blockquotes (up to configurable depth)
 - Render tapbacks as emoji reactions (❤️ for "loved", etc.)
 - Deterministic sorting by `(date, guid)` for reproducibility
 
-**Determinism:** Identical input → identical output. No randomization, stable key ordering.
+**Determinism:** Identical input → identical output. No randomization, stable
+key ordering.
 
-**Input:** `messages.enriched.json`
-**Output:** Daily markdown files (`timeline/YYYY-MM-DD.md`)
+**Input:** `messages.enriched.json` **Output:** Daily markdown files
+(`timeline/YYYY-MM-DD.md`)
 
 ## Message Schema
 
-The unified `Message` type represents all message kinds with a discriminated union:
+The unified `Message` type represents all message kinds with a discriminated
+union:
 
 ```typescript
 type Message = {
-  guid: string                    // Unique identifier
-  messageKind: 'text' | 'media' | 'tapback' | 'notification'
-  date: string                    // ISO 8601 with Z suffix (UTC)
+  guid: string // Unique identifier
+  messageKind: "text" | "media" | "tapback" | "notification"
+  date: string // ISO 8601 with Z suffix (UTC)
   isFromMe: boolean
 
   // Optional fields by kind
-  text?: string                   // For text/notification messages
-  media?: MediaMeta              // For media messages (see below)
-  tapback?: TapbackInfo          // For tapback messages
+  text?: string // For text/notification messages
+  media?: MediaMeta // For media messages (see below)
+  tapback?: TapbackInfo // For tapback messages
 
   // Linking
-  replyingTo?: ReplyInfo         // Links to parent message GUID
+  replyingTo?: ReplyInfo // Links to parent message GUID
 
   // Metadata
-  service: string                // SMS, iMessage, etc.
-  handle?: string                // Phone number or Apple ID
-  senderName?: string            // Display name
-  groupGuid?: string             // For split messages, original DB GUID
+  service: string // SMS, iMessage, etc.
+  handle?: string // Phone number or Apple ID
+  senderName?: string // Display name
+  groupGuid?: string // For split messages, original DB GUID
 
   // Preservation fields
   subject?: string
@@ -321,44 +635,46 @@ type Message = {
   isDeleted?: boolean
 
   // Provenance
-  sourceType?: 'csv' | 'db'
+  sourceType?: "csv" | "db"
   sourceMetadata?: Record<string, unknown>
 }
 
 type MediaMeta = {
-  id: string                      // Unique media ID
-  type: 'image' | 'audio' | 'pdf' | 'video' | 'document'
+  id: string // Unique media ID
+  type: "image" | "audio" | "pdf" | "video" | "document"
   filename?: string
-  path?: string                   // Absolute path if file exists
+  path?: string // Absolute path if file exists
   mimeType?: string
   size?: number
-  duration?: number               // For audio/video in seconds
-  enrichment?: MediaEnrichment[]  // AI analysis results
+  duration?: number // For audio/video in seconds
+  enrichment?: MediaEnrichment[] // AI analysis results
   provenance?: {
     originalPath?: string
-    source: 'csv' | 'db'
+    source: "csv" | "db"
     lastSeen?: string
   }
 }
 
 type MediaEnrichment = {
-  kind: 'image_analysis' | 'transcription' | 'pdf_summary' | 'link_context'
+  kind: "image_analysis" | "transcription" | "pdf_summary" | "link_context"
   content: Record<string, unknown>
-  provider: string                // 'gemini', 'firecrawl', etc.
+  provider: string // 'gemini', 'firecrawl', etc.
   model: string
   version: string
-  createdAt: string              // ISO 8601
-  error?: string                  // If enrichment failed
+  createdAt: string // ISO 8601
+  error?: string // If enrichment failed
 }
 ```
 
-All dates are **ISO 8601 with Z suffix** (UTC). See [Dates and Timezones](#dates-and-timezones) for conversion details.
+All dates are **ISO 8601 with Z suffix** (UTC). See
+[Dates and Timezones](#dates-and-timezones) for conversion details.
 
 ## CLI Commands
 
 ### Main Pipeline Commands
 
 #### `ingest-csv`
+
 Import messages from iMazing CSV export.
 
 ```bash
@@ -370,11 +686,14 @@ pnpm cli ingest-csv \
 ```
 
 **Options:**
+
 - `-i, --input <path>` - iMazing CSV file (required)
-- `-o, --output <path>` - Output JSON file (default: `./messages.csv.ingested.json`)
+- `-o, --output <path>` - Output JSON file (default:
+  `./messages.csv.ingested.json`)
 - `-a, --attachments <dirs...>` - Root directories containing media files
 
 #### `ingest-db`
+
 Extract messages from macOS Messages.app SQLite database.
 
 ```bash
@@ -385,12 +704,15 @@ pnpm cli ingest-db \
 ```
 
 **Options:**
+
 - `-i, --input <path>` - Messages.app database file (required)
-- `-o, --output <path>` - Output JSON file (default: `./messages.db.ingested.json`)
+- `-o, --output <path>` - Output JSON file (default:
+  `./messages.db.ingested.json`)
 - `--contact <id>` - Filter by contact (phone or Apple ID)
 - `-a, --attachments <dirs...>` - Attachment root directories
 
 #### `normalize-link`
+
 Merge sources, deduplicate, link replies/tapbacks, and validate schema.
 
 ```bash
@@ -401,12 +723,17 @@ pnpm cli normalize-link \
 ```
 
 **Options:**
+
 - `-i, --input <paths...>` - Input JSON files (required, can specify multiple)
-- `-o, --output <path>` - Output JSON file (default: `./messages.normalized.json`)
-- `-m, --merge-strategy <strategy>` - `exact` (GUID only) | `content` (content equivalence) | `all` (both, default)
+- `-o, --output <path>` - Output JSON file (default:
+  `./messages.normalized.json`)
+- `-m, --merge-strategy <strategy>` - `exact` (GUID only) | `content` (content
+  equivalence) | `all` (both, default)
 
 #### `enrich-ai`
-Augment messages with AI analysis (images, audio, links). Resumable and incremental.
+
+Augment messages with AI analysis (images, audio, links). Resumable and
+incremental.
 
 ```bash
 pnpm cli enrich-ai \
@@ -422,12 +749,15 @@ pnpm cli enrich-ai \
 ```
 
 **Options:**
+
 - `-i, --input <path>` - Input normalized JSON (required)
 - `-o, --output <path>` - Output JSON file (default: `./messages.enriched.json`)
-- `-c, --checkpoint-dir <path>` - Checkpoint directory (default: `./.checkpoints`)
+- `-c, --checkpoint-dir <path>` - Checkpoint directory (default:
+  `./.checkpoints`)
 - `--resume` - Resume from last checkpoint
 - `--incremental` - Only enrich messages new since last enrichment run
-- `--state-file <path>` - Path to incremental state file (default: `./.imessage-state.json`)
+- `--state-file <path>` - Path to incremental state file (default:
+  `./.imessage-state.json`)
 - `--reset-state` - Clear incremental state and enrich all messages
 - `--rate-limit <ms>` - Delay between API calls (default: 1000)
 - `--max-retries <n>` - Max retries on API errors (default: 3)
@@ -437,6 +767,7 @@ pnpm cli enrich-ai \
 - `--enable-links` - Enable link enrichment (default: true)
 
 #### `render-markdown`
+
 Generate daily markdown files from enriched messages.
 
 ```bash
@@ -451,6 +782,7 @@ pnpm cli render-markdown \
 ```
 
 **Options:**
+
 - `-i, --input <path>` - Input enriched JSON (required)
 - `-o, --output <path>` - Output directory (default: `./timeline`)
 - `--group-by-time` - Group by Morning/Afternoon/Evening (default: true)
@@ -462,6 +794,7 @@ pnpm cli render-markdown \
 ### Utility Commands
 
 #### `validate`
+
 Validate JSON file against Message schema.
 
 ```bash
@@ -469,12 +802,15 @@ pnpm cli validate -i messages.json [-q]
 ```
 
 **Options:**
+
 - `-i, --input <path>` - JSON file to validate (required)
 - `-q, --quiet` - Suppress detailed error output
 
-**Output:** Exit code 0 on success, 1 on validation failure. Prints summary stats.
+**Output:** Exit code 0 on success, 1 on validation failure. Prints summary
+stats.
 
 #### `stats`
+
 Show statistics about a message file.
 
 ```bash
@@ -482,12 +818,15 @@ pnpm cli stats -i messages.json [-v]
 ```
 
 **Options:**
+
 - `-i, --input <path>` - JSON file (required)
 - `-v, --verbose` - Show per-kind breakdown
 
-**Output:** Message count, breakdown by `messageKind`, date range, attachment count, etc.
+**Output:** Message count, breakdown by `messageKind`, date range, attachment
+count, etc.
 
 #### `doctor`
+
 Run system diagnostics.
 
 ```bash
@@ -495,6 +834,7 @@ pnpm cli doctor [-v]
 ```
 
 **Checks:**
+
 - Node.js version (22+)
 - Dependencies (pnpm packages)
 - Config file exists and is readable
@@ -503,6 +843,7 @@ pnpm cli doctor [-v]
 - Write permissions to output directories
 
 #### `init`
+
 Generate starter configuration file.
 
 ```bash
@@ -510,13 +851,15 @@ pnpm cli init [-f json|yaml] [--force] [-o custom-path.yaml]
 ```
 
 **Options:**
+
 - `-f, --format <format>` - `json` or `yaml` (default: yaml)
 - `--force` - Overwrite existing config
 - `-o, --output <path>` - Custom config path
 
 ## Configuration
 
-Configuration can be provided via `imessage-config.yaml` or `imessage-config.json`. Create with `pnpm cli init` or manually:
+Configuration can be provided via `imessage-config.yaml` or
+`imessage-config.json`. Create with `pnpm cli init` or manually:
 
 ```yaml
 version: "1.0"
@@ -528,40 +871,43 @@ attachmentRoots:
 
 # Google Gemini API configuration
 gemini:
-  apiKey: ${GEMINI_API_KEY}         # Loaded from environment
-  model: gemini-1.5-pro              # Recommended model
-  rateLimitDelay: 1000               # Milliseconds between requests
-  maxRetries: 3                       # Retry failed API calls
+  apiKey: ${GEMINI_API_KEY} # Loaded from environment
+  model: gemini-1.5-pro # Recommended model
+  rateLimitDelay: 1000 # Milliseconds between requests
+  maxRetries: 3 # Retry failed API calls
 
 # Firecrawl (link enrichment) configuration
 firecrawl:
-  apiKey: ${FIRECRAWL_API_KEY}       # Optional, for link context
+  apiKey: ${FIRECRAWL_API_KEY} # Optional, for link context
   enabled: true
 
 # Enrichment settings
 enrichment:
-  enableVisionAnalysis: true          # Image captions/summaries
-  enableAudioTranscription: true      # Audio transcription
-  enableLinkEnrichment: true          # Link context extraction
-  imageCacheDir: ./.cache/images      # Preview cache location
-  checkpointInterval: 100             # Items per checkpoint
-  forceRefresh: false                 # Re-enrich existing
+  enableVisionAnalysis: true # Image captions/summaries
+  enableAudioTranscription: true # Audio transcription
+  enableLinkEnrichment: true # Link context extraction
+  imageCacheDir: ./.cache/images # Preview cache location
+  checkpointInterval: 100 # Items per checkpoint
+  forceRefresh: false # Re-enrich existing
 
 # Rendering settings
 render:
-  groupByTimeOfDay: true              # Morning/Afternoon/Evening sections
-  renderRepliesAsNested: true         # Blockquote threading
-  renderTapbacksAsEmoji: true         # ❤️ instead of text
-  maxNestingDepth: 10                 # Max blockquote levels
+  groupByTimeOfDay: true # Morning/Afternoon/Evening sections
+  renderRepliesAsNested: true # Blockquote threading
+  renderTapbacksAsEmoji: true # ❤️ instead of text
+  maxNestingDepth: 10 # Max blockquote levels
 ```
 
 **Environment Variables:**
+
 - `GEMINI_API_KEY` - Google Gemini API key (required for enrichment)
 - `FIRECRAWL_API_KEY` - Firecrawl API key (optional, for link enrichment)
 - `TF_BUILD` - Set by CI systems (enables test reporters)
 
 **Config Loading:**
-- Looks for `imessage-config.yaml` or `imessage-config.json` in current directory
+
+- Looks for `imessage-config.yaml` or `imessage-config.json` in current
+  directory
 - Supports environment variable expansion: `${VARIABLE_NAME}`
 - CLI `--config` flag overrides default path
 
@@ -625,27 +971,35 @@ pnpm cli enrich-ai \
 
 ## Dates and Timezones
 
-All dates in JSON outputs are **ISO 8601 UTC with Z suffix** (e.g., `2025-10-26T14:30:45.000Z`).
+All dates in JSON outputs are **ISO 8601 UTC with Z suffix** (e.g.,
+`2025-10-26T14:30:45.000Z`).
 
 ### CSV Import
-- iMazing CSV format: `MM/DD/YYYY, HH:MM:SS` (local timezone, interpreted as UTC)
+
+- iMazing CSV format: `MM/DD/YYYY, HH:MM:SS` (local timezone, interpreted as
+  UTC)
 - Converted to ISO 8601 with Z suffix
 
 ### Database Import
+
 - Apple epoch: Seconds since 2001-01-01 00:00:00 UTC
-- Formula: `ISO = (appleSeconds + 978307200) * 1000` (convert to milliseconds, then to ISO)
+- Formula: `ISO = (appleSeconds + 978307200) * 1000` (convert to milliseconds,
+  then to ISO)
 - Result: ISO 8601 with Z suffix
 
 ### Markdown Rendering
+
 - Timestamps displayed in UTC
 - Grouped by calendar date (UTC)
-- To display in local timezone, render the timestamp differently in post-processing
+- To display in local timezone, render the timestamp differently in
+  post-processing
 
 ## Idempotency and Determinism
 
 ### Idempotent Enrichment
 
 Enrichment is **idempotent** by design:
+
 - Check if `enrichment.kind` already exists for a message
 - Skip if present (already enriched)
 - Use `--force-refresh` to re-enrich specific kinds
@@ -663,16 +1017,19 @@ pnpm cli enrich-ai -i messages.normalized.json -o messages.enriched.json \
 ### Deterministic Rendering
 
 Markdown output is **fully deterministic**:
+
 - Messages sorted by `(date, guid)` before rendering
 - Enrichments sorted by kind within each message
 - JSON keys in sorted order
 - No randomization or time-dependent output
 
-This means: `sha256(messages.enriched.json) → sha256(timeline/*.md)` is consistent across runs.
+This means: `sha256(messages.enriched.json) → sha256(timeline/*.md)` is
+consistent across runs.
 
 ### Checkpoint Consistency
 
 Checkpoints include config hash verification:
+
 - Each checkpoint stores SHA256 of enrichment config
 - Resume only if config unchanged
 - Detects breaking changes (API key updates, disable/enable analysis modes)
@@ -682,8 +1039,10 @@ Checkpoints include config hash verification:
 ### Concurrency
 
 - **Ingest** (Stage 1): Single-threaded, fast (CSV parsing ~10k msgs/s)
-- **Normalize-Link** (Stage 2): Single-threaded, O(n log n) complexity (~1k msgs/s for dedup)
-- **Enrich-AI** (Stage 3): API call bound, respectful rate limiting (1-5 msgs/min depending on Gemini quota)
+- **Normalize-Link** (Stage 2): Single-threaded, O(n log n) complexity (~1k
+  msgs/s for dedup)
+- **Enrich-AI** (Stage 3): API call bound, respectful rate limiting (1-5
+  msgs/min depending on Gemini quota)
 - **Render** (Stage 4): Single-threaded, fast (~10k msgs/s)
 
 ### Memory
@@ -694,10 +1053,13 @@ Checkpoints include config hash verification:
 
 ### Cost Optimization
 
-- **Incremental mode**: Only enrich new messages (~80% cost reduction for mature datasets)
-- **Selective enrichment**: Enable/disable analysis modes (`--enable-vision`, etc.)
+- **Incremental mode**: Only enrich new messages (~80% cost reduction for mature
+  datasets)
+- **Selective enrichment**: Enable/disable analysis modes (`--enable-vision`,
+  etc.)
 - **Image caching**: Preview conversion cached by filename (avoid re-processing)
-- **Fallback chain**: Use Firecrawl fallback before provider-specific parsing (reduce API calls)
+- **Fallback chain**: Use Firecrawl fallback before provider-specific parsing
+  (reduce API calls)
 
 ### Suggested Workflow
 
@@ -765,6 +1127,7 @@ pnpm cli enrich-ai \
 ## Testing
 
 The project includes 50+ test files covering:
+
 - Schema validation (happy path + invariant violations)
 - CSV/DB ingestion (parsing, path resolution, date conversion)
 - Linking algorithms (reply matching, tapback association)
@@ -788,7 +1151,8 @@ pnpm test:coverage
 
 ### Coverage
 
-Maintained at **70%+ branch coverage**. Critical paths (linking, dedup, enrichment) at 95%+.
+Maintained at **70%+ branch coverage**. Critical paths (linking, dedup,
+enrichment) at 95%+.
 
 ## Contributing
 
@@ -800,8 +1164,10 @@ Contributions welcome! Please:
 4. Ensure tests pass: `pnpm test`
 5. Format code: `pnpm format`
 6. Lint: `pnpm lint`
-7. Commit with semantic message: `git commit -m "feat: add amazing feature"`
-8. Push and create a pull request
+7. **Create a changeset**: `pnpm version:gen` (for user-facing changes)
+8. Commit with semantic message: `git commit -m "feat: add amazing feature"`
+   - ✅ Hooks automatically validate commit format and code quality
+9. Push and create a pull request
 
 ### Development Setup
 
@@ -826,12 +1192,27 @@ pnpm quality-check
 - **Linting**: ESLint with recommended rules
 - **Testing**: Vitest with 70%+ coverage threshold
 - **Commits**: Conventional commits (feat:, fix:, docs:, etc.)
+  - See [Automated Release Workflow](./docs/automated-release-workflow.md) for
+    commit format guide
+
+### Release Process
+
+This project uses **automated releases** with Changesets:
+
+- **Create changeset** for user-facing changes: `pnpm version:gen`
+- **Commit messages** validated automatically via Husky + commitlint
+- **CI/CD** creates "Version Packages" PR when changesets are merged
+- **Publishing** happens automatically when version PR is merged
+
+📚 **Full documentation:**
+[Automated Release Workflow](./docs/automated-release-workflow.md)
 
 ## Troubleshooting
 
 ### "API rate limit exceeded"
 
 **Solution:** Increase `--rate-limit` delay
+
 ```bash
 pnpm cli enrich-ai -i messages.normalized.json -o enriched.json --rate-limit 2000
 ```
@@ -839,29 +1220,33 @@ pnpm cli enrich-ai -i messages.normalized.json -o enriched.json --rate-limit 200
 ### "Checkpoint config hash mismatch"
 
 **Cause:** Changed enrichment config (API key, enable/disable analysis)
-**Solution:** Use `--reset-state` to clear or manually delete `.imessage-state.json`
+**Solution:** Use `--reset-state` to clear or manually delete
+`.imessage-state.json`
+
 ```bash
 pnpm cli enrich-ai -i messages.normalized.json -o enriched.json --reset-state
 ```
 
 ### "Attachment paths not resolved"
 
-**Cause:** Media file not found in attachment directories
-**Check:**
+**Cause:** Media file not found in attachment directories **Check:**
+
 1. Verify path in config (`attachmentRoots`)
 2. Check file exists on disk
-3. Check file permissions
-**Result:** Path stored as filename with provenance metadata
+3. Check file permissions **Result:** Path stored as filename with provenance
+   metadata
 
 ### "Validation errors in normalized.json"
 
 **Debug:**
+
 ```bash
 pnpm cli validate -i messages.normalized.json -v
 # Shows which fields failed validation
 ```
 
 **Common causes:**
+
 - Missing `messageKind` field
 - Date not in ISO 8601 UTC format
 - Inconsistent data types (string vs number)
@@ -870,37 +1255,47 @@ Run `pnpm cli doctor` for system-level diagnostics.
 
 ## FAQ
 
-**Q: Can I use this on Linux/Windows?**
-A: CSV ingestion works everywhere. Database ingestion requires macOS (to access Messages.app). You can export from macOS and process on other systems.
+**Q: Can I use this on Linux/Windows?** A: CSV ingestion works everywhere.
+Database ingestion requires macOS (to access Messages.app). You can export from
+macOS and process on other systems.
 
-**Q: How much storage do the outputs take?**
-A: Enriched JSON is typically 2-3x original normalized JSON (due to enrichment data). Markdown files are 1-2x enriched JSON. A 1000-message conversation: ~5-10MB JSON, ~10-20MB markdown.
+**Q: How much storage do the outputs take?** A: Enriched JSON is typically 2-3x
+original normalized JSON (due to enrichment data). Markdown files are 1-2x
+enriched JSON. A 1000-message conversation: ~5-10MB JSON, ~10-20MB markdown.
 
-**Q: Can I re-use enriched.json if I change the render config?**
-A: Yes! Rendering is deterministic and config-independent. Change render settings (grouping, nesting depth) and re-render without re-enriching.
+**Q: Can I re-use enriched.json if I change the render config?** A: Yes!
+Rendering is deterministic and config-independent. Change render settings
+(grouping, nesting depth) and re-render without re-enriching.
 
-**Q: What if I don't have API keys?**
-A: Enrichment skips (messages remain as-is). Set `--enable-vision false --enable-audio false --enable-links false` to disable. Rendering still works perfectly without enrichment.
+**Q: What if I don't have API keys?** A: Enrichment skips (messages remain
+as-is). Set `--enable-vision false --enable-audio false --enable-links false` to
+disable. Rendering still works perfectly without enrichment.
 
-**Q: How do I update my timeline when new messages arrive?**
-A: Re-export from Messages.app/iMazing, then run the full pipeline OR use `--incremental --resume` to process only new messages (80%+ faster).
+**Q: How do I update my timeline when new messages arrive?** A: Re-export from
+Messages.app/iMazing, then run the full pipeline OR use `--incremental --resume`
+to process only new messages (80%+ faster).
 
-**Q: Is my data private?**
-A: Yes. All processing is local. API calls to Gemini/Firecrawl are necessary for enrichment but never persist to artifacts. No data retained after processing. Set API keys via environment variables (not in config files).
+**Q: Is my data private?** A: Yes. All processing is local. API calls to
+Gemini/Firecrawl are necessary for enrichment but never persist to artifacts. No
+data retained after processing. Set API keys via environment variables (not in
+config files).
 
 ## Technical Details
 
 ### Schema Invariants
 
 Messages enforce cross-field constraints via Zod `superRefine()`:
+
 - `messageKind='media'` → `media` field must exist and be complete
 - `messageKind='tapback'` → `tapback` field must exist
-- `messageKind='text'|'notification'` → may have text, must not have media/tapback
+- `messageKind='text'|'notification'` → may have text, must not have
+  media/tapback
 - All dates must be ISO 8601 with Z suffix
 
 ### Linking Heuristics
 
 Reply linking uses a confidence-scoring algorithm:
+
 1. Check DB association (if present, use immediately)
 2. Search ±30s timestamp window
 3. Score candidates:
@@ -912,6 +1307,7 @@ Reply linking uses a confidence-scoring algorithm:
 ### Deduplication Strategy
 
 CSV/DB deduplication uses a multi-pass approach:
+
 1. Exact GUID matching (primary)
 2. Content equivalence (fuzzy text + same sender + same timestamp)
 3. Prefer DB values in conflicts (authoritiveness)
@@ -920,7 +1316,9 @@ CSV/DB deduplication uses a multi-pass approach:
 ### Idempotency Design
 
 Enrichment is idempotent via kind-based deduplication:
-- Each enrichment entry has a `kind` (e.g., `'image_analysis'`, `'transcription'`)
+
+- Each enrichment entry has a `kind` (e.g., `'image_analysis'`,
+  `'transcription'`)
 - Check if `kind` already exists before enriching
 - `forceRefresh` replaces specific kind (preserves others)
 - Result: Safe to re-run without duplicating enrichments
@@ -952,8 +1350,10 @@ See [LICENSE](LICENSE) file for full text.
 
 ## Contact & Support
 
-- **Issues & Bugs**: [GitHub Issues](https://github.com/yourusername/imessage-timeline/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/imessage-timeline/discussions)
+- **Issues & Bugs**:
+  [GitHub Issues](https://github.com/yourusername/imessage-timeline/issues)
+- **Discussions**:
+  [GitHub Discussions](https://github.com/yourusername/imessage-timeline/discussions)
 - **Email**: support@example.com (replace with actual contact)
 
 ---
