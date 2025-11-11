@@ -21,46 +21,10 @@ env:
   TF_BUILD: true
 
 jobs:
-  setup:
-    name: Setup and cache
-    runs-on: ubuntu-latest
-    outputs:
-      node-version: ${{ steps.versions.outputs.node }}
-      pnpm-version: ${{ steps.versions.outputs.pnpm }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable Corepack (pnpm)
-        run: corepack enable
-
-      - name: Setup pnpm
-        id: pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Setup Bun (for bun/bunx scripts)
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.1.34'
-
-      - name: Capture tool versions
-        id: versions
-        run: |
-          echo "node=$(node -v)" >> "$GITHUB_OUTPUT"
-          echo "pnpm=$(pnpm -v)" >> "$GITHUB_OUTPUT"
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    needs: setup
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -93,7 +57,7 @@ jobs:
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
-    needs: setup
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
