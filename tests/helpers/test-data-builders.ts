@@ -5,7 +5,21 @@
  * chainable API. Complements fixture loaders for inline test data creation.
  */
 
-import type { Message, MediaMeta, TapbackPayload } from '../../src/schema/message'
+import type { Message, MediaMeta, TapbackInfo } from '../../src/schema/message'
+
+// ============================================================================
+// Test Message Type (extends schema for test-specific fields)
+// ============================================================================
+
+/**
+ * Test message type with additional test-only fields for builders.
+ * Allows setting auxiliary fields for testing that may not be in production schema.
+ */
+type TestMessage = Partial<Message> & {
+  notificationText?: string
+  metadata?: Record<string, unknown>
+  threadTargetGuid?: string
+}
 
 // ============================================================================
 // Message Builder
@@ -22,7 +36,7 @@ import type { Message, MediaMeta, TapbackPayload } from '../../src/schema/messag
  *   .build()
  */
 export class MessageBuilder {
-  private message: Partial<Message>
+  private message: TestMessage
 
   constructor() {
     this.message = {
@@ -105,7 +119,8 @@ export class MessageBuilder {
 
   /** Set delivered date */
   deliveredAt(date: string | Date): this {
-    this.message.dateDelivered = typeof date === 'string' ? date : date.toISOString()
+    this.message.dateDelivered =
+      typeof date === 'string' ? date : date.toISOString()
     return this
   }
 
@@ -117,7 +132,8 @@ export class MessageBuilder {
 
   /** Set edited date */
   editedAt(date: string | Date): this {
-    this.message.dateEdited = typeof date === 'string' ? date : date.toISOString()
+    this.message.dateEdited =
+      typeof date === 'string' ? date : date.toISOString()
     return this
   }
 
@@ -183,12 +199,18 @@ export class MessageBuilder {
   }
 
   /** Set as tapback message */
-  tapback(kind: TapbackPayload['tapbackKind'], targetGuid: string): this {
+  tapback(kind: TapbackInfo['type'], targetGuid: string): this {
     this.message.messageKind = 'tapback'
+    // Provide schema-compliant fields while preserving legacy aliases
+    // for tests that expect tapback.tapbackKind/targetGuid
     this.message.tapback = {
-      tapbackKind: kind,
-      targetGuid,
-    }
+      type: kind,
+      action: 'added',
+      targetMessageGuid: targetGuid,
+      // legacy/test-friendly aliases (not part of schema, but harmless extras)
+      tapbackKind: kind as unknown as never,
+      targetGuid: targetGuid as unknown as never,
+    } as unknown as TapbackInfo
     return this
   }
 
@@ -200,7 +222,7 @@ export class MessageBuilder {
   }
 
   /** Add metadata fields */
-  metadata(metadata: Record<string, any>): this {
+  metadata(metadata: Record<string, unknown>): this {
     this.message.metadata = {
       ...this.message.metadata,
       ...metadata,
@@ -251,7 +273,7 @@ export function conversationThread(count: number): Message[] {
       .date(new Date(Date.now() + i * 60000).toISOString()) // 1 min apart
 
     if (i > 0) {
-      builder.replyTo(messages[i - 1].guid)
+      builder.replyTo(messages[i - 1]!.guid!)
     }
 
     messages.push(builder.build())
@@ -271,14 +293,14 @@ export function conversationThread(count: number): Message[] {
  * // Creates 10 messages alternating between sent and received
  */
 export function alternatingMessages(count: number): Message[] {
-  return Array.from({ length: count }, (_, i) =>
-    messageBuilder()
+  return Array.from({ length: count }, (_, i) => {
+    const method = i % 2 === 0 ? 'fromThem' : 'fromMe'
+    const date = new Date(Date.now() + i * 60000).toISOString()
+    const builder = messageBuilder()
       .text(`Message ${i + 1}`)
       .from(i % 2 === 0 ? 'Alice' : 'Me')
-      [i % 2 === 0 ? 'fromThem' : 'fromMe']()
-      .date(new Date(Date.now() + i * 60000).toISOString())
-      .build(),
-  )
+    return builder[method]().date(date).build()
+  })
 }
 
 /**
@@ -293,18 +315,18 @@ export function alternatingMessages(count: number): Message[] {
  */
 export function mediaMessages(count: number = 1): Message[] {
   const messages: Message[] = []
-  const types = [
-    { method: 'image' as const, file: 'photo.jpg' },
-    { method: 'audio' as const, file: 'audio.m4a' },
-    { method: 'video' as const, file: 'video.mov' },
-    { method: 'pdf' as const, file: 'doc.pdf' },
+  type MediaMethod = 'image' | 'audio' | 'video' | 'pdf'
+  const types: Array<{ method: MediaMethod; file: string }> = [
+    { method: 'image', file: 'photo.jpg' },
+    { method: 'audio', file: 'audio.m4a' },
+    { method: 'video', file: 'video.mov' },
+    { method: 'pdf', file: 'doc.pdf' },
   ]
 
   for (const type of types) {
     for (let i = 0; i < count; i++) {
-      const msg = messageBuilder()
-        [type.method](`${type.file.split('.')[0]}-${i + 1}.${type.file.split('.')[1]}`)
-        .build()
+      const filename = `${type.file.split('.')[0]}-${i + 1}.${type.file.split('.')[1]}`
+      const msg = messageBuilder()[type.method](filename).build()
       messages.push(msg)
     }
   }
@@ -324,7 +346,7 @@ export function mediaMessages(count: number = 1): Message[] {
  */
 export function tapbackMessages(
   parentGuid: string,
-  kinds: TapbackPayload['tapbackKind'][] = ['liked', 'loved', 'laughed'],
+  kinds: Array<TapbackInfo['type']> = ['liked', 'loved', 'laughed'],
 ): Message[] {
   return kinds.map((kind, i) =>
     messageBuilder()
@@ -353,10 +375,11 @@ export function dailyMessagePattern(date: string | Date): Message[] {
   for (let i = 0; i < 5; i++) {
     const time = new Date(baseDate)
     time.setHours(8 + i, Math.floor(Math.random() * 60))
+    const method: 'fromMe' | 'fromThem' = i % 2 === 0 ? 'fromMe' : 'fromThem'
     messages.push(
       messageBuilder()
         .text(`Morning message ${i + 1}`)
-        [i % 2 === 0 ? 'fromMe' : 'fromThem']()
+        [method]()
         .date(time.toISOString())
         .build(),
     )
@@ -366,10 +389,11 @@ export function dailyMessagePattern(date: string | Date): Message[] {
   for (let i = 0; i < 8; i++) {
     const time = new Date(baseDate)
     time.setHours(12 + i, Math.floor(Math.random() * 60))
+    const method: 'fromMe' | 'fromThem' = i % 2 === 0 ? 'fromMe' : 'fromThem'
     messages.push(
       messageBuilder()
         .text(`Afternoon message ${i + 1}`)
-        [i % 2 === 0 ? 'fromMe' : 'fromThem']()
+        [method]()
         .date(time.toISOString())
         .build(),
     )
@@ -379,10 +403,11 @@ export function dailyMessagePattern(date: string | Date): Message[] {
   for (let i = 0; i < 7; i++) {
     const time = new Date(baseDate)
     time.setHours(18 + i, Math.floor(Math.random() * 60))
+    const method: 'fromMe' | 'fromThem' = i % 2 === 0 ? 'fromMe' : 'fromThem'
     messages.push(
       messageBuilder()
         .text(`Evening message ${i + 1}`)
-        [i % 2 === 0 ? 'fromMe' : 'fromThem']()
+        [method]()
         .date(time.toISOString())
         .build(),
     )

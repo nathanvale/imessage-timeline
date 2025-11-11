@@ -7,6 +7,7 @@
 
 import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
+
 import type { Message } from '../../src/schema/message'
 
 // ============================================================================
@@ -39,7 +40,7 @@ export type MessageFixture = {
 // ============================================================================
 
 /**
- * Loads a JSON fixture file from the tests/fixtures directory
+ * Load a fixture file synchronously
  *
  * @param filename - Name of the fixture file (relative to fixtures dir)
  * @param options - Loading options
@@ -49,7 +50,10 @@ export type MessageFixture = {
  * const data = loadFixture('messages/small-dataset.json')
  * const csv = loadFixture('csv/melanie-messages.csv', { parseJson: false })
  */
-export function loadFixture<T = any>(filename: string, options: FixtureOptions = {}): T {
+export function loadFixture<T = unknown>(
+  filename: string,
+  options: FixtureOptions = {},
+): T {
   const {
     baseDir = resolve(process.cwd(), 'tests/fixtures'),
     parseJson = true,
@@ -72,7 +76,7 @@ export function loadFixture<T = any>(filename: string, options: FixtureOptions =
       return JSON.parse(content) as T
     } catch (error) {
       throw new Error(
-        `Failed to parse JSON fixture ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to parse JSON fixture ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
     }
   }
@@ -94,7 +98,9 @@ export function loadMessageFixture(filename: string): MessageFixture {
   const data = loadFixture<MessageFixture>(filename)
 
   if (!data.messages || !Array.isArray(data.messages)) {
-    throw new Error(`Invalid message fixture: ${filename} (missing 'messages' array)`)
+    throw new Error(
+      `Invalid message fixture: ${filename} (missing 'messages' array)`,
+    )
   }
 
   return data
@@ -193,7 +199,7 @@ export function loadTextFixture(filename: string): string {
  * @example
  * const messages = loadJsonLinesFixture('stream-output.jsonl')
  */
-export function loadJsonLinesFixture<T = any>(filename: string): T[] {
+export function loadJsonLinesFixture<T = unknown>(filename: string): T[] {
   const content = loadFixture<string>(filename, { parseJson: false })
   return content
     .split('\n')
@@ -214,7 +220,9 @@ export function loadJsonLinesFixture<T = any>(filename: string): T[] {
  * @example
  * const msg = createMessageFixture({ text: 'Test message', isFromMe: true })
  */
-export function createMessageFixture(overrides: Partial<Message> = {}): Message {
+export function createMessageFixture(
+  overrides: Partial<Message> = {},
+): Message {
   const defaults: Message = {
     guid: `test-${Date.now()}-${Math.random()}`,
     messageKind: 'text',
@@ -250,7 +258,7 @@ export function createMessageFixture(overrides: Partial<Message> = {}): Message 
  */
 export function createMessagesFixture(
   count: number,
-  overridesFn?: (index: number) => Partial<Message>
+  overridesFn?: (index: number) => Partial<Message>,
 ): Message[] {
   return Array.from({ length: count }, (_, i) => {
     const overrides = overridesFn ? overridesFn(i) : {}
@@ -272,7 +280,7 @@ export function createMessagesFixture(
  */
 export function createMediaMessageFixture(
   mediaKind: 'image' | 'audio' | 'video' | 'pdf',
-  overrides: Partial<Message> = {}
+  overrides: Partial<Message> = {},
 ): Message {
   const extensions = {
     image: 'jpg',
@@ -308,16 +316,27 @@ export function createMediaMessageFixture(
  * const reaction = createTapbackFixture('liked', 'parent-guid-123')
  */
 export function createTapbackFixture(
-  tapbackKind: 'liked' | 'loved' | 'laughed' | 'emphasized' | 'questioned' | 'disliked',
+  tapbackKind:
+    | 'liked'
+    | 'loved'
+    | 'laughed'
+    | 'emphasized'
+    | 'questioned'
+    | 'disliked',
   parentGuid: string,
-  overrides: Partial<Message> = {}
+  overrides: Partial<Message> = {},
 ): Message {
   return createMessageFixture({
     messageKind: 'tapback',
     tapback: {
+      // Schema-compliant fields
+      type: tapbackKind,
+      action: 'added',
+      targetMessageGuid: parentGuid,
+      // Legacy/test-friendly aliases
       tapbackKind,
       targetGuid: parentGuid,
-    },
+    } as unknown as Message['tapback'],
     ...overrides,
   })
 }

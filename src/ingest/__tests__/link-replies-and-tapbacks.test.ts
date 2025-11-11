@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+
+import {
+  linkRepliesToParents,
+  linkTapbacksToParents,
+  detectAmbiguousLinks,
+} from '../link-replies-and-tapbacks'
+
 import type { Message } from '#lib/schema/message'
-import { linkRepliesToParents, linkTapbacksToParents, detectAmbiguousLinks } from '../link-replies-and-tapbacks'
 
 /**
  * Test suite for reply and tapback linking (NORMALIZE--T03)
@@ -411,10 +417,9 @@ describe('linkRepliesToParents', () => {
         date: '2025-10-17T10:00:10.000Z',
       })
 
-      const { linked, ambiguousLinks } = linkRepliesToParents(
-        [msg1, msg2, replyMsg],
-        { trackAmbiguous: true }
-      ) as any
+      const { linked, ambiguousLinks } = linkRepliesToParents([msg1, msg2, replyMsg], {
+        trackAmbiguous: true,
+      }) as any
 
       expect(ambiguousLinks).toBeDefined()
       expect(ambiguousLinks.length).toBeGreaterThan(0)
@@ -454,9 +459,11 @@ describe('linkRepliesToParents', () => {
       const result = detectAmbiguousLinks([msg1, msg2, msg3, replyMsg])
 
       expect(result.tieCount).toBeGreaterThan(0)
-      expect(result.ambiguousMessages).toContainEqual(expect.objectContaining({
-        messageGuid: 'csv:124:0',
-      }))
+      expect(result.ambiguousMessages).toContainEqual(
+        expect.objectContaining({
+          messageGuid: 'csv:124:0',
+        }),
+      )
     })
 
     it('should log confidence scores for top candidates', () => {
@@ -489,7 +496,7 @@ describe('linkRepliesToParents', () => {
           expect.objectContaining({
             topCandidates: expect.any(Array),
           }),
-        ])
+        ]),
       )
     })
   })

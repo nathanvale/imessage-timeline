@@ -10,8 +10,8 @@
  * - Loading test-specific polyfills
  */
 
-// Extend Vitest matchers if needed
-import { expect } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { beforeEach, afterEach, vi } from 'vitest'
 
 // Global test setup can be added here
 // For example:
@@ -22,6 +22,9 @@ import { expect } from 'vitest'
 // Ensure clean state between test suites
 beforeEach(() => {
   // Reset any global state if needed
+  vi.resetAllMocks()
+  vi.clearAllMocks()
+  vi.useRealTimers()
 })
 
 afterEach(() => {

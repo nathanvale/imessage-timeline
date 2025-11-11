@@ -1,20 +1,60 @@
 {
-  "name": "imessage-timeline",
-  "version": "0.0.0",
-  "description": "Extract, transform, and analyze iMessage conversations with AI-powered enrichment and timeline rendering.",
-  "type": "module",
-  "imports": {
-    "#schema/*": "./src/schema/*",
-    "#ingest/*": "./src/ingest/*",
-    "#normalize/*": "./src/normalize/*",
-    "#enrich/*": "./src/enrich/*",
-    "#render/*": "./src/render/*"
+  "author": {
+    "name": "Nathan Vale",
+    "url": "https://github.com/nathanvale"
   },
   "bin": {
     "imessage-timeline": "./dist/cli.js"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/nathanvale/imessage-timeline/issues"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@mendable/firecrawl-js": "^4.3.7",
+    "cli-progress": "^3.12.0",
+    "commander": "^14.0.1",
+    "csv-parse": "^5.6.0",
+    "csv-stringify": "^6.5.2",
+    "js-yaml": "^4.1.0",
+    "pino": "^10.0.0",
+    "sharp": "^0.34.4",
+    "zod": "^3.23.8"
+  },
+  "description": "Extract, transform, and analyze iMessage conversations with AI-powered enrichment and timeline rendering.",
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@changesets/cli": "^2.29.7",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@eslint/js": "^9.39.1",
+    "@orchestr8/quality-check": "^1.2.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/cli-progress": "^3.11.6",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.8.1",
+    "@vitest/coverage-v8": "^4.0.8",
+    "better-sqlite3": "^12.4.1",
+    "changesets": "^1.0.2",
+    "eslint": "^9.39.1",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "jsdom": "^25.0.1",
+    "lint-staged": "^15.2.10",
+    "pino-pretty": "^11.2.2",
+    "prettier": "^3.6.2",
+    "prettier-plugin-sort-json": "^4.1.1",
+    "publint": "^0.3.15",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^4.0.8"
+  },
+  "engines": {
+    "node": ">=22.20"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -22,45 +62,22 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist/**",
-    "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
+  "files": ["dist/**", "README.md", "LICENSE", "CHANGELOG.md"],
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/nathanvale"
+    }
   ],
-  "scripts": {
-    "build": "bunx --bun tsc -p tsconfig.json",
-    "clean": "rimraf dist .tsbuildinfo 2>/dev/null || true",
-    "dev": "bun src/cli.ts",
-    "cli": "node ./dist/cli.js",
-    "start": "node ./dist/cli.js",
-    "watch": "bunx --bun tsc -p tsconfig.json --watch",
-    "lint": "bunx --bun eslint .",
-    "lint:fix": "bunx --bun eslint . --fix",
-    "format": "bunx --bun prettier -w .",
-    "prepare": "husky",
-    "version:gen": "changeset",
-    "release": "changeset publish",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:ci": "TF_BUILD=true vitest run",
-    "coverage": "vitest run --coverage",
-    "test:coverage": "vitest run --coverage",
-    "validate:json": "bun scripts/validate-json.ts",
-    "quality-check": "quality-check",
-    "quality-check:ci": "quality-check --since origin/main --safe --fix",
-    "typecheck": "bunx --bun tsc -p tsconfig.eslint.json --noEmit"
+  "homepage": "https://github.com/nathanvale/imessage-timeline#readme",
+  "imports": {
+    "#enrich/*": "./src/enrich/*",
+    "#ingest/*": "./src/ingest/*",
+    "#normalize/*": "./src/normalize/*",
+    "#render/*": "./src/render/*",
+    "#schema/*": "./src/schema/*",
+    "#utils/*": "./src/utils/*"
   },
-  "engines": {
-    "node": ">=22.20"
-  },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
-  },
-  "sideEffects": false,
-  "license": "MIT",
   "keywords": [
     "imessage",
     "typescript",
@@ -70,51 +87,63 @@
     "timeline",
     "ai-enrichment"
   ],
-  "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "@mendable/firecrawl-js": "^4.3.7",
-    "cli-progress": "^3.12.0",
-    "commander": "^14.0.1",
-    "csv-parse": "^5.6.0",
-    "csv-stringify": "^6.5.2",
-    "js-yaml": "^4.1.0",
-    "sharp": "^0.34.4",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.29.7",
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
-    "@eslint/js": "^9.38.0",
-    "@orchestr8/quality-check": "^1.2.0",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@types/cli-progress": "^3.11.6",
-    "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.8.1",
-    "@vitest/coverage-v8": "^3.2.4",
-    "better-sqlite3": "^12.4.1",
-    "changesets": "^1.0.2",
-    "eslint": "^9.38.0",
-    "eslint-plugin-import": "^2.32.0",
-    "husky": "^9.1.7",
-    "jsdom": "^25.0.1",
-    "lint-staged": "^15.2.10",
-    "prettier": "^3.6.2",
-    "prettier-plugin-sort-json": "^4.1.1",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.1",
-    "vitest": "^3.2.4"
-  },
+  "license": "MIT",
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,mts,cts}": [
-      "eslint --fix",
-      "prettier -w"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier -w"
-    ]
-  }
+    "*.{json,md,yml,yaml}": ["prettier -w"],
+    "*.{ts,tsx,js,jsx,mts,cts}": ["eslint --fix", "prettier -w"]
+  },
+  "main": "./dist/index.js",
+  "name": "imessage-timeline",
+  "packageManager": "pnpm@9.0.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nathanvale/imessage-timeline.git"
+  },
+  "scripts": {
+    "build": "bunx --bun tsc -p tsconfig.json",
+    "check:publint": "publint",
+    "check:types": "attw --pack",
+    "check:updates": "pnpm outdated || true",
+    "clean": "rimraf dist .tsbuildinfo 2>/dev/null || true",
+    "cli": "node ./dist/cli.js",
+    "coverage": "vitest run --coverage",
+    "dev": "bun src/cli.ts",
+    "format": "bunx --bun prettier -w .",
+    "format:check": "bunx --bun prettier -c .",
+    "hygiene": "pnpm run -s check:publint && pnpm run -s check:types",
+    "lint": "bunx --bun eslint .",
+    "lint:fix": "bunx --bun eslint . --fix",
+    "pack:dry": "pnpm pack --pack-destination ./.pack && ls -lah ./.pack && tar -tf ./.pack/*.tgz | sort | sed 's/^/ - /'",
+    "pre:enter:beta": "changeset pre enter beta",
+    "pre:enter:next": "changeset pre enter next",
+    "pre:enter:rc": "changeset pre enter rc",
+    "pre:exit": "changeset pre exit",
+    "prepare": "husky",
+    "publish:pre": "changeset publish",
+    "quality-check": "quality-check",
+    "quality-check:ci": "quality-check --since origin/main --safe --fix",
+    "release": "changeset publish",
+    "release:snapshot:canary": "changeset version --snapshot canary && changeset publish --tag canary",
+    "security:audit": "pnpm audit",
+    "start": "node ./dist/cli.js",
+    "test": "vitest run",
+    "test:ci": "TF_BUILD=true vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest",
+    "typecheck": "bunx --bun tsc -p tsconfig.eslint.json --noEmit",
+    "upgrade:minor": "pnpm up --latest --recursive --filter='.'",
+    "validate:json": "bun scripts/validate-json.ts",
+    "version:gen": "changeset",
+    "version:pre": "changeset version",
+    "watch": "bunx --bun tsc -p tsconfig.json --watch"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "0.0.0"
 }

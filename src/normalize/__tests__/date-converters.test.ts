@@ -3,13 +3,7 @@
 // Tests written FIRST to drive implementation
 
 import { describe, it, expect } from 'vitest'
-import {
-  convertAppleEpochToUTC,
-  normalizeCSVDate,
-  validateDateFormat,
-  roundTripDateValidation,
-  detectTimezoneDrift,
-} from '../date-converters'
+
 import {
   knownTimestamps,
   csvUtcTimestamps,
@@ -17,6 +11,13 @@ import {
   dstEdgeCases,
   APPLE_EPOCH_SECONDS,
 } from '../../../__tests__/fixtures/date-converters'
+import {
+  convertAppleEpochToUTC,
+  normalizeCSVDate,
+  validateDateFormat,
+  roundTripDateValidation,
+  detectTimezoneDrift,
+} from '../date-converters'
 
 describe('NORMALIZE--T06: Date Validators and Converters', () => {
   describe('AC02: Apple epoch conversion', () => {

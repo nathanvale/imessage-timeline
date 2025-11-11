@@ -1,25 +1,11 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "sunday"
+      interval: 'weekly'
+      day: 'sunday'
     open-pull-requests-limit: 10
     commit-message:
-      prefix: "chore"
-      include: "scope"
-
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-    open-pull-requests-limit: 10
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    versioning-strategy: increase-if-necessary
-    allow:
-      - dependency-type: "direct"
-      - dependency-type: "direct-development"
+      prefix: 'chore(gha)'
+      include: 'scope'

@@ -21,7 +21,12 @@
  */
 
 import { promises as fs } from 'fs'
+
 import type { ExportEnvelope, Message } from '#schema/message'
+
+import { createLogger } from '#utils/logger'
+
+// moved type import above to satisfy import/order
 
 // ============================================================================
 // Types (AC01-AC05)
@@ -94,7 +99,9 @@ export type MergeResult = {
  * @param filePath - Path to existing enriched.json
  * @returns ExportEnvelope if valid, null if missing or corrupted
  */
-export async function loadExistingEnriched(filePath: string): Promise<ExportEnvelope | null> {
+export async function loadExistingEnriched(
+  filePath: string,
+): Promise<ExportEnvelope | null> {
   try {
     const content = await fs.readFile(filePath, 'utf-8')
     const parsed = JSON.parse(content) as ExportEnvelope
@@ -197,8 +204,10 @@ export function mergeEnrichments(
       addedCount,
       preservedCount,
       totalMessages,
-      mergedPercentage: totalMessages > 0 ? (mergedCount / totalMessages) * 100 : 0,
-      addedPercentage: totalMessages > 0 ? (addedCount / totalMessages) * 100 : 0,
+      mergedPercentage:
+        totalMessages > 0 ? (mergedCount / totalMessages) * 100 : 0,
+      addedPercentage:
+        totalMessages > 0 ? (addedCount / totalMessages) * 100 : 0,
     },
     mergedCount,
     addedCount,
@@ -338,8 +347,10 @@ export function createEnrichmentMergeResult(
       addedCount: options.addedCount,
       preservedCount: options.preservedCount,
       totalMessages: messages.length,
-      mergedPercentage: messages.length > 0 ? (options.mergedCount / messages.length) * 100 : 0,
-      addedPercentage: messages.length > 0 ? (options.addedCount / messages.length) * 100 : 0,
+      mergedPercentage:
+        messages.length > 0 ? (options.mergedCount / messages.length) * 100 : 0,
+      addedPercentage:
+        messages.length > 0 ? (options.addedCount / messages.length) * 100 : 0,
     },
     mergedCount: options.mergedCount,
     addedCount: options.addedCount,
@@ -363,20 +374,23 @@ export function createEnrichmentMergeResult(
  */
 export function logMergeSummary(result: MergeResult): void {
   const { mergedCount, addedCount, preservedCount } = result
+  const logger = createLogger('utils:enrichment-merge')
 
   if (mergedCount > 0) {
-    console.info(`✓ Merged ${mergedCount} existing messages with new enrichments`)
+    logger.info('Merged existing messages with new enrichments', {
+      mergedCount,
+    })
   }
 
   if (addedCount > 0) {
-    console.info(`✓ Added ${addedCount} new messages to enriched.json`)
+    logger.info('Added new messages to enriched.json', { addedCount })
   }
 
   if (preservedCount > 0) {
-    console.info(`✓ Preserved ${preservedCount} enrichments from prior run`)
+    logger.info('Preserved enrichments from prior run', { preservedCount })
   }
 
   if (mergedCount === 0 && addedCount === 0) {
-    console.info('✓ No new enrichments to merge')
+    logger.info('No new enrichments to merge')
   }
 }

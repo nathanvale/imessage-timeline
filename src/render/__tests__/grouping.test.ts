@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import type { Message } from '#schema/message'
+
 import {
   groupMessagesByDateAndTimeOfDay,
   generateAnchorId,
@@ -8,6 +8,8 @@ import {
   type GroupedMessages,
   type TimeOfDayGroup,
 } from '../grouping'
+
+import type { Message } from '#schema/message'
 
 describe('RENDER--T01: Grouping and Anchor Generation', () => {
   describe('AC01: Group messages by date (YYYY-MM-DD)', () => {
@@ -230,12 +232,7 @@ describe('RENDER--T01: Grouping and Anchor Generation', () => {
     })
 
     it('should handle various GUID formats', () => {
-      const guids = [
-        'simple-guid',
-        'DB:complex-guid-123',
-        'p:0/parent-guid',
-        'abc123def456',
-      ]
+      const guids = ['simple-guid', 'DB:complex-guid-123', 'p:0/parent-guid', 'abc123def456']
 
       guids.forEach((guid) => {
         const anchor = generateAnchorId(guid)

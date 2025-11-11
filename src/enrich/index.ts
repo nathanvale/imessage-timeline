@@ -18,12 +18,13 @@ export * from './pdf-video-handling'
 export * from './link-enrichment'
 export * from './idempotency'
 
-import type { Message, MediaEnrichment } from '#schema/message'
 import {
   shouldSkipEnrichment,
   addEnrichmentIdempotent,
   deduplicateEnrichmentByKind,
 } from './idempotency'
+
+import type { Message, MediaEnrichment } from '#schema/message'
 
 type EnrichmentConfig = {
   enableVisionAnalysis?: boolean
@@ -50,7 +51,7 @@ type EnrichmentConfig = {
 export function applyEnrichmentIdempotent(
   message: Message,
   enrichment: MediaEnrichment,
-  config: EnrichmentConfig = {}
+  config: EnrichmentConfig = {},
 ): Message {
   const { forceRefresh = false } = config
 
@@ -68,7 +69,7 @@ export function applyEnrichmentIdempotent(
 export function shouldSkipEnrichmentForKind(
   message: Message,
   kind: MediaEnrichment['kind'],
-  forceRefresh: boolean = false
+  forceRefresh: boolean = false,
 ): boolean {
   if (forceRefresh) {
     return false

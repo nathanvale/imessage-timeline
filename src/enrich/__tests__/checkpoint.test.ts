@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import type { Message } from '#schema/message'
+
 import {
   createCheckpoint,
   loadCheckpoint,
@@ -22,6 +22,8 @@ import {
   initializeCheckpointState,
   prepareCheckpoint,
 } from '../checkpoint'
+
+import type { Message } from '#schema/message'
 
 describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
   let testCheckpointDir: string
@@ -324,9 +326,7 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
           failedCount: 1,
           enrichmentsByKind: { image_analysis: 40, transcription: 10 },
         },
-        failedItems: [
-          { index: 120, guid: 'msg-120', kind: 'image_analysis', error: 'Timeout' },
-        ],
+        failedItems: [{ index: 120, guid: 'msg-120', kind: 'image_analysis', error: 'Timeout' }],
         configHash: 'config-hash-150',
       })
 
@@ -340,10 +340,7 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
       expect(resumeIndex).toBe(150)
 
       // Verify config before resume
-      const configValid = verifyConfigHash(
-        originalCheckpoint.configHash,
-        'config-hash-150'
-      )
+      const configValid = verifyConfigHash(originalCheckpoint.configHash, 'config-hash-150')
       expect(configValid).toBe(true)
     })
 
@@ -476,9 +473,7 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
         totalProcessed: 100,
         totalFailed: 2,
         stats: { processedCount: 100, failedCount: 2, enrichmentsByKind: {} },
-        failedItems: [
-          { index: 45, guid: 'msg-45', kind: 'image_analysis', error: 'Timeout' },
-        ],
+        failedItems: [{ index: 45, guid: 'msg-45', kind: 'image_analysis', error: 'Timeout' }],
         configHash: 'config-hash-100',
       })
 
@@ -516,7 +511,7 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
         3, // totalFailed
         { processedCount: 50, failedCount: 1, enrichmentsByKind: { image_analysis: 40 } },
         [{ index: 120, guid: 'msg-120', kind: 'image_analysis', error: 'Timeout' }],
-        'config-hash-150'
+        'config-hash-150',
       )
 
       expect(checkpoint.lastProcessedIndex).toBe(149)
@@ -529,7 +524,14 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
 
     it('should set current timestamp on prepared checkpoint', () => {
       const before = new Date().getTime()
-      const checkpoint = prepareCheckpoint(99, 100, 0, { processedCount: 100, failedCount: 0, enrichmentsByKind: {} }, [], 'hash')
+      const checkpoint = prepareCheckpoint(
+        99,
+        100,
+        0,
+        { processedCount: 100, failedCount: 0, enrichmentsByKind: {} },
+        [],
+        'hash',
+      )
       const after = new Date().getTime()
 
       const checkpointTime = new Date(checkpoint.createdAt).getTime()

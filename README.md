@@ -7,6 +7,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![CI](https://github.com/nathanvale/imessage-timeline/actions/workflows/pr-quality.yml/badge.svg?branch=main)](https://github.com/nathanvale/imessage-timeline/actions/workflows/pr-quality.yml)
+[![CodeQL](https://github.com/nathanvale/imessage-timeline/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/nathanvale/imessage-timeline/actions/workflows/codeql.yml)
 [![Tests](https://img.shields.io/badge/Tests-50%2B-brightgreen)](#testing)
 [![Coverage](https://img.shields.io/badge/Coverage-70%25%2B-brightgreen)](#testing)
 
@@ -22,6 +24,30 @@ time-of-day.
 
 Perfect for creating browsable conversation archives, enriched research notes,
 or personal history exports.
+
+### Automated Quality & Security
+
+This repository is continuously checked by:
+
+- **PR quality** workflow: lint, typecheck, full Vitest suite + V8 coverage,
+  delta quality checks
+- **CodeQL**: static analysis for code vulnerabilities (JS/TS)
+- **OSV Scanner**: open source vulnerability scanning of dependencies
+- **Workflow Lint**: actionlint validation of GitHub Actions syntax
+- **Dependency Review**: flags risky transitive additions on PRs
+- **Package Hygiene**: build integrity (`publint`, type checks, dry pack)
+- **Renovate**: automated npm/pnpm dependency maintenance (grouped, safe
+  automerge for dev minor/patch)
+- **Dependabot**: weekly GitHub Actions version bumps only
+
+Badges surface current status; failing checks block merges ensuring a
+high-signal, low-noise pipeline.
+
+### CI performance (optional)
+
+- setup-node already caches pnpm. If installs become a bottleneck, consider
+  adding a pnpm store cache step to PR quality (restore/save `.pnpm-store`). We
+  can wire this later once baseline run times are known.
 
 ## CLI
 
@@ -176,39 +202,39 @@ import {
   type Message,
   type Config,
   type DeltaResult,
-} from "imessage-timeline"
+} from 'imessage-timeline'
 ```
 
 ### Example: Load and Validate Config
 
 ```typescript
-import { loadConfig, validateConfig } from "imessage-timeline"
+import { loadConfig, validateConfig } from 'imessage-timeline'
 
 // Load config with auto-discovery (looks for imessage-config.yaml/json)
 const config = await loadConfig()
 
 // Load specific config file
-const config = await loadConfig({ configPath: "./custom-config.yaml" })
+const config = await loadConfig({ configPath: './custom-config.yaml' })
 
 // Validate existing config object
 const validated = validateConfig({
-  gemini: { apiKey: "your-key" },
-  inputs: { csv: ["messages.csv"] },
+  gemini: { apiKey: 'your-key' },
+  inputs: { csv: ['messages.csv'] },
 })
 ```
 
 ### Example: Ingest Messages from CSV
 
 ```typescript
-import { ingestCSV, createExportEnvelope } from "imessage-timeline"
-import type { Message, IngestOptions } from "imessage-timeline"
+import { ingestCSV, createExportEnvelope } from 'imessage-timeline'
+import type { Message, IngestOptions } from 'imessage-timeline'
 
 const options: IngestOptions = {
-  attachmentDir: "/path/to/attachments",
+  attachmentDir: '/path/to/attachments',
   strictMode: false,
 }
 
-const messages: Message[] = ingestCSV("./messages.csv", options)
+const messages: Message[] = ingestCSV('./messages.csv', options)
 
 // Wrap in export envelope
 const envelope = createExportEnvelope(messages)
@@ -218,12 +244,12 @@ console.log(`Ingested ${envelope.totalMessages} messages`)
 ### Example: Deduplicate and Merge Sources
 
 ```typescript
-import { dedupAndMerge } from "imessage-timeline"
-import type { Message } from "imessage-timeline"
+import { dedupAndMerge } from 'imessage-timeline'
+import type { Message } from 'imessage-timeline'
 
-const csvMessages: Message[] = ingestCSV("./messages.csv", options)
+const csvMessages: Message[] = ingestCSV('./messages.csv', options)
 const dbMessages: Message[] = JSON.parse(
-  fs.readFileSync("./db-export.json", "utf-8"),
+  fs.readFileSync('./db-export.json', 'utf-8'),
 )
 
 const result = dedupAndMerge(csvMessages, dbMessages)
@@ -236,8 +262,8 @@ console.log(`Deduped ${result.stats.duplicatesRemoved} duplicates`)
 ### Example: Detect New Messages (Incremental Processing)
 
 ```typescript
-import { detectDelta, extractGuidsFromMessages } from "imessage-timeline"
-import type { Message, DeltaResult } from "imessage-timeline"
+import { detectDelta, extractGuidsFromMessages } from 'imessage-timeline'
+import type { Message, DeltaResult } from 'imessage-timeline'
 
 const currentMessages: Message[] = loadCurrentMessages()
 const previousMessages: Message[] = loadPreviousCheckpoint()
@@ -256,8 +282,8 @@ await enrichOnlyNew(newGuids)
 ### Example: Rate Limiting for API Calls
 
 ```typescript
-import { createRateLimiter } from "imessage-timeline"
-import type { RateLimitConfig } from "imessage-timeline"
+import { createRateLimiter } from 'imessage-timeline'
+import type { RateLimitConfig } from 'imessage-timeline'
 
 const limiter = createRateLimiter({
   requestsPerSecond: 10,
@@ -267,7 +293,7 @@ const limiter = createRateLimiter({
 
 // Use with fetch or any async API call
 const response = await limiter.execute(async () => {
-  return fetch("https://api.example.com/data")
+  return fetch('https://api.example.com/data')
 })
 
 console.log(`Status: ${response.status}`)
@@ -276,19 +302,19 @@ console.log(`Status: ${response.status}`)
 ### Example: Generate Config Programmatically
 
 ```typescript
-import { generateConfigContent, getDefaultConfigPath } from "imessage-timeline"
-import fs from "node:fs/promises"
+import { generateConfigContent, getDefaultConfigPath } from 'imessage-timeline'
+import fs from 'node:fs/promises'
 
 // Generate YAML config with defaults
-const yamlContent = generateConfigContent("yaml")
-const configPath = getDefaultConfigPath("yaml")
+const yamlContent = generateConfigContent('yaml')
+const configPath = getDefaultConfigPath('yaml')
 
-await fs.writeFile(configPath, yamlContent, "utf-8")
+await fs.writeFile(configPath, yamlContent, 'utf-8')
 console.log(`Config written to ${configPath}`)
 
 // Generate JSON config
-const jsonContent = generateConfigContent("json")
-await fs.writeFile("./imessage-config.json", jsonContent, "utf-8")
+const jsonContent = generateConfigContent('json')
+await fs.writeFile('./imessage-config.json', jsonContent, 'utf-8')
 ```
 
 ### TypeScript Type Definitions
@@ -319,7 +345,7 @@ import type {
   RateLimitConfig,
   RateLimitState,
   ApiResponse,
-} from "imessage-timeline"
+} from 'imessage-timeline'
 ```
 
 ### Advanced: Custom Pipeline
@@ -332,8 +358,8 @@ import {
   detectDelta,
   mergeEnrichments,
   createRateLimiter,
-} from "imessage-timeline"
-import type { Message, Config } from "imessage-timeline"
+} from 'imessage-timeline'
+import type { Message, Config } from 'imessage-timeline'
 
 async function runCustomPipeline() {
   // 1. Load configuration
@@ -345,7 +371,7 @@ async function runCustomPipeline() {
     strictMode: false,
   })
 
-  const dbMessages = JSON.parse(await fs.readFile(config.inputs.db, "utf-8"))
+  const dbMessages = JSON.parse(await fs.readFile(config.inputs.db, 'utf-8'))
 
   // 3. Merge and deduplicate
   const merged = dedupAndMerge(csvMessages, dbMessages)
@@ -359,7 +385,7 @@ async function runCustomPipeline() {
   const limiter = createRateLimiter({ requestsPerSecond: 5 })
 
   for (const message of delta.new) {
-    if (message.media?.kind === "image") {
+    if (message.media?.kind === 'image') {
       const enrichment = await limiter.execute(() =>
         enrichImageWithGemini(message),
       )
@@ -611,7 +637,7 @@ union:
 ```typescript
 type Message = {
   guid: string // Unique identifier
-  messageKind: "text" | "media" | "tapback" | "notification"
+  messageKind: 'text' | 'media' | 'tapback' | 'notification'
   date: string // ISO 8601 with Z suffix (UTC)
   isFromMe: boolean
 
@@ -635,13 +661,13 @@ type Message = {
   isDeleted?: boolean
 
   // Provenance
-  sourceType?: "csv" | "db"
+  sourceType?: 'csv' | 'db'
   sourceMetadata?: Record<string, unknown>
 }
 
 type MediaMeta = {
   id: string // Unique media ID
-  type: "image" | "audio" | "pdf" | "video" | "document"
+  type: 'image' | 'audio' | 'pdf' | 'video' | 'document'
   filename?: string
   path?: string // Absolute path if file exists
   mimeType?: string
@@ -650,13 +676,13 @@ type MediaMeta = {
   enrichment?: MediaEnrichment[] // AI analysis results
   provenance?: {
     originalPath?: string
-    source: "csv" | "db"
+    source: 'csv' | 'db'
     lastSeen?: string
   }
 }
 
 type MediaEnrichment = {
-  kind: "image_analysis" | "transcription" | "pdf_summary" | "link_context"
+  kind: 'image_analysis' | 'transcription' | 'pdf_summary' | 'link_context'
   content: Record<string, unknown>
   provider: string // 'gemini', 'firecrawl', etc.
   model: string
@@ -862,7 +888,7 @@ Configuration can be provided via `imessage-config.yaml` or
 `imessage-config.json`. Create with `pnpm cli init` or manually:
 
 ```yaml
-version: "1.0"
+version: '1.0'
 
 # Attachment directories to search for media files
 attachmentRoots:
@@ -1126,6 +1152,9 @@ pnpm cli enrich-ai \
 
 ## Testing
 
+See our testing guide for configuration rationale and patterns:
+`docs/testing-best-practices.md`.
+
 The project includes 50+ test files covering:
 
 - Schema validation (happy path + invariant violations)
@@ -1206,6 +1235,40 @@ This project uses **automated releases** with Changesets:
 
 📚 **Full documentation:**
 [Automated Release Workflow](./docs/automated-release-workflow.md)
+
+### Release Channels
+
+We support prerelease channels for fast feedback and safe promotion:
+
+- `next` for early adopters
+- `beta` for feature-complete testing
+- `rc` for release candidates
+- `canary` snapshots for experimental builds
+
+See the channel usage, promotion flow, and workflow details:
+[Release Channels & Prerelease Strategy](./docs/release-channels.md)
+
+### Package Hygiene
+
+We enforce a tight publish surface and solid metadata:
+
+- Validated with publint and AreTheTypesWrong
+- Minimal tarball via `files` whitelist
+- Provenance enabled for trusted builds
+
+See the full checklist and how to run the checks:
+[Package Hygiene & Metadata Quality](./docs/package-hygiene.md)
+
+### Prettier formatting
+
+We use a minimal, opinionated Prettier setup:
+
+- Global 80-char width, trailing commas, single quotes, no semicolons
+- Deterministic JSON sorting via plugin
+- Non-mutating check for CI/local validation
+
+Docs and rationale:
+[Prettier Best Practices & Formatting Strategy](./docs/prettier-best-practices.md)
 
 ## Troubleshooting
 

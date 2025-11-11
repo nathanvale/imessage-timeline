@@ -1,8 +1,11 @@
-import { describe, it, expect, beforeAll } from 'vitest'
-import type { CSVRow } from '../ingest-csv';
-import { ingestCSV, parseCSVRow, convertToISO8601, validateMessages } from '../ingest-csv'
-import * as path from 'path'
 import { readFileSync } from 'fs'
+import * as path from 'path'
+
+import { describe, it, expect, beforeAll } from 'vitest'
+
+import { ingestCSV, parseCSVRow, convertToISO8601, validateMessages } from '../ingest-csv'
+
+import type { CSVRow } from '../ingest-csv'
 
 describe('ingest-csv', () => {
   describe('parseCSVRow - iMazing CSV format', () => {
@@ -14,15 +17,15 @@ describe('ingest-csv', () => {
         'Delivered Date': '',
         'Read Date': '2023-10-21 17:26:02',
         'Edited Date': '',
-        'Service': 'SMS',
-        'Type': 'Incoming',
+        Service: 'SMS',
+        Type: 'Incoming',
         'Sender ID': '+61412667520',
         'Sender Name': 'Melanie',
-        'Status': 'Read',
+        Status: 'Read',
         'Replying to': '',
-        'Subject': '',
-        'Text': 'Hey Nathan, how are you?',
-        'Attachment': '',
+        Subject: '',
+        Text: 'Hey Nathan, how are you?',
+        Attachment: '',
         'Attachment type': '',
       }
 
@@ -47,15 +50,15 @@ describe('ingest-csv', () => {
         'Delivered Date': '2023-10-22 08:30:05',
         'Read Date': '2023-10-22 08:35:00',
         'Edited Date': '',
-        'Service': 'iMessage',
-        'Type': 'Outgoing',
+        Service: 'iMessage',
+        Type: 'Outgoing',
         'Sender ID': 'Nathan',
         'Sender Name': 'Nathan',
-        'Status': 'Read',
+        Status: 'Read',
         'Replying to': '',
-        'Subject': '',
-        'Text': 'That sounds great! 😊',
-        'Attachment': '',
+        Subject: '',
+        Text: 'That sounds great! 😊',
+        Attachment: '',
         'Attachment type': '',
       }
 
@@ -78,15 +81,15 @@ describe('ingest-csv', () => {
         'Delivered Date': '',
         'Read Date': '',
         'Edited Date': '',
-        'Service': 'iMessage',
-        'Type': 'Outgoing',
+        Service: 'iMessage',
+        Type: 'Outgoing',
         'Sender ID': 'Nathan',
         'Sender Name': 'Nathan',
-        'Status': 'Delivered',
+        Status: 'Delivered',
         'Replying to': '',
-        'Subject': '',
-        'Text': 'Check out this photo',
-        'Attachment': 'IMG_001.jpg',
+        Subject: '',
+        Text: 'Check out this photo',
+        Attachment: 'IMG_001.jpg',
         'Attachment type': 'image/jpeg',
       }
 
@@ -105,11 +108,11 @@ describe('ingest-csv', () => {
       const row: CSVRow = {
         'Chat Session': 'Melanie',
         'Message Date': '2023-10-21 15:00:00',
-        'Service': 'iMessage',
-        'Type': 'Outgoing',
+        Service: 'iMessage',
+        Type: 'Outgoing',
         'Sender Name': 'Nathan',
-        'Text': 'Photo below',
-        'Attachment': 'IMG_002.jpg',
+        Text: 'Photo below',
+        Attachment: 'IMG_002.jpg',
         'Attachment type': 'image/jpeg',
       } as any
 
@@ -123,9 +126,9 @@ describe('ingest-csv', () => {
     // AC02: Determine messageKind and isFromMe from Type field
     it('should set isFromMe=true for Outgoing/Sent types', () => {
       const row: CSVRow = {
-        'Type': 'Sent',
+        Type: 'Sent',
         'Message Date': '2023-10-21 11:00:00',
-        'Text': 'Test',
+        Text: 'Test',
       } as any
 
       const messages = parseCSVRow(row, 5, { attachmentRoots: [] })
@@ -135,9 +138,9 @@ describe('ingest-csv', () => {
 
     it('should set isFromMe=false for Incoming type', () => {
       const row: CSVRow = {
-        'Type': 'Incoming',
+        Type: 'Incoming',
         'Message Date': '2023-10-21 11:00:00',
-        'Text': 'Test',
+        Text: 'Test',
         'Sender Name': 'Melanie',
       } as any
 
@@ -152,9 +155,9 @@ describe('ingest-csv', () => {
         'Chat Session': 'Test',
         'Message Date': '2023-10-21 11:06:22',
         'Read Date': '2023-10-21 17:26:02',
-        'Type': 'Incoming',
+        Type: 'Incoming',
         'Sender Name': 'Test',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const messages = parseCSVRow(row, 7, { attachmentRoots: [] })
@@ -166,7 +169,7 @@ describe('ingest-csv', () => {
     it('should skip rows with invalid dates', () => {
       const row: CSVRow = {
         'Message Date': 'invalid-date',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const messages = parseCSVRow(row, 8, { attachmentRoots: [] })
@@ -179,9 +182,9 @@ describe('ingest-csv', () => {
         'Message Date': '2023-10-21 11:00:00',
         'Delivered Date': '',
         'Read Date': '',
-        'Type': 'Incoming',
+        Type: 'Incoming',
         'Sender Name': 'Test',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const messages = parseCSVRow(row, 9, { attachmentRoots: [] })
@@ -194,10 +197,10 @@ describe('ingest-csv', () => {
     it('should preserve service field', () => {
       const row: CSVRow = {
         'Message Date': '2023-10-21 11:00:00',
-        'Service': 'SMS',
-        'Type': 'Incoming',
+        Service: 'SMS',
+        Type: 'Incoming',
         'Sender Name': 'Melanie',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const messages = parseCSVRow(row, 10, { attachmentRoots: [] })
@@ -208,18 +211,18 @@ describe('ingest-csv', () => {
     it('should set isRead based on Status field', () => {
       const readRow: CSVRow = {
         'Message Date': '2023-10-21 11:00:00',
-        'Status': 'Read',
-        'Type': 'Incoming',
+        Status: 'Read',
+        Type: 'Incoming',
         'Sender Name': 'Melanie',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const unreadRow: CSVRow = {
         'Message Date': '2023-10-21 11:00:00',
-        'Status': 'Unread',
-        'Type': 'Incoming',
+        Status: 'Unread',
+        Type: 'Incoming',
         'Sender Name': 'Melanie',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const readMessages = parseCSVRow(readRow, 11, { attachmentRoots: [] })
@@ -233,9 +236,9 @@ describe('ingest-csv', () => {
     it('should include exportMetadata with source and lineNumber', () => {
       const row: CSVRow = {
         'Message Date': '2023-10-21 11:00:00',
-        'Type': 'Incoming',
+        Type: 'Incoming',
         'Sender Name': 'Melanie',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const messages = parseCSVRow(row, 42, { attachmentRoots: [] })
@@ -250,9 +253,9 @@ describe('ingest-csv', () => {
     it('should include replyingTo in metadata when present', () => {
       const row: CSVRow = {
         'Message Date': '2023-10-21 11:00:00',
-        'Type': 'Incoming',
+        Type: 'Incoming',
         'Sender Name': 'Melanie',
-        'Text': 'I agree!',
+        Text: 'I agree!',
         'Replying to': 'csv:40:0',
       } as any
 
@@ -296,9 +299,9 @@ describe('ingest-csv', () => {
     it('should validate messages against schema', () => {
       const row: CSVRow = {
         'Message Date': '2023-10-21 11:00:00',
-        'Type': 'Incoming',
+        Type: 'Incoming',
         'Sender Name': 'Melanie',
-        'Text': 'Hello',
+        Text: 'Hello',
       } as any
 
       const messages = parseCSVRow(row, 1, { attachmentRoots: [] })
@@ -316,7 +319,7 @@ describe('ingest-csv', () => {
     beforeAll(() => {
       csvPath = path.join(
         '/Users/nathanvale/code/my-second-brain/02_Areas/Personal/Melanie & Relationship/data',
-        'Messages - Melanie.csv'
+        'Messages - Melanie.csv',
       )
     })
 
@@ -339,7 +342,9 @@ describe('ingest-csv', () => {
       expect(messagesWithoutDates).toHaveLength(0)
 
       // All dates should be ISO 8601 with Z suffix
-      const validDates = messages.every((m) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(m.date))
+      const validDates = messages.every((m) =>
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(m.date),
+      )
       expect(validDates).toBe(true)
     })
 

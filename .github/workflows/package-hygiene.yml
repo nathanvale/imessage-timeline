@@ -1,0 +1,46 @@
+name: Package Hygiene
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'src/**'
+      - 'tsconfig.*'
+      - '.github/workflows/package-hygiene.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.20
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Publint (package structure lint)
+        run: pnpm check:publint
+      - name: Types validation (are-the-types-wrong)
+        run: pnpm check:types
+      - name: Dry pack & artifact
+        run: pnpm pack:dry
+      - name: Upload packed artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-tarball
+          path: ./.pack/*.tgz

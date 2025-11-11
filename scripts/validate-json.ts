@@ -5,8 +5,10 @@
 
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-import type { Message, ExportEnvelope } from '../src/schema/message'
+
 import { MessageSchema, ExportEnvelopeSchema } from '../src/schema/message'
+
+import type { Message, ExportEnvelope } from '../src/schema/message'
 import type { ZodError } from 'zod'
 
 // ============================================================================
@@ -47,7 +49,8 @@ function formatZodErrors(error: ZodError, filePath: string): string {
   }
 
   errors.forEach((err, index) => {
-    const fieldPath = err.path && err.path.length > 0 ? err.path.join('.') : '<root>'
+    const fieldPath =
+      err.path && err.path.length > 0 ? err.path.join('.') : '<root>'
     const message = err.message || 'Unknown validation error'
 
     output.push(`${index + 1}. Field: ${fieldPath}`)
@@ -58,7 +61,9 @@ function formatZodErrors(error: ZodError, filePath: string): string {
     output.push('')
   })
 
-  output.push(`\n❌ ${errors.length} validation error${errors.length > 1 ? 's' : ''} found\n`)
+  output.push(
+    `\n❌ ${errors.length} validation error${errors.length > 1 ? 's' : ''} found\n`,
+  )
 
   return output.join('\n')
 }
@@ -99,7 +104,9 @@ function displayStats(stats: Stats, source: string): void {
   console.log(`    - text: ${stats.byKind.text.toLocaleString()}`)
   console.log(`    - media: ${stats.byKind.media.toLocaleString()}`)
   console.log(`    - tapback: ${stats.byKind.tapback.toLocaleString()}`)
-  console.log(`    - notification: ${stats.byKind.notification.toLocaleString()}`)
+  console.log(
+    `    - notification: ${stats.byKind.notification.toLocaleString()}`,
+  )
 
   if (stats.withReplies > 0) {
     console.log(`\n  With replies: ${stats.withReplies.toLocaleString()}`)
@@ -120,7 +127,9 @@ async function main(): Promise<void> {
   if (!filePath) {
     console.error('❌ Error: Missing file path argument\n')
     console.error('Usage: node scripts/validate-json.ts <file-path>')
-    console.error('Example: node scripts/validate-json.ts ./exports/messages.json\n')
+    console.error(
+      'Example: node scripts/validate-json.ts ./exports/messages.json\n',
+    )
     process.exit(2)
   }
 
@@ -142,7 +151,12 @@ async function main(): Promise<void> {
     let source = 'unknown'
     let validationError: ZodError | Error | null = null
 
-    if (data && typeof data === 'object' && !Array.isArray(data) && 'messages' in data) {
+    if (
+      data &&
+      typeof data === 'object' &&
+      !Array.isArray(data) &&
+      'messages' in data
+    ) {
       // ExportEnvelope
       try {
         const envelope = ExportEnvelopeSchema.parse(data) as ExportEnvelope
@@ -163,12 +177,16 @@ async function main(): Promise<void> {
         validationError = error as ZodError
       }
     } else {
-      validationError = new Error('Data is neither an ExportEnvelope nor an array of messages')
+      validationError = new Error(
+        'Data is neither an ExportEnvelope nor an array of messages',
+      )
     }
 
     if (validationError) {
       if ('errors' in validationError) {
-        console.error(formatZodErrors(validationError as ZodError, absolutePath))
+        console.error(
+          formatZodErrors(validationError as ZodError, absolutePath),
+        )
       } else {
         console.error(`❌ Error: ${validationError.message}`)
       }

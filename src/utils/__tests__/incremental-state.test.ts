@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { promises as fs } from 'fs'
-import path from 'path'
 import os from 'os'
+import path from 'path'
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
 import {
   IncrementalState,
   createIncrementalState,

@@ -1,6 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import path from 'path'
 import { promises as fs } from 'fs'
+import path from 'path'
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
+import { MessageSchema } from '../schema/message'
 import {
   mergeEnrichments,
   loadExistingEnriched,
@@ -8,8 +11,8 @@ import {
   backupEnrichedJson,
   updateMergeStatistics,
 } from '../utils/enrichment-merge'
-import { Message, ExportEnvelope } from '../schema/message'
-import { MessageSchema } from '../schema/message'
+
+import type { Message, ExportEnvelope } from '../schema/message'
 
 // ============================================================================
 // Test Fixtures
@@ -551,10 +554,7 @@ describe('backupEnrichedJson', () => {
 
     await backupEnrichedJson(originalPath)
 
-    const backupContent = await fs.readFile(
-      path.join(tmpDir, 'enriched.json.backup'),
-      'utf-8',
-    )
+    const backupContent = await fs.readFile(path.join(tmpDir, 'enriched.json.backup'), 'utf-8')
     const backupData = JSON.parse(backupContent)
 
     expect(backupData.messages[0].media?.enrichment).toBeDefined()
@@ -641,9 +641,7 @@ describe('enrichment merge - integration', () => {
 
 describe('enrichment merge - edge cases', () => {
   it('handles large enriched.json files (1000+ messages)', async () => {
-    const messages = Array.from({ length: 1000 }, (_, i) =>
-      createTestMessage({ guid: `msg-${i}` }),
-    )
+    const messages = Array.from({ length: 1000 }, (_, i) => createTestMessage({ guid: `msg-${i}` }))
 
     // Create 500 existing messages + 100 new messages
     const existingSubset = messages.slice(0, 500)

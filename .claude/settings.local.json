@@ -1,4 +1,14 @@
 {
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "wallaby",
+    "mcp-server-firecrawl",
+    "sequential-thinking",
+    "filesystem",
+    "context7",
+    "tavily-mcp",
+    "puppeteer"
+  ],
   "permissions": {
     "allow": [
       "Read(//Users/nathanvale/code/capture-bridge/**)",
@@ -14,17 +24,9 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm cli:*)",
       "Bash(pnpm start normalize-link --help)",
-      "Bash(node ./dist/cli.js:*)"
+      "Bash(node ./dist/cli.js:*)",
+      "Bash(jq:*)",
+      "Bash(sponge:*)"
     ]
-  },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "wallaby",
-    "mcp-server-firecrawl",
-    "sequential-thinking",
-    "filesystem",
-    "context7",
-    "tavily-mcp",
-    "puppeteer"
-  ]
+  }
 }

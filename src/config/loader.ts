@@ -5,16 +5,12 @@
  * Loads config from YAML/JSON files with env var substitution and precedence
  */
 
-import { readFile, access } from 'fs/promises'
 import { constants } from 'fs'
+import { readFile, access } from 'fs/promises'
+
 import yaml from 'js-yaml'
-import {
-  ConfigSchema,
-  validateConfig,
-  CONFIG_FILE_PATTERNS,
-  detectConfigFormat,
-  type Config,
-} from './schema.js'
+
+import { validateConfig, detectConfigFormat, type Config } from './schema.js'
 
 /**
  * In-memory cache for loaded configurations
@@ -35,7 +31,7 @@ let configCachePath: string | null = null
  * @returns Path to first existing config file, or null if none found
  */
 export async function discoverConfigFile(
-  baseDir: string = process.cwd()
+  baseDir: string = process.cwd(),
 ): Promise<string | null> {
   const fileNames = [
     'imessage-config.yaml',
@@ -80,7 +76,7 @@ export async function loadConfigFile(filePath: string): Promise<unknown> {
       throw new Error(
         `Failed to parse JSON config file ${filePath}: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       )
     }
   } else if (format === 'yaml') {
@@ -90,7 +86,7 @@ export async function loadConfigFile(filePath: string): Promise<unknown> {
       throw new Error(
         `Failed to parse YAML config file ${filePath}: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       )
     }
   }
@@ -120,7 +116,7 @@ export function substituteEnvVars(obj: unknown): unknown {
       const value = process.env[envVar]
       if (value === undefined) {
         throw new Error(
-          `Environment variable ${envVar} is not set but referenced in config`
+          `Environment variable ${envVar} is not set but referenced in config`,
         )
       }
       return value
@@ -135,7 +131,10 @@ export function substituteEnvVars(obj: unknown): unknown {
   // Handle objects - recursively substitute each value
   if (typeof obj === 'object' && obj !== null) {
     return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [key, substituteEnvVars(value)])
+      Object.entries(obj).map(([key, value]) => [
+        key,
+        substituteEnvVars(value),
+      ]),
     )
   }
 
@@ -157,7 +156,7 @@ export function substituteEnvVars(obj: unknown): unknown {
  */
 export function mergeConfig(
   fileConfig: Partial<Config>,
-  cliOptions: Partial<Config> = {}
+  cliOptions: Partial<Config> = {},
 ): Partial<Config> {
   // Deep merge: CLI options override file config
   // Note: Zod schema will apply defaults for missing fields
@@ -171,6 +170,7 @@ export function mergeConfig(
     merged.gemini = {
       ...fileConfig.gemini,
       ...cliOptions.gemini,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
   }
 
@@ -184,6 +184,7 @@ export function mergeConfig(
     merged.enrichment = {
       ...fileConfig.enrichment,
       ...cliOptions.enrichment,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
   }
 
@@ -191,6 +192,7 @@ export function mergeConfig(
     merged.render = {
       ...fileConfig.render,
       ...cliOptions.render,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
   }
 
@@ -228,11 +230,13 @@ export function mergeConfig(
  * })
  * ```
  */
-export async function loadConfig(options: {
-  configPath?: string
-  cliOptions?: Partial<Config>
-  skipCache?: boolean
-} = {}): Promise<Config> {
+export async function loadConfig(
+  options: {
+    configPath?: string
+    cliOptions?: Partial<Config>
+    skipCache?: boolean
+  } = {},
+): Promise<Config> {
   const { configPath, cliOptions = {}, skipCache = false } = options
 
   // CONFIG-T02-AC05: Return cached config if available
@@ -257,7 +261,7 @@ export async function loadConfig(options: {
       throw new Error(
         `Failed to load config from ${filePath}: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       )
     }
   }
@@ -276,9 +280,7 @@ export async function loadConfig(options: {
     return validated
   } catch (error) {
     throw new Error(
-      `Config validation failed: ${
-        error instanceof Error ? error.message : String(error)
-      }`
+      `Config validation failed: ${error instanceof Error ? error.message : String(error)}`,
     )
   }
 }

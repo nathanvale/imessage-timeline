@@ -19,9 +19,13 @@
  * - logDeltaSummary: Human-readable delta report
  */
 
+import { loadIncrementalState, detectNewMessages } from './incremental-state'
+
 import type { Message } from '#schema/message'
 import type { IncrementalState } from './incremental-state'
-import { loadIncrementalState, detectNewMessages } from './incremental-state'
+
+import { humanInfo } from '#utils/human'
+import { createLogger } from '#utils/logger'
 
 // ============================================================================
 // Types (AC01-AC05)
@@ -73,7 +77,9 @@ export type DeltaResult = {
  * @param stateFilePath - Path to .imessage-state.json
  * @returns IncrementalState if found and valid, null if missing or corrupted
  */
-async function loadPreviousState(stateFilePath: string): Promise<IncrementalState | null> {
+async function loadPreviousState(
+  stateFilePath: string,
+): Promise<IncrementalState | null> {
   return loadIncrementalState(stateFilePath)
 }
 
@@ -110,7 +116,10 @@ export function extractGuidsFromMessages(messages: Message[]): Set<string> {
  * @param previousState - Prior state with enriched GUIDs (null if first run)
  * @returns New GUIDs not in previous state
  */
-function computeDelta(currentGuids: Set<string>, previousState: IncrementalState | null): string[] {
+function computeDelta(
+  currentGuids: Set<string>,
+  previousState: IncrementalState | null,
+): string[] {
   if (!previousState) {
     // First run: all current messages are "new"
     return Array.from(currentGuids)
@@ -136,19 +145,33 @@ function computeDelta(currentGuids: Set<string>, previousState: IncrementalState
  * @param result - DeltaResult to summarize
  */
 export function logDeltaSummary(result: DeltaResult): void {
+  const logger = createLogger('utils:delta-detection')
   const newCount = result.newCount
   const totalCount = result.totalMessages
   const previousCount = result.previousEnrichedCount
 
   // Log delta summary (AC05)
   if (result.isFirstRun) {
-    console.info(`📝 First enrichment run: ${totalCount} messages to process`)
+    // Structured log (machine consumption)
+    logger.info('First enrichment run', { totalMessages: totalCount })
+    // Human-friendly console output retained for tests & CLI UX
+    // Format expected by tests: contains both 'First enrichment run' and '<N> messages'
+    humanInfo(`First enrichment run: ${totalCount} messages`)
   } else {
-    const percentNew = ((newCount / totalCount) * 100).toFixed(1)
-    console.info(
-      `🔄 Delta detected: Found ${newCount} new messages to enrich (${percentNew}% of ${totalCount} total)`,
+    const percentNew = totalCount > 0 ? (newCount / totalCount) * 100 : 0
+    // Structured log
+    logger.info('Delta detected', {
+      newMessages: newCount,
+      percentNew,
+      totalMessages: totalCount,
+      previouslyEnriched: previousCount,
+    })
+    // Human-readable lines expected by tests
+    // Includes phrases: 'Delta detected', '<X> new messages', '<Y.Y%>' and 'Previously enriched: <N>'
+    humanInfo(
+      `Delta detected: ${newCount} new messages (${percentNew.toFixed(1)}%) of ${totalCount} total messages`,
     )
-    console.info(`   Previously enriched: ${previousCount}`)
+    humanInfo(`Previously enriched: ${previousCount}`)
   }
 }
 

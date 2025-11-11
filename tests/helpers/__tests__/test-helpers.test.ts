@@ -6,13 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import {
-  createMockGeminiVision,
-  createMockFirecrawl,
-  createMockProviderSuite,
-  resetAllMocks,
-  setupMockFailures,
-} from '../mock-providers'
+
 import {
   loadFixture,
   createMessageFixture,
@@ -22,6 +16,13 @@ import {
   fixtureExists,
   getFixturePath,
 } from '../fixture-loaders'
+import {
+  createMockGeminiVision,
+  createMockFirecrawl,
+  createMockProviderSuite,
+  resetAllMocks,
+  setupMockFailures,
+} from '../mock-providers'
 import {
   validateMessage,
   validateMessages,

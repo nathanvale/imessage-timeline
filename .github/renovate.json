@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": true,
+  "enabled": true,
+  "enabledManagers": ["npm", "pnpm"],
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":separateMultipleMajorReleases",
+    ":timezone(UTC)",
+    ":preserveSemverRanges"
+  ],
+  "labels": ["deps", "renovate"],
+  "lockFileMaintenance": {
+    "automerge": true,
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "npm": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "addLabels": ["deps-dev"],
+      "automerge": true,
+      "automergeType": "branch",
+      "commitMessagePrefix": "chore(deps-dev): ",
+      "groupName": "devDependencies (minor/patch)",
+      "matchDepTypes": ["devDependencies"],
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "addLabels": ["deps"],
+      "commitMessagePrefix": "chore(deps): ",
+      "groupName": "runtime dependencies",
+      "matchDepTypes": ["dependencies"],
+      "matchManagers": ["npm"]
+    },
+    {
+      "addLabels": ["lint"],
+      "commitMessagePrefix": "chore(lint): ",
+      "groupName": "eslint toolchain",
+      "matchPackagePatterns": ["^eslint$", "^@eslint/", "^typescript-eslint"]
+    },
+    {
+      "addLabels": ["test"],
+      "commitMessagePrefix": "chore(test): ",
+      "groupName": "vitest & coverage",
+      "matchPackagePatterns": ["^vitest$", "^@vitest/"]
+    }
+  ],
+  "platformAutomerge": false,
+  "pnpm": {
+    "enabled": true
+  },
+  "prConcurrentLimit": 5,
+  "prCreation": "not-pending",
+  "rangeStrategy": "bump",
+  "rebaseWhen": "behind-base-branch",
+  "schedule": ["before 6am on monday"]
+}

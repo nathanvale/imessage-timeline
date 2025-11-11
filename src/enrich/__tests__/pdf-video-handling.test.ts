@@ -1,6 +1,9 @@
-import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
 import path from 'path'
+
+import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
+
 import { analyzePdfOrVideo, analyzePdfsOrVideos } from '../pdf-video-handling'
+
 import type { Message, MediaMeta } from '#schema/message'
 
 // Mock Gemini API
@@ -10,9 +13,11 @@ vi.mock('@google/generative-ai', () => {
       this.getGenerativeModel = vi.fn().mockReturnValue({
         generateContent: vi.fn().mockResolvedValue({
           response: {
-            text: vi.fn().mockReturnValue(
-              'This document discusses the implementation of the iMessage pipeline system with focus on PDF handling and video metadata extraction.'
-            ),
+            text: vi
+              .fn()
+              .mockReturnValue(
+                'This document discusses the implementation of the iMessage pipeline system with focus on PDF handling and video metadata extraction.',
+              ),
           },
         }),
       })
@@ -23,11 +28,13 @@ vi.mock('@google/generative-ai', () => {
 
 // Mock fs promises
 vi.mock('fs/promises', async (importOriginal) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await importOriginal<typeof import('fs/promises')>()
   return {
     ...actual,
     access: vi.fn().mockResolvedValue(undefined),
     stat: vi.fn().mockResolvedValue({ size: 1024000 }), // ~1MB file
+    default: actual,
   }
 })
 
@@ -264,7 +271,9 @@ Keep it to 2-3 sentences.`
         total: 8,
       }
 
-      expect(stats.successCount + stats.failureCount + stats.fallbackCount).toBeLessThanOrEqual(stats.total)
+      expect(stats.successCount + stats.failureCount + stats.fallbackCount).toBeLessThanOrEqual(
+        stats.total,
+      )
     })
 
     it('should handle network errors gracefully', async () => {

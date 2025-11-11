@@ -1,0 +1,54 @@
+name: Bun Canary
+
+on:
+  # Keep manual-only initially; can re-enable PR trigger later
+  workflow_dispatch: {}
+
+jobs:
+  bun-canary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node (for pnpm install scripts)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (TypeScript)
+        run: pnpm build
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.x'
+
+      - name: Bun smoke CLI
+        run: bun run ./dist/cli.js --help || bun run dist/cli.js --help
+
+      - name: Bun vitest experimental subset
+        run: |
+          echo 'Running minimal vitest suite under Bun (experimental)'
+          bunx vitest run --reporter=default --include "src/**/delta-detection.test.ts" || echo "Bun test subset failed (non-blocking)"
+
+      - name: Upload canary log artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bun-canary-logs
+          path: .
+          if-no-files-found: ignore

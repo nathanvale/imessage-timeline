@@ -10,10 +10,25 @@
  */
 
 import { createHash } from 'crypto'
-import type { Message } from '#schema/message'
+
+import { renderAllEnrichments } from './embeds-blockquotes.js'
 import { groupMessagesByDateAndTimeOfDay, getDatesSorted } from './grouping.js'
 import { formatReplyThread } from './reply-rendering.js'
-import { renderAllEnrichments } from './embeds-blockquotes.js'
+
+import type { Message } from '#schema/message'
+
+/**
+ * Deterministic local-time formatter (HH:mm:ss, 00-23 hour range)
+ * Uses getHours()/getMinutes()/getSeconds() to avoid 24:00:00 edge produced by some locales.
+ * Keeps prior snapshot expectations (local time basis) while eliminating "24" hour formatting.
+ */
+function formatTimeLocal(iso: string): string {
+  const d = new Date(iso)
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  const ss = String(d.getSeconds()).padStart(2, '0')
+  return `${hh}:${mm}:${ss}`
+}
 
 /**
  * Main render function: Convert messages to markdown files
@@ -71,7 +86,9 @@ function renderDateSection(
   // Afternoon section
   if (timeOfDayGroup.afternoon.length > 0) {
     sections.push('## Afternoon (12:00 - 17:59)')
-    sections.push(renderTimeOfDayMessages(timeOfDayGroup.afternoon, allMessages))
+    sections.push(
+      renderTimeOfDayMessages(timeOfDayGroup.afternoon, allMessages),
+    )
     sections.push('')
   }
 
@@ -88,7 +105,10 @@ function renderDateSection(
 /**
  * Render all messages for a specific time-of-day group
  */
-function renderTimeOfDayMessages(messages: Message[], allMessages: Message[]): string {
+function renderTimeOfDayMessages(
+  messages: Message[],
+  allMessages: Message[],
+): string {
   const parts: string[] = []
 
   for (const message of messages) {
@@ -111,12 +131,7 @@ function renderSingleMessage(message: Message, allMessages: Message[]): string {
   const anchor = `[#${message.guid}](#msg-${message.guid})`
 
   // Message header with timestamp and sender
-  const time = new Date(message.date).toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  })
+  const time = formatTimeLocal(message.date)
 
   const header = `${anchor} **${message.handle || 'Unknown'}** [${time}]`
   parts.push(header)
@@ -205,7 +220,10 @@ export type DeterminismResult = {
   hashes: string[]
 }
 
-export function verifyDeterminism(messages: Message[], runsCount: number = 5): DeterminismResult {
+export function verifyDeterminism(
+  messages: Message[],
+  runsCount: number = 5,
+): DeterminismResult {
   const outputs: Map<string, string>[] = []
   const hashes: string[] = []
 

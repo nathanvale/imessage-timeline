@@ -1,0 +1,83 @@
+name: Channel Release (manual)
+
+on:
+  # Manual only; prevents unintended prerelease management during initial setup
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Channel tag (next, beta, rc)'
+        required: true
+        default: 'next'
+      intent:
+        description: 'Action: enter | version | publish | exit | snapshot'
+        required: true
+        default: 'version'
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  channel-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.20
+          registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - run: pnpm install --frozen-lockfile
+      - name: Code quality (safe fixes)
+        run: pnpm quality-check:ci
+      - name: Build
+        run: pnpm build
+      - name: Configure Git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Enter prerelease mode
+        if: ${{ inputs.intent == 'enter' }}
+        run: |
+          pnpm pre:enter:${{ inputs.channel }}
+          pnpm version:pre
+          git add .
+          git commit -m "chore(prerelease): enter ${{ inputs.channel }} channel"
+          git push --follow-tags
+      - name: Version (prerelease continuation)
+        if: ${{ inputs.intent == 'version' }}
+        run: |
+          pnpm version:pre
+          git add .
+          git commit -m "chore(prerelease): version bump on ${{ inputs.channel }} channel" || echo 'No changes to commit'
+          git push --follow-tags || echo 'Nothing new to push'
+      - name: Publish prerelease
+        if: ${{ inputs.intent == 'publish' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm publish:pre
+      - name: Exit prerelease mode
+        if: ${{ inputs.intent == 'exit' }}
+        run: |
+          pnpm pre:exit
+          pnpm version:pre
+          git add .
+          git commit -m "chore(prerelease): exit ${{ inputs.channel }} channel"
+          git push --follow-tags
+      - name: Canary snapshot publish
+        if: ${{ inputs.intent == 'snapshot' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm release:snapshot:canary

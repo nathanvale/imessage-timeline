@@ -1,7 +1,10 @@
-import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
+
+import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
+
 import { transcribeAudio, analyzeAudio } from '../audio-transcription'
+
 import type { MediaMeta, Message } from '#schema/message'
 
 // Mock Gemini API
@@ -22,7 +25,7 @@ Timestamps:
 00:05 - Speaker 2 responds
 00:10 - Speaker 1 continues
 
-Short Description: Two people have a brief conversation about a topic.`
+Short Description: Two people have a brief conversation about a topic.`,
             ),
           },
         }),
@@ -34,11 +37,13 @@ Short Description: Two people have a brief conversation about a topic.`
 
 // Mock fs promises
 vi.mock('fs/promises', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('fs/promises')>()
+  const actual = await importOriginal()
   return {
     ...actual,
     access: vi.fn().mockResolvedValue(undefined),
     stat: vi.fn().mockResolvedValue({ size: 1024000 }), // ~1MB file
+    // Vitest 4 requires a default export on partial mocks for pure ESM modules.
+    default: actual,
   }
 })
 

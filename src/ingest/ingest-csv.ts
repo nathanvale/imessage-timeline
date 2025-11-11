@@ -1,9 +1,12 @@
 import { readFileSync, existsSync, readdirSync } from 'fs'
-import { parse } from 'csv-parse/sync'
-import type { Message, ExportEnvelope} from '../schema/message.js';
-import { MessageSchema } from '../schema/message.js'
-import * as path from 'path'
 import * as os from 'os'
+import * as path from 'path'
+
+import { parse } from 'csv-parse/sync'
+
+import { MessageSchema } from '../schema/message.js'
+
+import type { Message, ExportEnvelope } from '../schema/message.js'
 
 export type IngestOptions = {
   attachmentRoots: string[]
@@ -17,7 +20,10 @@ export type CSVRow = {
 /**
  * Main entry point: Ingest CSV file and convert to unified Message schema
  */
-export function ingestCSV(csvFilePath: string, options: IngestOptions): Message[] {
+export function ingestCSV(
+  csvFilePath: string,
+  options: IngestOptions,
+): Message[] {
   const csvContent = readFileSync(csvFilePath, 'utf-8')
   const rows = parse(csvContent, { columns: true }) as CSVRow[]
 
@@ -39,7 +45,11 @@ export function ingestCSV(csvFilePath: string, options: IngestOptions): Message[
  *
  * AC01: Parse iMazing CSV rows with correct field mapping per CSV header
  */
-export function parseCSVRow(row: CSVRow, lineNumber: number, options: IngestOptions): Message[] {
+export function parseCSVRow(
+  row: CSVRow,
+  lineNumber: number,
+  options: IngestOptions,
+): Message[] {
   const messages: Message[] = []
 
   // Extract iMazing CSV fields (headers have spaces, not underscores)
@@ -119,7 +129,7 @@ export function parseCSVRow(row: CSVRow, lineNumber: number, options: IngestOpti
       {
         ...options,
         messageDate: date,
-      }
+      },
     )
 
     // Only create media message if path can be resolved to absolute path (schema requirement)
@@ -221,7 +231,7 @@ type AttachmentRecord = {
  */
 export function resolveAttachmentPath(
   attachment: AttachmentRecord | null | undefined,
-  options: IngestOptions & { messageDate?: string }
+  options: IngestOptions & { messageDate?: string },
 ): string | null {
   if (!attachment) return null
 
@@ -281,7 +291,9 @@ export function resolveAttachmentPath(
 /**
  * Infer media kind from MIME type
  */
-export function inferMediaKind(mimeType: string): 'image' | 'audio' | 'video' | 'pdf' | 'unknown' {
+export function inferMediaKind(
+  mimeType: string,
+): 'image' | 'audio' | 'video' | 'pdf' | 'unknown' {
   if (!mimeType) return 'unknown'
 
   if (mimeType.startsWith('image/')) return 'image'
@@ -333,7 +345,10 @@ type ValidationError = {
 /**
  * Validate all messages pass schema validation
  */
-export function validateMessages(messages: Message[]): { valid: boolean; errors: ValidationError[] } {
+export function validateMessages(messages: Message[]): {
+  valid: boolean
+  errors: ValidationError[]
+} {
   const errors: ValidationError[] = []
 
   for (let i = 0; i < messages.length; i++) {

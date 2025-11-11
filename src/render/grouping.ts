@@ -87,7 +87,9 @@ export function sortByTimestamp(messages: Message[]): Message[] {
  * AC01-AC05: Group messages by date and time-of-day
  * Returns nested structure with chronological ordering maintained
  */
-export function groupMessagesByDateAndTimeOfDay(messages: Message[]): GroupedMessages {
+export function groupMessagesByDateAndTimeOfDay(
+  messages: Message[],
+): GroupedMessages {
   const grouped: GroupedMessages = {}
 
   // First pass: create date groups and classify by time-of-day
@@ -149,12 +151,20 @@ export function getAllMessagesForDate(dateGroup: TimeOfDayGroup): Message[] {
  * Check if date group has any messages
  */
 export function hasMessages(dateGroup: TimeOfDayGroup): boolean {
-  return dateGroup.morning.length > 0 || dateGroup.afternoon.length > 0 || dateGroup.evening.length > 0
+  return (
+    dateGroup.morning.length > 0 ||
+    dateGroup.afternoon.length > 0 ||
+    dateGroup.evening.length > 0
+  )
 }
 
 /**
  * Get count of messages in time-of-day
  */
 export function getMessageCount(dateGroup: TimeOfDayGroup): number {
-  return dateGroup.morning.length + dateGroup.afternoon.length + dateGroup.evening.length
+  return (
+    dateGroup.morning.length +
+    dateGroup.afternoon.length +
+    dateGroup.evening.length
+  )
 }

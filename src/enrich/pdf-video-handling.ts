@@ -19,10 +19,14 @@
  * - Pipeline never crashes on enrichment errors
  */
 
-import path from 'path'
 import { access, stat } from 'fs/promises'
+import path from 'path'
+
 import { GoogleGenerativeAI } from '@google/generative-ai'
+
 import type { Message, MediaMeta, MediaEnrichment } from '#schema/message'
+
+import { createLogger } from '#utils/logger'
 
 type PdfVideoConfig = {
   enablePdfVideoAnalysis: boolean
@@ -40,14 +44,7 @@ type FormatStats = {
 /**
  * Logger for structured output
  */
-function log(level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: Record<string, unknown>) {
-  const prefix = `[enrich:pdf-video] [${level.toUpperCase()}]`
-  if (context) {
-    console.log(`${prefix} ${message}`, context)
-  } else {
-    console.log(`${prefix} ${message}`)
-  }
-}
+const _logger = createLogger('enrich:pdf-video')
 
 /**
  * Structured prompt for Gemini PDF summarization
@@ -76,7 +73,15 @@ function getFileExtension(filename: string): string {
  */
 function isSupportedFormat(mediaKind: string, extension: string): boolean {
   const supportedPdf = ['.pdf']
-  const supportedVideo = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.flv', '.m4v']
+  const supportedVideo = [
+    '.mp4',
+    '.mov',
+    '.avi',
+    '.mkv',
+    '.webm',
+    '.flv',
+    '.m4v',
+  ]
 
   if (mediaKind === 'pdf') {
     return supportedPdf.includes(extension)
@@ -93,7 +98,7 @@ function isSupportedFormat(mediaKind: string, extension: string): boolean {
  */
 export async function analyzePdf(
   audioPath: string,
-  config: Partial<PdfVideoConfig>
+  config: Partial<PdfVideoConfig>,
 ): Promise<MediaEnrichment> {
   const apiKey = config.geminiApiKey
   const modelName = config.geminiModel || 'gemini-1.5-pro'
@@ -122,7 +127,9 @@ export async function analyzePdf(
     ])
 
     const responseText = response.response.text()
-    log('debug', `Gemini PDF response received: ${responseText.substring(0, 150)}...`)
+    _logger.debug(
+      `Gemini PDF response received: ${responseText.substring(0, 150)}...`,
+    )
 
     // AC01: Extract summary from response
     const summary = responseText.trim()
@@ -138,10 +145,12 @@ export async function analyzePdf(
       pdfSummary: summary,
     }
 
-    log('info', `PDF analysis complete: ${audioPath}`, { kind: enrichment.kind })
+    _logger.info(`PDF analysis complete: ${audioPath}`, {
+      kind: enrichment.kind,
+    })
     return enrichment
   } catch (error) {
-    log('error', `Gemini API error for PDF ${audioPath}`, { error })
+    _logger.error(`Gemini API error for PDF ${audioPath}`, { error })
     throw error
   }
 }
@@ -149,7 +158,10 @@ export async function analyzePdf(
 /**
  * AC02: Extract video metadata (no transcription - out of scope)
  */
-export async function handleVideo(videoPath: string, _config: Partial<PdfVideoConfig>): Promise<MediaEnrichment> {
+export async function handleVideo(
+  videoPath: string,
+  _config: Partial<PdfVideoConfig>,
+): Promise<MediaEnrichment> {
   try {
     // Extract video metadata from file stats
     const fileStats = await stat(videoPath)
@@ -171,14 +183,14 @@ export async function handleVideo(videoPath: string, _config: Partial<PdfVideoCo
       },
     }
 
-    log('info', `Video metadata extracted: ${videoPath}`, {
+    _logger.info(`Video metadata extracted: ${videoPath}`, {
       size: fileStats.size,
       analyzed: false,
     })
 
     return enrichment
   } catch (error) {
-    log('error', `Error extracting video metadata: ${videoPath}`, { error })
+    _logger.error(`Error extracting video metadata: ${videoPath}`, { error })
     throw error
   }
 }
@@ -189,11 +201,11 @@ export async function handleVideo(videoPath: string, _config: Partial<PdfVideoCo
  */
 export async function analyzePdfOrVideo(
   message: Message,
-  config: Partial<PdfVideoConfig>
+  config: Partial<PdfVideoConfig>,
 ): Promise<Message> {
   // Skip if not enabled
   if (!config.enablePdfVideoAnalysis) {
-    log('debug', `PDF/video analysis disabled in config`)
+    _logger.debug(`PDF/video analysis disabled in config`)
     return message
   }
 
@@ -207,7 +219,7 @@ export async function analyzePdfOrVideo(
 
   // Skip if path is missing
   if (!message.media.path) {
-    log('warn', `Skipping media with missing path`, { filename })
+    _logger.warn(`Skipping media with missing path`, { filename })
     return message
   }
 
@@ -215,7 +227,7 @@ export async function analyzePdfOrVideo(
   try {
     await access(message.media.path)
   } catch {
-    log('warn', `Media file not found at path`, { path: message.media.path })
+    _logger.warn(`Media file not found at path`, { path: message.media.path })
     return message
   }
 
@@ -231,7 +243,7 @@ export async function analyzePdfOrVideo(
         enrichment: [...(message.media.enrichment || []), enrichment],
       }
 
-      log('info', `PDF enriched`, { filename, guid: message.guid })
+      _logger.info(`PDF enriched`, { filename, guid: message.guid })
 
       return {
         ...message,
@@ -239,7 +251,7 @@ export async function analyzePdfOrVideo(
       }
     } catch (error) {
       // AC03: Fallback to filename when Gemini fails
-      log('warn', `PDF summarization failed, using filename as fallback`, {
+      _logger.warn(`PDF summarization failed, using filename as fallback`, {
         filename,
         error: error instanceof Error ? error.message : String(error),
       })
@@ -276,14 +288,14 @@ export async function analyzePdfOrVideo(
         enrichment: [...(message.media.enrichment || []), enrichment],
       }
 
-      log('info', `Video metadata extracted`, { filename, guid: message.guid })
+      _logger.info(`Video metadata extracted`, { filename, guid: message.guid })
 
       return {
         ...message,
         media: updatedMedia,
       }
     } catch (error) {
-      log('error', `Error handling video`, {
+      _logger.error(`Error handling video`, {
         filename,
         guid: message.guid,
         error: error instanceof Error ? error.message : String(error),
@@ -298,7 +310,7 @@ export async function analyzePdfOrVideo(
   const supported = isSupportedFormat(mediaKind || '', extension)
 
   if (!supported && mediaKind) {
-    log('warn', `Unsupported format`, {
+    _logger.warn(`Unsupported format`, {
       filename,
       mediaKind,
       extension,
@@ -314,7 +326,7 @@ export async function analyzePdfOrVideo(
  */
 export async function analyzePdfsOrVideos(
   messages: Message[],
-  config: Partial<PdfVideoConfig>
+  config: Partial<PdfVideoConfig>,
 ): Promise<Message[]> {
   const results: Message[] = []
   let successCount = 0
@@ -330,7 +342,11 @@ export async function analyzePdfsOrVideos(
       const analyzed = await analyzePdfOrVideo(message, config)
 
       // Track if enrichment was added
-      if (analyzed.media?.enrichment && analyzed.media.enrichment.length > (message.media?.enrichment?.length || 0)) {
+      if (
+        analyzed.media?.enrichment &&
+        analyzed.media.enrichment.length >
+          (message.media?.enrichment?.length || 0)
+      ) {
         successCount++
 
         // Track format
@@ -349,7 +365,7 @@ export async function analyzePdfsOrVideos(
       // AC04: Track unsupported formats
       formatStats.unsupported[ext] = (formatStats.unsupported[ext] || 0) + 1
 
-      log('error', `Failed to analyze message`, {
+      _logger.error(`Failed to analyze message`, {
         guid: message.guid,
         filename,
         error: err instanceof Error ? err.message : String(err),
@@ -366,12 +382,15 @@ export async function analyzePdfsOrVideos(
     .join(', ')
 
   if (Object.keys(formatStats.unsupported).length > 0) {
-    log('info', `Unsupported formats: ${unsupportedSummary}`, {
-      totalUnsupported: Object.values(formatStats.unsupported).reduce((a, b) => a + b, 0),
+    _logger.info(`Unsupported formats: ${unsupportedSummary}`, {
+      totalUnsupported: Object.values(formatStats.unsupported).reduce(
+        (a, b) => a + b,
+        0,
+      ),
     })
   }
 
-  log('info', `Batch PDF/video analysis complete`, {
+  _logger.info(`Batch PDF/video analysis complete`, {
     successCount,
     skipCount,
     errorCount,

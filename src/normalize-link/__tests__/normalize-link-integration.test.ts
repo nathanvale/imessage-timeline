@@ -3,8 +3,10 @@
 // Integration tests for split, linking, dedup, dates, and paths with >70% coverage
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import type { Message } from '../../schema/message'
+
 import { validateNormalizedMessages } from '../../normalize/validate-normalized'
+
+import type { Message } from '../../schema/message'
 
 /**
  * AC01: Unit tests for DB split logic with various attachment counts
@@ -582,7 +584,7 @@ describe('Integration: Complete Pipeline', () => {
     const result = validateNormalizedMessages(csvMessages)
 
     expect(result).toHaveLength(2)
-    expect(result.every(m => m.messageKind && m.guid)).toBe(true)
+    expect(result.every((m) => m.messageKind && m.guid)).toBe(true)
   })
 
   it('should validate entire message set from DB source with part GUIDs', () => {
@@ -674,8 +676,8 @@ describe('Integration: Complete Pipeline', () => {
     const result = validateNormalizedMessages(comprehensiveSet)
 
     expect(result).toHaveLength(4)
-    expect(result.filter(m => m.messageKind === 'text')).toHaveLength(2)
-    expect(result.filter(m => m.messageKind === 'media')).toHaveLength(1)
-    expect(result.filter(m => m.messageKind === 'tapback')).toHaveLength(1)
+    expect(result.filter((m) => m.messageKind === 'text')).toHaveLength(2)
+    expect(result.filter((m) => m.messageKind === 'media')).toHaveLength(1)
+    expect(result.filter((m) => m.messageKind === 'tapback')).toHaveLength(1)
   })
 })

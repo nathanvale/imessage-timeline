@@ -3,6 +3,8 @@
 // Tests written FIRST to drive implementation
 
 import { describe, it, expect } from 'vitest'
+
+import { allValidMessages } from '../../../__tests__/fixtures/valid-messages'
 import {
   validateNormalizedMessages,
   formatValidationErrors,
@@ -10,7 +12,6 @@ import {
   collectValidationErrors,
   getSnakeCaseFields,
 } from '../validate-normalized'
-import { allValidMessages } from '../../../__tests__/fixtures/valid-messages'
 
 describe('NORMALIZE--T07: Zod Validation Layer', () => {
   describe('AC01: Run Zod schema validation on all messages', () => {
@@ -205,8 +206,20 @@ describe('NORMALIZE--T07: Zod Validation Layer', () => {
 
     it('should not fail-fast on first error', () => {
       const messages = [
-        { guid: 'valid-1', messageKind: 'text', text: 'OK', isFromMe: true, date: '2023-10-17T06:52:57.000Z' },
-        { guid: 'invalid-1', messageKind: 'text', text: 'Bad', isFromMe: 'not-boolean' as any, date: '2023-10-17T06:52:57.000Z' },
+        {
+          guid: 'valid-1',
+          messageKind: 'text',
+          text: 'OK',
+          isFromMe: true,
+          date: '2023-10-17T06:52:57.000Z',
+        },
+        {
+          guid: 'invalid-1',
+          messageKind: 'text',
+          text: 'Bad',
+          isFromMe: 'not-boolean' as any,
+          date: '2023-10-17T06:52:57.000Z',
+        },
         { guid: 'invalid-2', messageKind: 'text', text: 'Bad', isFromMe: true, date: 'not-a-date' },
       ]
 
@@ -335,8 +348,20 @@ describe('NORMALIZE--T07: Zod Validation Layer', () => {
 
     it('should provide helpful error context for debugging', () => {
       const mixedValid = [
-        { guid: 'valid-1', messageKind: 'text', text: 'OK', isFromMe: true, date: '2023-10-17T06:52:57.000Z' },
-        { guid: 'invalid-1', messageKind: 'text', text: 'Bad', is_from_me: true as any, date: '2023-10-17T06:52:57.000Z' },
+        {
+          guid: 'valid-1',
+          messageKind: 'text',
+          text: 'OK',
+          isFromMe: true,
+          date: '2023-10-17T06:52:57.000Z',
+        },
+        {
+          guid: 'invalid-1',
+          messageKind: 'text',
+          text: 'Bad',
+          is_from_me: true as any,
+          date: '2023-10-17T06:52:57.000Z',
+        },
       ]
 
       try {
@@ -350,7 +375,13 @@ describe('NORMALIZE--T07: Zod Validation Layer', () => {
 
     it('should output to messages.normalized.json after validation', () => {
       const validated = [
-        { guid: 'test', messageKind: 'text', text: 'OK', isFromMe: true, date: '2023-10-17T06:52:57.000Z' },
+        {
+          guid: 'test',
+          messageKind: 'text',
+          text: 'OK',
+          isFromMe: true,
+          date: '2023-10-17T06:52:57.000Z',
+        },
       ]
 
       const result = validateNormalizedMessages(validated)
@@ -372,8 +403,20 @@ describe('NORMALIZE--T07: Zod Validation Layer', () => {
 
     it('should provide error for duplicate GUIDs if validation applies', () => {
       const messages = [
-        { guid: 'dup-1', messageKind: 'text', text: 'A', isFromMe: true, date: '2023-10-17T06:52:57.000Z' },
-        { guid: 'dup-1', messageKind: 'text', text: 'B', isFromMe: true, date: '2023-10-17T06:52:58.000Z' },
+        {
+          guid: 'dup-1',
+          messageKind: 'text',
+          text: 'A',
+          isFromMe: true,
+          date: '2023-10-17T06:52:57.000Z',
+        },
+        {
+          guid: 'dup-1',
+          messageKind: 'text',
+          text: 'B',
+          isFromMe: true,
+          date: '2023-10-17T06:52:58.000Z',
+        },
       ]
 
       // This may or may not be validated depending on schema

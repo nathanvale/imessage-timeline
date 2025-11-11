@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import type { Message } from '#lib/schema/message'
+
 import {
   dedupAndMerge,
   findExactMatch,
@@ -10,6 +10,8 @@ import {
   type MergeStats,
   type ContentMatch,
 } from '../dedup-merge'
+
+import type { Message } from '#lib/schema/message'
 
 /**
  * Test suite for CSV/DB deduplication and merge (NORMALIZE--T04)
@@ -165,14 +167,39 @@ describe('dedupAndMerge', () => {
 
     it('should match multiple exact GUID pairs', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
-        createMessage({ guid: 'csv:3:0', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:2:0',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
+        createMessage({
+          guid: 'csv:3:0',
+          messageKind: 'text',
+          text: 'C',
+          date: '2025-10-17T10:00:10.000Z',
+        }),
       ]
 
       dbMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:3:0', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:3:0',
+          messageKind: 'text',
+          text: 'C',
+          date: '2025-10-17T10:00:10.000Z',
+        }),
       ]
 
       const result = dedupAndMerge(csvMessages, dbMessages)
@@ -472,12 +499,27 @@ describe('dedupAndMerge', () => {
   describe('AC04 — Data loss verification with count invariants', () => {
     it('should verify no data loss (output >= input)', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:2:0',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
       ]
 
       dbMessages = [
-        createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' }),
+        createMessage({
+          guid: 'DB:msg-001',
+          messageKind: 'text',
+          text: 'C',
+          date: '2025-10-17T10:00:10.000Z',
+        }),
       ]
 
       const result = dedupAndMerge(csvMessages, dbMessages)
@@ -489,18 +531,40 @@ describe('dedupAndMerge', () => {
       expect(result.stats.outputCount).toBe(3)
 
       // Verify invariant
-      expect(result.stats.outputCount).toBeGreaterThanOrEqual(Math.max(result.stats.csvCount, result.stats.dbCount))
+      expect(result.stats.outputCount).toBeGreaterThanOrEqual(
+        Math.max(result.stats.csvCount, result.stats.dbCount),
+      )
     })
 
     it('should count exact matches in dedup statistics', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:2:0',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
       ]
 
       dbMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }), // Match
-        createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }), // Match
+        createMessage({
+          guid: 'DB:msg-001',
+          messageKind: 'text',
+          text: 'C',
+          date: '2025-10-17T10:00:10.000Z',
+        }),
       ]
 
       const result = dedupAndMerge(csvMessages, dbMessages)
@@ -513,11 +577,21 @@ describe('dedupAndMerge', () => {
 
     it('should count content matches in statistics', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'Hello', date: '2025-10-17T10:00:00.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'Hello',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
       ]
 
       dbMessages = [
-        createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'Hello', date: '2025-10-17T10:00:00.000Z' }), // Content match
+        createMessage({
+          guid: 'DB:msg-001',
+          messageKind: 'text',
+          text: 'Hello',
+          date: '2025-10-17T10:00:00.000Z',
+        }), // Content match
       ]
 
       const result = dedupAndMerge(csvMessages, dbMessages)
@@ -527,9 +601,24 @@ describe('dedupAndMerge', () => {
 
     it('should fail if data loss detected', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
-        createMessage({ guid: 'csv:3:0', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:2:0',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
+        createMessage({
+          guid: 'csv:3:0',
+          messageKind: 'text',
+          text: 'C',
+          date: '2025-10-17T10:00:10.000Z',
+        }),
       ]
 
       dbMessages = []
@@ -543,13 +632,33 @@ describe('dedupAndMerge', () => {
 
     it('should report detailed merge statistics', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:2:0',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
       ]
 
       dbMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'DB:msg-001',
+          messageKind: 'text',
+          text: 'C',
+          date: '2025-10-17T10:00:10.000Z',
+        }),
       ]
 
       const result = dedupAndMerge(csvMessages, dbMessages)
@@ -568,12 +677,27 @@ describe('dedupAndMerge', () => {
   describe('AC05 — Deterministic GUID assignment', () => {
     it('should produce identical output for same input', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:2:0',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
       ]
 
       dbMessages = [
-        createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' }),
+        createMessage({
+          guid: 'DB:msg-001',
+          messageKind: 'text',
+          text: 'C',
+          date: '2025-10-17T10:00:10.000Z',
+        }),
       ]
 
       const result1 = dedupAndMerge([...csvMessages], [...dbMessages])
@@ -588,11 +712,21 @@ describe('dedupAndMerge', () => {
 
     it('should maintain same GUIDs across multiple runs', () => {
       const origCsvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'Message', date: '2025-10-17T10:00:00.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'Message',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
       ]
 
       const origDbMessages = [
-        createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'Message', date: '2025-10-17T10:00:00.000Z' }),
+        createMessage({
+          guid: 'DB:msg-001',
+          messageKind: 'text',
+          text: 'Message',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
       ]
 
       const result1 = dedupAndMerge([...origCsvMessages], [...origDbMessages])
@@ -605,9 +739,24 @@ describe('dedupAndMerge', () => {
     })
 
     it('should produce same output regardless of input sort order', () => {
-      const csv1 = createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' })
-      const csv2 = createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' })
-      const db1 = createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'C', date: '2025-10-17T10:00:10.000Z' })
+      const csv1 = createMessage({
+        guid: 'csv:1:0',
+        messageKind: 'text',
+        text: 'A',
+        date: '2025-10-17T10:00:00.000Z',
+      })
+      const csv2 = createMessage({
+        guid: 'csv:2:0',
+        messageKind: 'text',
+        text: 'B',
+        date: '2025-10-17T10:00:05.000Z',
+      })
+      const db1 = createMessage({
+        guid: 'DB:msg-001',
+        messageKind: 'text',
+        text: 'C',
+        date: '2025-10-17T10:00:10.000Z',
+      })
 
       // First order
       const result1 = dedupAndMerge([csv1, csv2], [db1])
@@ -619,8 +768,8 @@ describe('dedupAndMerge', () => {
       expect(result1.messages).toHaveLength(result2.messages.length)
 
       // Sort by GUID for comparison
-      const sorted1 = result1.messages.map(m => m.guid).sort()
-      const sorted2 = result2.messages.map(m => m.guid).sort()
+      const sorted1 = result1.messages.map((m) => m.guid).sort()
+      const sorted2 = result2.messages.map((m) => m.guid).sort()
       expect(sorted1).toEqual(sorted2)
     })
 
@@ -670,8 +819,18 @@ describe('dedupAndMerge', () => {
 
     it('should handle CSV-only messages', () => {
       csvMessages = [
-        createMessage({ guid: 'csv:1:0', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'csv:2:0', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
+        createMessage({
+          guid: 'csv:1:0',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'csv:2:0',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
       ]
 
       dbMessages = []
@@ -687,8 +846,18 @@ describe('dedupAndMerge', () => {
       csvMessages = []
 
       dbMessages = [
-        createMessage({ guid: 'DB:msg-001', messageKind: 'text', text: 'A', date: '2025-10-17T10:00:00.000Z' }),
-        createMessage({ guid: 'DB:msg-002', messageKind: 'text', text: 'B', date: '2025-10-17T10:00:05.000Z' }),
+        createMessage({
+          guid: 'DB:msg-001',
+          messageKind: 'text',
+          text: 'A',
+          date: '2025-10-17T10:00:00.000Z',
+        }),
+        createMessage({
+          guid: 'DB:msg-002',
+          messageKind: 'text',
+          text: 'B',
+          date: '2025-10-17T10:00:05.000Z',
+        }),
       ]
 
       const result = dedupAndMerge(csvMessages, dbMessages)
@@ -724,7 +893,7 @@ describe('dedupAndMerge', () => {
           messageKind: 'text',
           text: `Message ${i}`,
           date: new Date(2025, 9, 17, 10, i % 60).toISOString(),
-        })
+        }),
       )
 
       const largeDB = Array.from({ length: 100 }, (_, i) =>
@@ -733,7 +902,7 @@ describe('dedupAndMerge', () => {
           messageKind: 'text',
           text: `DB Message ${i}`,
           date: new Date(2025, 9, 17, 11, i % 60).toISOString(),
-        })
+        }),
       )
 
       const result1 = dedupAndMerge([...largeCSV], [...largeDB])

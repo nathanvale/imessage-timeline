@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import type { Message, MediaEnrichment } from '#schema/message'
+
 import {
   renderImageEmbed,
   renderPreviewImageWithLink,
@@ -26,6 +26,8 @@ import {
   getPdfSummaries,
   renderAllEnrichments,
 } from '../embeds-blockquotes'
+
+import type { Message, MediaEnrichment } from '#schema/message'
 
 describe('RENDER--T03: Embeds and Blockquotes', () => {
   // ============================================================================
@@ -67,26 +69,20 @@ describe('RENDER--T03: Embeds and Blockquotes', () => {
     it('renders preview image with link to original for HEIC', () => {
       const result = renderPreviewImageWithLink(
         '/path/to/image.heic.jpg', // preview path
-        '/path/to/image.heic' // original path
+        '/path/to/image.heic', // original path
       )
       expect(result).toContain('![[/path/to/image.heic.jpg]]')
       expect(result).toContain('[Original: image.heic](/path/to/image.heic)')
     })
 
     it('renders preview image with link to original for TIFF', () => {
-      const result = renderPreviewImageWithLink(
-        '/path/to/scan.tiff.jpg',
-        '/path/to/scan.tiff'
-      )
+      const result = renderPreviewImageWithLink('/path/to/scan.tiff.jpg', '/path/to/scan.tiff')
       expect(result).toContain('![[/path/to/scan.tiff.jpg]]')
       expect(result).toContain('[Original: scan.tiff](/path/to/scan.tiff)')
     })
 
     it('formats as markdown with proper line breaks', () => {
-      const result = renderPreviewImageWithLink(
-        '/preview/img.jpg',
-        '/original/img.heic'
-      )
+      const result = renderPreviewImageWithLink('/preview/img.jpg', '/original/img.heic')
       const lines = result.split('\n')
       expect(lines[0]).toBe('![[/preview/img.jpg]]')
       expect(lines[1]).toContain('[Original:')
@@ -95,16 +91,13 @@ describe('RENDER--T03: Embeds and Blockquotes', () => {
     it('extracts filename from original path for link text', () => {
       const result = renderPreviewImageWithLink(
         '/cache/preview.jpg',
-        '/attachments/photo-2025-01-15-12-34-56.heic'
+        '/attachments/photo-2025-01-15-12-34-56.heic',
       )
       expect(result).toContain('[Original: photo-2025-01-15-12-34-56.heic]')
     })
 
     it('handles paths without directory separator', () => {
-      const result = renderPreviewImageWithLink(
-        'preview.jpg',
-        'original.heic'
-      )
+      const result = renderPreviewImageWithLink('preview.jpg', 'original.heic')
       expect(result).toContain('![[preview.jpg]]')
       expect(result).toContain('[Original: original.heic]')
     })
@@ -160,9 +153,7 @@ describe('RENDER--T03: Embeds and Blockquotes', () => {
       const enrichment: MediaEnrichment = {
         kind: 'transcription',
         transcription: '[00:00:05] Hello world',
-        timestamps: [
-          { time: '00:00:05', speaker: 'Speaker 1', content: 'Hello world' },
-        ],
+        timestamps: [{ time: '00:00:05', speaker: 'Speaker 1', content: 'Hello world' }],
         createdAt: '2025-01-15T10:00:00Z',
         provider: 'gemini',
         version: '1.0',
@@ -303,7 +294,8 @@ describe('RENDER--T03: Embeds and Blockquotes', () => {
     it('formats multiline PDF summary with blockquote on each line', () => {
       const enrichment: MediaEnrichment = {
         kind: 'pdf_summary',
-        pdfSummary: 'Chapter 1: Introduction\nDiscusses background.\n\nChapter 2: Methods\nExplains approach.',
+        pdfSummary:
+          'Chapter 1: Introduction\nDiscusses background.\n\nChapter 2: Methods\nExplains approach.',
         createdAt: '2025-01-15T10:00:00Z',
         provider: 'gemini',
         version: '1.0',

@@ -4,17 +4,20 @@
  * Tests CONFIG--T03: Add Config Generation Command
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { readFile, unlink, access } from 'fs/promises'
 import { constants } from 'fs'
+import { readFile, unlink, access } from 'fs/promises'
+
 import yaml from 'js-yaml'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
 import {
   generateConfigContent,
   generateConfigFile,
   configFileExists,
   getDefaultConfigPath,
-  validateGeneratedConfig
+  validateGeneratedConfig,
 } from '../generator.js'
+
 import type { ConfigFormat } from '../schema.js'
 
 describe('Config Generator (CONFIG--T03)', () => {
@@ -76,8 +79,8 @@ describe('Config Generator (CONFIG--T03)', () => {
         version: '1.0',
         gemini: expect.objectContaining({
           apiKey: '${GEMINI_API_KEY}',
-          model: 'gemini-1.5-pro'
-        })
+          model: 'gemini-1.5-pro',
+        }),
       })
     })
 
@@ -150,7 +153,7 @@ describe('Config Generator (CONFIG--T03)', () => {
     it('creates YAML config file successfully', async () => {
       const result = await generateConfigFile({
         filePath: testYamlPath,
-        format: 'yaml'
+        format: 'yaml',
       })
 
       expect(result.success).toBe(true)
@@ -169,7 +172,7 @@ describe('Config Generator (CONFIG--T03)', () => {
     it('creates JSON config file successfully', async () => {
       const result = await generateConfigFile({
         filePath: testJsonPath,
-        format: 'json'
+        format: 'json',
       })
 
       expect(result.success).toBe(true)
@@ -201,7 +204,7 @@ describe('Config Generator (CONFIG--T03)', () => {
       // Create test file first
       await generateConfigFile({
         filePath: testYamlPath,
-        format: 'yaml'
+        format: 'yaml',
       })
 
       const exists = await configFileExists(testYamlPath)
@@ -212,14 +215,14 @@ describe('Config Generator (CONFIG--T03)', () => {
       // Create file first
       await generateConfigFile({
         filePath: testYamlPath,
-        format: 'yaml'
+        format: 'yaml',
       })
 
       // Try to create again without force
       const result = await generateConfigFile({
         filePath: testYamlPath,
         format: 'yaml',
-        force: false
+        force: false,
       })
 
       expect(result.success).toBe(false)
@@ -231,14 +234,14 @@ describe('Config Generator (CONFIG--T03)', () => {
       // Create file first
       await generateConfigFile({
         filePath: testYamlPath,
-        format: 'yaml'
+        format: 'yaml',
       })
 
       // Overwrite with force
       const result = await generateConfigFile({
         filePath: testYamlPath,
         format: 'yaml',
-        force: true
+        force: true,
       })
 
       expect(result.success).toBe(true)
@@ -355,7 +358,7 @@ describe('Config Generator (CONFIG--T03)', () => {
       // Generate file
       const generateResult = await generateConfigFile({
         filePath: testYamlPath,
-        format: 'yaml'
+        format: 'yaml',
       })
       expect(generateResult.success).toBe(true)
 
@@ -372,7 +375,7 @@ describe('Config Generator (CONFIG--T03)', () => {
       // Generate file
       const generateResult = await generateConfigFile({
         filePath: testJsonPath,
-        format: 'json'
+        format: 'json',
       })
       expect(generateResult.success).toBe(true)
 
@@ -392,7 +395,7 @@ describe('Config Generator (CONFIG--T03)', () => {
       // Try to overwrite without force
       const result = await generateConfigFile({
         filePath: testYamlPath,
-        format: 'yaml'
+        format: 'yaml',
       })
 
       expect(result.success).toBe(false)
@@ -406,7 +409,7 @@ describe('Config Generator (CONFIG--T03)', () => {
       const result = await generateConfigFile({
         filePath: testYamlPath,
         format: 'yaml',
-        force: true
+        force: true,
       })
 
       expect(result.success).toBe(true)

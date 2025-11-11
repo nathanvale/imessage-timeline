@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import { MessageSchema } from '../src/schema/message'
+
 import type { Message } from '../src/schema/message'
 
 console.log('✅ All schemas loaded successfully!')
@@ -69,10 +70,14 @@ const invalidMessage = {
 
 try {
   MessageSchema.parse(invalidMessage)
-  console.error('\n❌ Should have failed validation for media message without media payload!')
+  console.error(
+    '\n❌ Should have failed validation for media message without media payload!',
+  )
   process.exit(1)
 } catch {
-  console.log('\n✅ Correctly rejected invalid media message (no media payload)')
+  console.log(
+    '\n✅ Correctly rejected invalid media message (no media payload)',
+  )
 }
 
 // Test date validation - should fail without Z suffix

@@ -1,5 +1,7 @@
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
+
 import { enrichLinkContext, enrichLinksContext } from '../link-enrichment'
+
 import type { Message } from '#schema/message'
 
 // Mock Firecrawl

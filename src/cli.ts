@@ -6,12 +6,22 @@
  * Implements CLI--T01: Setup Commander.js Structure
  */
 
-import { Command } from 'commander'
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import type { Message } from './schema/message.js'
+
+import { Command, type CommanderError } from 'commander'
+
 import type { DBMessage } from './ingest/ingest-db.js'
+import type { Message } from './schema/message.js'
+
+import {
+  humanInfo,
+  humanWarn,
+  humanError,
+  setHumanLoggingEnabled,
+} from '#utils/human'
+import { createLogger, setCorrelationId, setLogLevel } from '#utils/logger'
 
 // Get package.json for version
 const __filename = fileURLToPath(import.meta.url)
@@ -24,6 +34,78 @@ const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
 // ============================================================================
 
 const program = new Command()
+const cliLogger = createLogger('cli')
+
+function applyLogLevel(verbose: boolean, quiet: boolean): void {
+  const level = quiet ? 'error' : verbose ? 'debug' : 'info'
+  setLogLevel(level)
+}
+
+// Helper to emit structured CLI events alongside human output when desired
+type CLILogMeta = {
+  command: string
+  phase: 'start' | 'progress' | 'summary' | 'warning' | 'error'
+  message?: string
+  options?: Record<string, unknown>
+  metrics?: Record<string, unknown>
+  error?: { type?: string; message: string; stack?: string }
+  context?: Record<string, unknown>
+  exitCode?: number
+}
+
+// Exported for potential test usage
+function logEvent(event: string, meta: CLILogMeta): void {
+  cliLogger.info(event, meta)
+}
+
+// CLI option types
+type RenderMarkdownOptions = {
+  input: string
+  output?: string
+  startDate?: string
+  endDate?: string
+  groupByTime?: boolean
+  nestedReplies?: boolean
+  maxNestingDepth?: string
+}
+
+type ValidateOptions = { input: string; quiet?: boolean }
+type StatsOptions = { input: string; verbose?: boolean }
+type CleanOptions = { checkpointDir: string; force?: boolean; all?: boolean }
+type DoctorOptions = { verbose?: boolean }
+type InitOptions = { format: 'json' | 'yaml'; force: boolean; output?: string }
+type IngestCSVOptions = {
+  input: string
+  output: string
+  attachments?: Array<string>
+}
+type IngestDBOptions = {
+  input: string
+  output: string
+  attachments?: Array<string>
+  contact?: string
+}
+type NormalizeLinkOptions = {
+  input: Array<string> | string
+  output: string
+  mergeMode: string
+}
+type EnrichAIOptions = {
+  input: string
+  output: string
+  checkpointDir: string
+  resume?: boolean
+  incremental?: boolean
+  stateFile?: string
+  resetState?: boolean
+  forceRefresh?: boolean
+  rateLimitMs?: string
+  maxRetries?: string
+  checkpointInterval?: string
+  enableVision?: boolean
+  enableAudio?: boolean
+  enableLinks?: boolean
+}
 
 program
   .name('imessage-timeline')
@@ -40,21 +122,39 @@ program
   .option('-v, --verbose', 'enable verbose logging', false)
   .option('-q, --quiet', 'suppress non-error output', false)
   .option('-c, --config <path>', 'path to config file', 'imessage-config.json')
+  .option(
+    '--json',
+    'emit structured JSON log events only (machine-readable)',
+    false,
+  )
+
+// Toggle human logging before each command action
+program.hook('preAction', () => {
+  const opts = program.opts<{ json?: boolean }>()
+  const envJson = String(process.env.IMESSAGE_JSON || '').toLowerCase()
+  const envJsonOnly = ['1', 'true', 'yes', 'y', 'json', 'json-only'].includes(
+    envJson,
+  )
+  const jsonOnly = Boolean(opts.json) || envJsonOnly
+  setHumanLoggingEnabled(!jsonOnly)
+})
 
 // ============================================================================
 // CLI--T01-AC05: Top-level error handler with user-friendly messages
 // ============================================================================
 
 program.configureOutput({
-  outputError: (str, write) => {
-    // Format error messages for better readability
-    const errorMsg = str.replace(/^error: /, '❌ Error: ').replace(/^Error: /, '❌ Error: ')
+  outputError: (str: string, write: (msg: string) => void) => {
+    const errorMsg = str
+      .replace(/^error: /, '❌ Error: ')
+      .replace(/^Error: /, '❌ Error: ')
     write(errorMsg)
+    cliLogger.error('Commander output error', { raw: str })
   },
 })
 
 // Custom error handler for better error messages
-program.exitOverride((err) => {
+program.exitOverride((err: CommanderError) => {
   // Allow help and version to exit cleanly
   if (err.code === 'commander.help') {
     process.exit(0)
@@ -65,20 +165,26 @@ program.exitOverride((err) => {
 
   // Handle missing required options
   if (err.code === 'commander.missingArgument') {
-    console.error(`❌ Error: ${err.message}`)
-    console.error(`\nRun 'imessage-timeline ${program.args[0] || ''} --help' for usage information`)
+    humanError(`❌ Error: ${err.message}`)
+    humanError(
+      `\nRun 'imessage-timeline ${program.args[0] || ''} --help' for usage information`,
+    )
     process.exit(1)
   }
 
   // Handle unknown commands
   if (err.code === 'commander.unknownCommand') {
-    console.error(`❌ Error: ${err.message}`)
-    console.error(`\nRun 'imessage-timeline --help' to see available commands`)
+    humanError(`❌ Error: ${err.message}`)
+    humanError(`\nRun 'imessage-timeline --help' to see available commands`)
     process.exit(1)
   }
 
   // Generic error handler
-  console.error(`❌ Error: ${err.message}`)
+  humanError(`❌ Error: ${err.message}`)
+  cliLogger.error('CLI exit override error', {
+    code: err.code,
+    message: err.message,
+  })
   process.exit(err.exitCode || 1)
 })
 
@@ -94,20 +200,31 @@ program
   .command('ingest-csv')
   .description('Import messages from iMazing CSV export')
   .requiredOption('-i, --input <path>', 'path to CSV file')
-  .option('-o, --output <path>', 'output JSON file path', './messages.csv.ingested.json')
+  .option(
+    '-o, --output <path>',
+    'output JSON file path',
+    './messages.csv.ingested.json',
+  )
   .option('-a, --attachments <dir...>', 'attachment root directories')
-  .action(async (options) => {
+  .action(async (options: IngestCSVOptions) => {
     const { input, output, attachments } = options
     const verbose = program.opts().verbose
+    applyLogLevel(verbose, program.opts().quiet)
+    setCorrelationId(`ingest-csv:${Date.now().toString(36)}`)
+    logEvent('ingest-start', {
+      command: 'ingest-csv',
+      phase: 'start',
+      options: { input, output, attachmentsCount: attachments?.length },
+    })
 
     try {
       // CLI-T02-AC04: Input file validation with clear error messages
       const fs = await import('fs')
       if (!fs.existsSync(input)) {
-        console.error(`❌ Input CSV file not found: ${input}`)
-        console.error('\nPlease check:')
-        console.error('  • File path is correct')
-        console.error('  • File exists and is readable')
+        humanError(`❌ Input CSV file not found: ${input}`)
+        humanError('\nPlease check:')
+        humanError('  • File path is correct')
+        humanError('  • File exists and is readable')
         process.exit(1)
       }
 
@@ -116,11 +233,11 @@ program
       if (attachments && attachments.length > 0) {
         for (const dir of attachments) {
           if (!fs.existsSync(dir)) {
-            console.error(`❌ Attachment directory not found: ${dir}`)
+            humanError(`❌ Attachment directory not found: ${dir}`)
             process.exit(1)
           }
           if (!fs.statSync(dir).isDirectory()) {
-            console.error(`❌ Not a directory: ${dir}`)
+            humanError(`❌ Not a directory: ${dir}`)
             process.exit(1)
           }
           attachmentRoots.push(dir)
@@ -129,37 +246,42 @@ program
         // Default: ~/Library/Messages/Attachments
         const os = await import('os')
         const path = await import('path')
-        const defaultRoot = path.join(os.homedir(), 'Library', 'Messages', 'Attachments')
+        const defaultRoot = path.join(
+          os.homedir(),
+          'Library',
+          'Messages',
+          'Attachments',
+        )
         if (fs.existsSync(defaultRoot)) {
           attachmentRoots.push(defaultRoot)
           if (verbose) {
-            console.info(`Using default attachment root: ${defaultRoot}`)
+            cliLogger.info('Using default attachment root', { defaultRoot })
           }
         }
       }
 
       // CLI-T02-AC01: ingest-csv command with all options from usage guide
-      const { ingestCSV, createExportEnvelope, validateMessages } = await import(
-        './ingest/ingest-csv.js'
-      )
+      const { ingestCSV, createExportEnvelope, validateMessages } =
+        await import('./ingest/ingest-csv.js')
 
       if (verbose) {
-        console.info(`📄 Reading CSV: ${input}`)
-        console.info(`📁 Attachment roots: ${attachmentRoots.join(', ')}`)
+        cliLogger.info('Reading CSV ingest', { input, attachmentRoots })
       }
 
       const messages = ingestCSV(input, { attachmentRoots })
 
       // CLI-T02-AC05: Progress output: ✓ Parsed 2,847 messages from CSV
-      console.info(`✓ Parsed ${messages.length.toLocaleString()} messages from CSV`)
+      humanInfo(
+        `✓ Parsed ${messages.length.toLocaleString()} messages from CSV`,
+      )
 
       // Validate messages before writing
       const validation = validateMessages(messages)
       if (!validation.valid) {
-        console.error(`❌ ${validation.errors.length} messages failed validation`)
+        humanError(`❌ ${validation.errors.length} messages failed validation`)
         if (verbose) {
           validation.errors.slice(0, 5).forEach((err) => {
-            console.error(`  Message ${err.index}:`, err.issues)
+            humanError(`  Message ${err.index}:`, err.issues)
           })
         }
         process.exit(1)
@@ -169,22 +291,54 @@ program
       const envelope = createExportEnvelope(messages)
       fs.writeFileSync(output, JSON.stringify(envelope, null, 2), 'utf-8')
 
-      console.info(`✓ Wrote ${messages.length.toLocaleString()} messages to ${output}`)
-      console.info(`\n📊 Summary:`)
-      console.info(`  Text: ${messages.filter((m) => m.messageKind === 'text').length}`)
-      console.info(`  Media: ${messages.filter((m) => m.messageKind === 'media').length}`)
-      console.info(
-        `  Notifications: ${messages.filter((m) => m.messageKind === 'notification').length}`,
+      humanInfo(
+        `✓ Wrote ${messages.length.toLocaleString()} messages to ${output}`,
       )
+      humanInfo(`\n📊 Summary:`)
+      const textCount = messages.filter((m) => m.messageKind === 'text').length
+      const mediaCount = messages.filter(
+        (m) => m.messageKind === 'media',
+      ).length
+      const notifCount = messages.filter(
+        (m) => m.messageKind === 'notification',
+      ).length
+      humanInfo(`  Text: ${textCount}`)
+      humanInfo(`  Media: ${mediaCount}`)
+      humanInfo(`  Notifications: ${notifCount}`)
+      logEvent('ingest-summary', {
+        command: 'ingest-csv',
+        phase: 'summary',
+        metrics: {
+          total: messages.length,
+          text: textCount,
+          media: mediaCount,
+          notifications: notifCount,
+        },
+        options: { output },
+        exitCode: 0,
+      })
       process.exit(0)
     } catch (error) {
-      console.error(
+      humanError(
         `❌ Failed to ingest CSV:`,
         error instanceof Error ? error.message : String(error),
       )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('ingest-error', {
+        command: 'ingest-csv',
+        phase: 'error',
+        error: errorMeta,
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -193,21 +347,36 @@ program
   .command('ingest-db')
   .description('Import messages from macOS Messages.app database export (JSON)')
   .requiredOption('-i, --input <path>', 'path to JSON file with DB messages')
-  .option('-o, --output <path>', 'output JSON file path', './messages.db.ingested.json')
+  .option(
+    '-o, --output <path>',
+    'output JSON file path',
+    './messages.db.ingested.json',
+  )
   .option('-a, --attachments <dir...>', 'attachment root directories')
   .option('--contact <handle>', 'filter to specific contact handle')
-  .action(async (options) => {
+  .action(async (options: IngestDBOptions) => {
     const { input, output, attachments, contact } = options
     const verbose = program.opts().verbose
+    applyLogLevel(verbose, program.opts().quiet)
+    logEvent('ingest-start', {
+      command: 'ingest-db',
+      phase: 'start',
+      options: {
+        input,
+        output,
+        attachmentsCount: attachments?.length,
+        contact,
+      },
+    })
 
     try {
       // CLI-T02-AC04: Input file validation with clear error messages
       const fs = await import('fs')
       if (!fs.existsSync(input)) {
-        console.error(`❌ Input JSON file not found: ${input}`)
-        console.error('\nPlease check:')
-        console.error('  • File path is correct')
-        console.error('  • File exists and is readable')
+        humanError(`❌ Input JSON file not found: ${input}`)
+        humanError('\nPlease check:')
+        humanError('  • File path is correct')
+        humanError('  • File exists and is readable')
         process.exit(1)
       }
 
@@ -216,11 +385,11 @@ program
       if (attachments && attachments.length > 0) {
         for (const dir of attachments) {
           if (!fs.existsSync(dir)) {
-            console.error(`❌ Attachment directory not found: ${dir}`)
+            humanError(`❌ Attachment directory not found: ${dir}`)
             process.exit(1)
           }
           if (!fs.statSync(dir).isDirectory()) {
-            console.error(`❌ Not a directory: ${dir}`)
+            humanError(`❌ Not a directory: ${dir}`)
             process.exit(1)
           }
           attachmentRoots.push(dir)
@@ -229,25 +398,28 @@ program
         // Default: ~/Library/Messages/Attachments
         const os = await import('os')
         const path = await import('path')
-        const defaultRoot = path.join(os.homedir(), 'Library', 'Messages', 'Attachments')
+        const defaultRoot = path.join(
+          os.homedir(),
+          'Library',
+          'Messages',
+          'Attachments',
+        )
         if (fs.existsSync(defaultRoot)) {
           attachmentRoots.push(defaultRoot)
           if (verbose) {
-            console.info(`Using default attachment root: ${defaultRoot}`)
+            humanInfo(`Using default attachment root: ${defaultRoot}`)
           }
         }
       }
 
       // CLI-T02-AC02: ingest-db command with database path and contact filtering
       const { splitDBMessage } = await import('./ingest/ingest-db.js')
-      const { createExportEnvelope, validateMessages } = await import('./ingest/ingest-csv.js')
+      const { createExportEnvelope, validateMessages } = await import(
+        './ingest/ingest-csv.js'
+      )
 
       if (verbose) {
-        console.info(`📄 Reading DB export: ${input}`)
-        console.info(`📁 Attachment roots: ${attachmentRoots.join(', ')}`)
-        if (contact) {
-          console.info(`🔍 Filtering to contact: ${contact}`)
-        }
+        cliLogger.info('Reading DB export', { input, attachmentRoots, contact })
       }
 
       // Read and parse DB export JSON
@@ -255,15 +427,21 @@ program
       const dbMessages = JSON.parse(content) as DBMessage[]
 
       if (!Array.isArray(dbMessages)) {
-        console.error(`❌ Expected JSON array of DB messages, got: ${typeof dbMessages}`)
+        humanError(
+          `❌ Expected JSON array of DB messages, got: ${typeof dbMessages}`,
+        )
         process.exit(1)
       }
 
       // Filter by contact if specified
       let filteredMessages: DBMessage[] = dbMessages
       if (contact) {
-        filteredMessages = dbMessages.filter((m: DBMessage) => m.handle === contact)
-        console.info(`✓ Filtered to ${filteredMessages.length} messages from ${contact}`)
+        filteredMessages = dbMessages.filter(
+          (m: DBMessage) => m.handle === contact,
+        )
+        humanInfo(
+          `✓ Filtered to ${filteredMessages.length} messages from ${contact}`,
+        )
       }
 
       // Split DB messages into Message objects
@@ -274,15 +452,16 @@ program
       })
 
       // CLI-T02-AC05: Progress output
-      console.info(`✓ Parsed ${messages.length.toLocaleString()} messages from DB export`)
-
+      humanInfo(
+        `✓ Parsed ${messages.length.toLocaleString()} messages from DB export`,
+      )
       // Validate messages before writing
       const validation = validateMessages(messages)
       if (!validation.valid) {
-        console.error(`❌ ${validation.errors.length} messages failed validation`)
+        humanError(`❌ ${validation.errors.length} messages failed validation`)
         if (verbose) {
           validation.errors.slice(0, 5).forEach((err) => {
-            console.error(`  Message ${err.index}:`, err.issues)
+            humanError(`  Message ${err.index}:`, err.issues)
           })
         }
         process.exit(1)
@@ -292,19 +471,48 @@ program
       const envelope = createExportEnvelope(messages)
       fs.writeFileSync(output, JSON.stringify(envelope, null, 2), 'utf-8')
 
-      console.info(`✓ Wrote ${messages.length.toLocaleString()} messages to ${output}`)
-      console.info(`\n📊 Summary:`)
-      console.info(`  Text: ${messages.filter((m: Message) => m.messageKind === 'text').length}`)
-      console.info(`  Media: ${messages.filter((m: Message) => m.messageKind === 'media').length}`)
+      humanInfo(
+        `✓ Wrote ${messages.length.toLocaleString()} messages to ${output}`,
+      )
+      humanInfo(`\n📊 Summary:`)
+      const dbText = messages.filter(
+        (m: Message) => m.messageKind === 'text',
+      ).length
+      const dbMedia = messages.filter(
+        (m: Message) => m.messageKind === 'media',
+      ).length
+      humanInfo(`  Text: ${dbText}`)
+      humanInfo(`  Media: ${dbMedia}`)
+      logEvent('ingest-summary', {
+        command: 'ingest-db',
+        phase: 'summary',
+        metrics: { total: messages.length, text: dbText, media: dbMedia },
+        options: { output, contact },
+        exitCode: 0,
+      })
       process.exit(0)
     } catch (error) {
-      console.error(
+      humanError(
         `❌ Failed to ingest DB export:`,
         error instanceof Error ? error.message : String(error),
       )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('ingest-error', {
+        command: 'ingest-db',
+        phase: 'error',
+        error: errorMeta,
+        options: { output, contact },
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -313,12 +521,24 @@ program
 program
   .command('normalize-link')
   .description('Deduplicate and link messages from multiple sources')
-  .requiredOption('-i, --input <files...>', 'input JSON files (CSV, DB, or both)')
-  .option('-o, --output <path>', 'output JSON file path', './messages.normalized.json')
-  .option('-m, --merge-mode <mode>', 'merge mode: exact|content|all (default: all)', 'all')
-  .action(async (options) => {
+  .requiredOption(
+    '-i, --input <files...>',
+    'input JSON files (CSV, DB, or both)',
+  )
+  .option(
+    '-o, --output <path>',
+    'output JSON file path',
+    './messages.normalized.json',
+  )
+  .option(
+    '-m, --merge-mode <mode>',
+    'merge mode: exact|content|all (default: all)',
+    'all',
+  )
+  .action(async (options: NormalizeLinkOptions) => {
     const { input, output, mergeMode } = options
     const verbose = program.opts().verbose
+    applyLogLevel(verbose, program.opts().quiet)
 
     try {
       // Validate inputs
@@ -327,21 +547,25 @@ program
 
       for (const file of inputFiles) {
         if (!fs.existsSync(file)) {
-          console.error(`❌ Input file not found: ${file}`)
+          humanError(`❌ Input file not found: ${file}`)
           process.exit(1)
         }
       }
 
       // CLI-T03-AC01: Validate merge mode
       if (!['exact', 'content', 'all'].includes(mergeMode)) {
-        console.error(`❌ Invalid merge mode: ${mergeMode}`)
-        console.error('Valid modes: exact (GUID only), content (text matching), all (both)')
+        humanError(`❌ Invalid merge mode: ${mergeMode}`)
+        humanError(
+          'Valid modes: exact (GUID only), content (text matching), all (both)',
+        )
         process.exit(1)
       }
 
       if (verbose) {
-        console.info(`📄 Reading ${inputFiles.length} input file(s)`)
-        console.info(`🔗 Merge mode: ${mergeMode}`)
+        cliLogger.info('Start normalize-link', {
+          files: inputFiles.length,
+          mergeMode,
+        })
       }
 
       // Load input files
@@ -351,24 +575,40 @@ program
         const data = JSON.parse(content)
         const messages = Array.isArray(data) ? data : data.messages || []
         allMessages.push(...messages)
-        console.info(`✓ Loaded ${messages.length} messages from ${file}`)
+        humanInfo(`✓ Loaded ${messages.length} messages from ${file}`)
       }
 
       // Import normalize pipeline
-      const { linkRepliesToParents } = await import('./ingest/link-replies-and-tapbacks.js')
+      const { linkRepliesToParents } = await import(
+        './ingest/link-replies-and-tapbacks.js'
+      )
       const { dedupAndMerge } = await import('./ingest/dedup-merge.js')
-      const { validateNormalizedMessages } = await import('./normalize/validate-normalized.js')
+      const { validateNormalizedMessages } = await import(
+        './normalize/validate-normalized.js'
+      )
 
       if (verbose) {
-        console.info(`📊 Total messages before linking: ${allMessages.length}`)
+        cliLogger.info('Total messages before linking', {
+          count: allMessages.length,
+        })
       }
 
       // Step 1: Link replies and tapbacks
-      const linkedResult = linkRepliesToParents(allMessages, { trackAmbiguous: true })
-      const linkedMessages = Array.isArray(linkedResult) ? linkedResult : linkedResult.messages
+      const linkedResult = linkRepliesToParents(allMessages, {
+        trackAmbiguous: true,
+      })
+      const linkedMessages = Array.isArray(linkedResult)
+        ? linkedResult
+        : linkedResult.messages
 
-      if (verbose && !Array.isArray(linkedResult) && linkedResult.ambiguousLinks) {
-        console.info(`⚠️  Found ${linkedResult.ambiguousLinks.length} ambiguous links`)
+      if (
+        verbose &&
+        !Array.isArray(linkedResult) &&
+        linkedResult.ambiguousLinks
+      ) {
+        cliLogger.warn('Ambiguous reply/tapback links detected', {
+          count: linkedResult.ambiguousLinks.length,
+        })
       }
 
       // Step 2: Deduplicate and merge (if multiple sources)
@@ -378,18 +618,21 @@ program
         const csvMessages = linkedMessages.filter(
           (m: Message) => m.exportVersion?.includes('csv') || !m.rowid,
         )
-        const dbMessages = linkedMessages.filter((m: Message) => m.rowid !== undefined)
+        const dbMessages = linkedMessages.filter(
+          (m: Message) => m.rowid !== undefined,
+        )
 
         const mergeResult = dedupAndMerge(csvMessages, dbMessages)
         normalizedMessages = mergeResult.messages
 
         if (verbose) {
-          console.info(`\n📈 Merge Statistics:`)
-          console.info(`  Input: ${mergeResult.stats.csvCount + mergeResult.stats.dbCount}`)
-          console.info(`  Output: ${mergeResult.stats.outputCount}`)
-          console.info(`  Exact Matches: ${mergeResult.stats.exactMatches}`)
-          console.info(`  Content Matches: ${mergeResult.stats.contentMatches}`)
-          console.info(`  No Matches: ${mergeResult.stats.noMatches}`)
+          cliLogger.info('Merge statistics', {
+            input: mergeResult.stats.csvCount + mergeResult.stats.dbCount,
+            output: mergeResult.stats.outputCount,
+            exactMatches: mergeResult.stats.exactMatches,
+            contentMatches: mergeResult.stats.contentMatches,
+            noMatches: mergeResult.stats.noMatches,
+          })
         }
       }
 
@@ -403,31 +646,63 @@ program
 
       fs.writeFileSync(output, JSON.stringify(envelope, null, 2), 'utf-8')
 
-      console.info(`\n✅ Normalized ${validatedMessages.length.toLocaleString()} messages`)
-      console.info(`✓ Wrote to ${output}`)
-      console.info(`\n📊 Final Summary:`)
-      console.info(
-        `  Text: ${validatedMessages.filter((m: Message) => m.messageKind === 'text').length}`,
+      humanInfo(
+        `\n✅ Normalized ${validatedMessages.length.toLocaleString()} messages`,
       )
-      console.info(
-        `  Media: ${validatedMessages.filter((m: Message) => m.messageKind === 'media').length}`,
-      )
-      console.info(
-        `  Tapbacks: ${validatedMessages.filter((m: Message) => m.messageKind === 'tapback').length}`,
-      )
-      console.info(
-        `  Notifications: ${validatedMessages.filter((m: Message) => m.messageKind === 'notification').length}`,
-      )
+      humanInfo(`✓ Wrote to ${output}`)
+      humanInfo(`\n📊 Final Summary:`)
+      const nText = validatedMessages.filter(
+        (m: Message) => m.messageKind === 'text',
+      ).length
+      const nMedia = validatedMessages.filter(
+        (m: Message) => m.messageKind === 'media',
+      ).length
+      const nTapbacks = validatedMessages.filter(
+        (m: Message) => m.messageKind === 'tapback',
+      ).length
+      const nNotifs = validatedMessages.filter(
+        (m: Message) => m.messageKind === 'notification',
+      ).length
+      humanInfo(`  Text: ${nText}`)
+      humanInfo(`  Media: ${nMedia}`)
+      humanInfo(`  Tapbacks: ${nTapbacks}`)
+      humanInfo(`  Notifications: ${nNotifs}`)
+      logEvent('normalize-summary', {
+        command: 'normalize-link',
+        phase: 'summary',
+        metrics: {
+          total: validatedMessages.length,
+          text: nText,
+          media: nMedia,
+          tapbacks: nTapbacks,
+          notifications: nNotifs,
+        },
+        options: { output },
+        exitCode: 0,
+      })
 
       process.exit(0)
     } catch (error) {
-      console.error(
+      humanError(
         `❌ Failed to normalize-link:`,
         error instanceof Error ? error.message : String(error),
       )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('normalize-error', {
+        command: 'normalize-link',
+        phase: 'error',
+        error: errorMeta,
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -437,23 +712,43 @@ program
   .command('enrich-ai')
   .description('Add AI-powered enrichment to media messages')
   .requiredOption('-i, --input <path>', 'input normalized JSON file')
-  .option('-o, --output <path>', 'output JSON file path', './messages.enriched.json')
-  .option('-c, --checkpoint-dir <path>', 'checkpoint directory', './.checkpoints')
+  .option(
+    '-o, --output <path>',
+    'output JSON file path',
+    './messages.enriched.json',
+  )
+  .option(
+    '-c, --checkpoint-dir <path>',
+    'checkpoint directory',
+    './.checkpoints',
+  )
   .option('--resume', 'resume from last checkpoint', false)
-  .option('--incremental', 'only enrich messages new since last enrichment run', false)
+  .option(
+    '--incremental',
+    'only enrich messages new since last enrichment run',
+    false,
+  )
   .option(
     '--state-file <path>',
     'path to incremental state file (auto-detects .imessage-state.json by default)',
   )
-  .option('--reset-state', 'clear incremental state and enrich all messages', false)
+  .option(
+    '--reset-state',
+    'clear incremental state and enrich all messages',
+    false,
+  )
   .option('--force-refresh', 'force re-enrichment even if already done', false)
   .option('--rate-limit <ms>', 'delay between API calls (milliseconds)', '1000')
   .option('--max-retries <n>', 'max retries on API errors', '3')
   .option('--checkpoint-interval <n>', 'write checkpoint every N items', '100')
   .option('--enable-vision', 'enable image analysis with Gemini Vision', true)
-  .option('--enable-audio', 'enable audio transcription with Gemini Audio', true)
+  .option(
+    '--enable-audio',
+    'enable audio transcription with Gemini Audio',
+    true,
+  )
   .option('--enable-links', 'enable link enrichment with Firecrawl', true)
-  .action(async (options) => {
+  .action(async (options: EnrichAIOptions) => {
     const {
       input,
       output,
@@ -471,12 +766,32 @@ program
       enableLinks,
     } = options
     const verbose = program.opts().verbose
+    applyLogLevel(verbose, program.opts().quiet)
+    logEvent('enrich-start', {
+      command: 'enrich',
+      phase: 'start',
+      options: {
+        input,
+        output,
+        checkpointDir,
+        resume,
+        incremental,
+        stateFile: userProvidedStateFile,
+        resetState,
+        rateLimitMs,
+        maxRetries,
+        checkpointInterval,
+        enableVision,
+        enableAudio,
+        enableLinks,
+      },
+    })
 
     try {
       // Validate inputs
       const fs = await import('fs')
       if (!fs.existsSync(input)) {
-        console.error(`❌ Input file not found: ${input}`)
+        humanError(`❌ Input file not found: ${input}`)
         process.exit(1)
       }
 
@@ -486,34 +801,40 @@ program
       const checkpointIntervalNum = parseInt(checkpointInterval as string, 10)
 
       if (isNaN(rateLimitDelay) || rateLimitDelay < 0) {
-        console.error('❌ --rate-limit must be a non-negative number (milliseconds)')
+        humanError(
+          '❌ --rate-limit must be a non-negative number (milliseconds)',
+        )
         process.exit(1)
       }
       if (isNaN(maxRetriesNum) || maxRetriesNum < 0) {
-        console.error('❌ --max-retries must be a non-negative number')
+        humanError('❌ --max-retries must be a non-negative number')
         process.exit(1)
       }
       if (isNaN(checkpointIntervalNum) || checkpointIntervalNum < 1) {
-        console.error('❌ --checkpoint-interval must be a positive number')
+        humanError('❌ --checkpoint-interval must be a positive number')
         process.exit(1)
       }
 
       if (verbose) {
-        console.info(`📄 Input: ${input}`)
-        console.info(`💾 Output: ${output}`)
-        console.info(`📍 Checkpoint dir: ${checkpointDir}`)
-        console.info(`⏱️  Rate limit: ${rateLimitDelay}ms`)
-        console.info(`🔄 Max retries: ${maxRetriesNum}`)
-        console.info(`💿 Checkpoint interval: ${checkpointIntervalNum} items`)
-        console.info(`🖼️  Vision: ${enableVision ? 'enabled' : 'disabled'}`)
-        console.info(`🎵 Audio: ${enableAudio ? 'enabled' : 'disabled'}`)
-        console.info(`🔗 Links: ${enableLinks ? 'enabled' : 'disabled'}`)
-        console.info(`♻️  Incremental mode: ${incremental ? 'enabled' : 'disabled'}`)
+        cliLogger.info('Enrich config', {
+          input,
+          output,
+          checkpointDir,
+          rateLimitDelay,
+          maxRetries: maxRetriesNum,
+          checkpointInterval: checkpointIntervalNum,
+          enableVision,
+          enableAudio,
+          enableLinks,
+          incremental,
+        })
       }
 
       // Create checkpoint directory if needed
       if (!fs.existsSync(checkpointDir)) {
-        await import('fs/promises').then((fsp) => fsp.mkdir(checkpointDir, { recursive: true }))
+        await import('fs/promises').then((fsp) =>
+          fsp.mkdir(checkpointDir, { recursive: true }),
+        )
       }
 
       // Load normalized messages
@@ -521,12 +842,15 @@ program
       const data = JSON.parse(content)
       const messages = Array.isArray(data) ? data : data.messages || []
 
-      console.info(`✓ Loaded ${messages.length.toLocaleString()} messages`)
+      humanInfo(`✓ Loaded ${messages.length.toLocaleString()} messages`)
 
       // Import enrichment modules
-      const { loadCheckpoint, computeConfigHash, saveCheckpoint, createCheckpoint } = await import(
-        './enrich/checkpoint.js'
-      )
+      const {
+        loadCheckpoint,
+        computeConfigHash,
+        saveCheckpoint,
+        createCheckpoint,
+      } = await import('./enrich/checkpoint.js')
 
       // Compute config hash for checkpoint verification (AC05: Config consistency)
       const enrichConfig = {
@@ -547,7 +871,7 @@ program
       if (resetState && stateFileExists) {
         fs.unlinkSync(stateFilePath)
         if (verbose) {
-          console.info(`🗑️  Reset incremental state file: ${stateFilePath}`)
+          humanInfo(`🗑️  Reset incremental state file: ${stateFilePath}`)
         }
       }
 
@@ -557,7 +881,9 @@ program
       )
 
       // INCREMENTAL--T04-AC02: Auto-detect state file and load previous state
-      let previousState: Awaited<ReturnType<typeof loadIncrementalState>> | null = null
+      let previousState: Awaited<
+        ReturnType<typeof loadIncrementalState>
+      > | null = null
       let newMessageGuids: string[] = []
       let newMessageCount = messages.length
 
@@ -573,16 +899,20 @@ program
           newMessageGuids = detectNewMessages(currentGuids, previousState)
           newMessageCount = newMessageGuids.length
           if (verbose) {
-            console.info(
+            humanInfo(
               `♻️  Incremental mode: detected ${newMessageCount.toLocaleString()} new messages`,
             )
-            console.info(`   Total messages: ${messages.length.toLocaleString()}`)
+            humanInfo(`   Total messages: ${messages.length.toLocaleString()}`)
           }
         }
       } else if (incremental && !stateFileExists && !resetState) {
         if (verbose) {
-          console.info(`♻️  Incremental mode enabled but no state file found: ${stateFilePath}`)
-          console.info(`   Enriching all ${messages.length.toLocaleString()} messages`)
+          humanInfo(
+            `♻️  Incremental mode enabled but no state file found: ${stateFilePath}`,
+          )
+          humanInfo(
+            `   Enriching all ${messages.length.toLocaleString()} messages`,
+          )
         }
       }
 
@@ -592,16 +922,20 @@ program
         const checkpoint = await loadCheckpoint(checkpointPath)
         if (checkpoint) {
           if (checkpoint.configHash !== configHash) {
-            console.error('❌ Config has changed since last checkpoint')
-            console.error('Use --force-refresh to re-enrich or delete checkpoint file')
+            humanError('❌ Config has changed since last checkpoint')
+            humanError(
+              'Use --force-refresh to re-enrich or delete checkpoint file',
+            )
             process.exit(1)
           }
           startIndex = checkpoint.lastProcessedIndex + 1
-          console.info(`✓ Resuming from checkpoint at index ${startIndex}`)
-          console.info(`  Already processed: ${checkpoint.totalProcessed}`)
-          console.info(`  Failed items: ${checkpoint.totalFailed}`)
+          cliLogger.info('Resuming from checkpoint', {
+            startIndex,
+            alreadyProcessed: checkpoint.totalProcessed,
+            failedItems: checkpoint.totalFailed,
+          })
         } else if (resume) {
-          console.warn(`⚠️  No checkpoint found, starting from beginning`)
+          humanWarn(`⚠️  No checkpoint found, starting from beginning`)
         }
       }
 
@@ -609,14 +943,19 @@ program
       const enrichedMessages: Message[] = []
       let totalProcessed = 0
       let totalFailed = 0
-      const failedItems: Array<{ index: number; guid: string; kind: string; error: string }> = []
+      const failedItems: Array<{
+        index: number
+        guid: string
+        kind: string
+        error: string
+      }> = []
 
       // INCREMENTAL--T04-AC05: Show progress with new message count
       const progressMsg =
         incremental && newMessageCount < messages.length
           ? `Enriching ${newMessageCount.toLocaleString()} new messages (${messages.length.toLocaleString()} total)`
           : `Processing ${messages.length.toLocaleString()} messages`
-      console.info(`\n🚀 Starting enrichment: ${progressMsg}`)
+      humanInfo(`\n🚀 Starting enrichment: ${progressMsg}`)
 
       for (let i = startIndex; i < messages.length; i++) {
         const message = messages[i]
@@ -643,12 +982,13 @@ program
             })
             await saveCheckpoint(checkpoint, checkpointPath)
             if (verbose) {
-              console.info(`💾 Checkpoint written at index ${i + 1}`)
+              cliLogger.info('Checkpoint written', { index: i + 1 })
             }
           }
         } catch (error) {
           totalFailed++
-          const errorMessage = error instanceof Error ? error.message : String(error)
+          const errorMessage =
+            error instanceof Error ? error.message : String(error)
           failedItems.push({
             index: i,
             guid: message.guid || 'unknown',
@@ -656,7 +996,23 @@ program
             error: errorMessage,
           })
           if (verbose) {
-            console.warn(`⚠️  Failed to enrich message ${i}: ${errorMessage}`)
+            humanWarn(`⚠️  Failed to enrich message ${i}: ${errorMessage}`)
+            logEvent('enrich-item-failed', {
+              command: 'enrich',
+              phase: 'warning',
+              context: {
+                index: i,
+                guid: message.guid || 'unknown',
+                kind: message.messageKind || 'unknown',
+              },
+              error: {
+                type: error instanceof Error ? error.name : 'Unknown',
+                message: errorMessage,
+                ...(error instanceof Error && error.stack
+                  ? { stack: error.stack }
+                  : {}),
+              },
+            })
           }
         }
       }
@@ -682,18 +1038,42 @@ program
       envelope.source = 'merged'
       fs.writeFileSync(output, JSON.stringify(envelope, null, 2), 'utf-8')
 
-      console.info(`\n✅ Enrichment complete`)
-      console.info(`✓ Processed: ${totalProcessed.toLocaleString()} messages`)
+      humanInfo(`\n✅ Enrichment complete`)
+      humanInfo(`✓ Processed: ${totalProcessed.toLocaleString()} messages`)
       if (totalFailed > 0) {
-        console.info(`⚠️  Failed: ${totalFailed.toLocaleString()} messages`)
+        humanInfo(`⚠️  Failed: ${totalFailed.toLocaleString()} messages`)
       }
-      console.info(`✓ Wrote to ${output}`)
+      humanInfo(`✓ Wrote to ${output}`)
+      logEvent('enrich-summary', {
+        command: 'enrich',
+        phase: 'summary',
+        metrics: { processed: totalProcessed, failed: totalFailed },
+        options: { output, checkpointInterval: checkpointIntervalNum },
+        context: { checkpointPath },
+        exitCode: 0,
+      })
       process.exit(0)
     } catch (error) {
-      console.error(`❌ Failed to enrich:`, error instanceof Error ? error.message : String(error))
+      humanError(
+        `❌ Failed to enrich:`,
+        error instanceof Error ? error.message : String(error),
+      )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('enrich-error', {
+        command: 'enrich',
+        phase: 'error',
+        error: errorMeta,
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -706,22 +1086,55 @@ program
   .command('render-markdown')
   .description('Generate Obsidian-compatible markdown timeline files')
   .requiredOption('-i, --input <path>', 'input enriched JSON file')
-  .option('-o, --output <dir>', 'output directory for markdown files', './timeline')
+  .option(
+    '-o, --output <dir>',
+    'output directory for markdown files',
+    './timeline',
+  )
   .option('--start-date <date>', 'render messages from this date (YYYY-MM-DD)')
   .option('--end-date <date>', 'render messages until this date (YYYY-MM-DD)')
-  .option('--group-by-time', 'group messages by time-of-day (Morning/Afternoon/Evening)', true)
+  .option(
+    '--group-by-time',
+    'group messages by time-of-day (Morning/Afternoon/Evening)',
+    true,
+  )
   .option('--nested-replies', 'render replies as nested blockquotes', true)
-  .option('--max-nesting-depth <n>', 'maximum nesting depth for replies (default 10)', '10')
-  .action(async (options) => {
-    const { input, output, startDate, endDate, groupByTime, nestedReplies, maxNestingDepth } =
-      options
+  .option(
+    '--max-nesting-depth <n>',
+    'maximum nesting depth for replies (default 10)',
+    '10',
+  )
+  .action(async (options: RenderMarkdownOptions) => {
+    const {
+      input,
+      output,
+      startDate,
+      endDate,
+      groupByTime,
+      nestedReplies,
+      maxNestingDepth,
+    } = options
     const verbose = program.opts().verbose
+    applyLogLevel(verbose, program.opts().quiet)
+    logEvent('render-start', {
+      command: 'render-markdown',
+      phase: 'start',
+      options: {
+        input,
+        output,
+        startDate,
+        endDate,
+        groupByTime,
+        nestedReplies,
+        maxNestingDepth,
+      },
+    })
 
     try {
       // CLI-T04-AC01: Date filtering validation
       const fs = await import('fs')
       if (!fs.existsSync(input)) {
-        console.error(`❌ Input file not found: ${input}`)
+        humanError(`❌ Input file not found: ${input}`)
         process.exit(1)
       }
 
@@ -731,7 +1144,9 @@ program
       if (startDate) {
         const start = new Date(startDate)
         if (isNaN(start.getTime())) {
-          console.error(`❌ Invalid start date: ${startDate} (use YYYY-MM-DD format)`)
+          humanError(
+            `❌ Invalid start date: ${startDate} (use YYYY-MM-DD format)`,
+          )
           process.exit(1)
         }
         startDateObj = start
@@ -740,7 +1155,7 @@ program
       if (endDate) {
         const end = new Date(endDate)
         if (isNaN(end.getTime())) {
-          console.error(`❌ Invalid end date: ${endDate} (use YYYY-MM-DD format)`)
+          humanError(`❌ Invalid end date: ${endDate} (use YYYY-MM-DD format)`)
           process.exit(1)
         }
         // Set to end of day
@@ -751,22 +1166,22 @@ program
       // CLI-T04-AC03: Validate max nesting depth
       const maxNestingDepthNum = parseInt(maxNestingDepth as string, 10)
       if (isNaN(maxNestingDepthNum) || maxNestingDepthNum < 1) {
-        console.error(`❌ --max-nesting-depth must be a positive number`)
+        humanError(`❌ --max-nesting-depth must be a positive number`)
         process.exit(1)
       }
 
       if (verbose) {
-        console.info(`📄 Input: ${input}`)
-        console.info(`📁 Output directory: ${output}`)
+        humanInfo(`📄 Input: ${input}`)
+        humanInfo(`📁 Output directory: ${output}`)
         if (startDateObj) {
-          console.info(`📅 Start date: ${startDate}`)
+          humanInfo(`📅 Start date: ${startDate}`)
         }
         if (endDateObj) {
-          console.info(`📅 End date: ${endDate}`)
+          humanInfo(`📅 End date: ${endDate}`)
         }
-        console.info(`⏱️  Group by time: ${groupByTime}`)
-        console.info(`⬅️  Nested replies: ${nestedReplies}`)
-        console.info(`📊 Max nesting depth: ${maxNestingDepthNum}`)
+        humanInfo(`⏱️  Group by time: ${groupByTime}`)
+        humanInfo(`⬅️  Nested replies: ${nestedReplies}`)
+        humanInfo(`📊 Max nesting depth: ${maxNestingDepthNum}`)
       }
 
       // Load input messages
@@ -775,7 +1190,7 @@ program
       let messages: Message[] = Array.isArray(data) ? data : data.messages || []
 
       if (verbose) {
-        console.info(`✓ Loaded ${messages.length.toLocaleString()} messages`)
+        humanInfo(`✓ Loaded ${messages.length.toLocaleString()} messages`)
       }
 
       // Filter by date range if specified
@@ -786,7 +1201,18 @@ program
           if (endDateObj && msgDate > endDateObj) return false
           return true
         })
-        console.info(`📊 Filtered to ${filtered.length.toLocaleString()} messages in date range`)
+        humanInfo(
+          `📊 Filtered to ${filtered.length.toLocaleString()} messages in date range`,
+        )
+        logEvent('render-filtered', {
+          command: 'render-markdown',
+          phase: 'progress',
+          metrics: { filtered: filtered.length, original: messages.length },
+          options: {
+            startDate: startDateObj ? startDateObj.toISOString() : undefined,
+            endDate: endDateObj ? endDateObj.toISOString() : undefined,
+          },
+        })
         messages = filtered
       }
 
@@ -797,18 +1223,18 @@ program
       const rendered = renderMessages(messages)
 
       if (rendered.size === 0) {
-        console.warn(`⚠️  No messages to render`)
+        humanWarn(`⚠️  No messages to render`)
         process.exit(0)
       }
 
       // CLI-T04-AC04: Create output directory if doesn't exist
       const path = await import('path')
-      const outputDir = path.resolve(output)
+      const outputDir = path.resolve(output || './timeline')
 
       if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true })
         if (verbose) {
-          console.info(`📁 Created output directory: ${outputDir}`)
+          cliLogger.info('Created output directory', { outputDir })
         }
       }
 
@@ -827,36 +1253,80 @@ program
         filesWritten++
 
         if (verbose) {
-          console.info(`✓ Wrote ${filename}`)
+          humanInfo(`✓ Wrote ${filename}`)
+          logEvent('render-file-written', {
+            command: 'render-markdown',
+            phase: 'progress',
+            metrics: { filesWritten },
+            context: { filename, filepath },
+          })
         }
       }
 
       // CLI-T04-AC05: Summary output
-      console.info(`\n✅ Rendered ${filesWritten} markdown file(s)`)
-      console.info(
+      humanInfo(`\n✅ Rendered ${filesWritten} markdown file(s)`)
+      humanInfo(
         `✓ Wrote ${filesWritten.toLocaleString()} markdown file${filesWritten === 1 ? '' : 's'} to ${outputDir}`,
       )
 
       // Message summary
-      const textMessages = messages.filter((m) => m.messageKind === 'text').length
-      const mediaMessages = messages.filter((m) => m.messageKind === 'media').length
-      const tapbacks = messages.filter((m) => m.messageKind === 'tapback').length
+      const textMessages = messages.filter(
+        (m) => m.messageKind === 'text',
+      ).length
+      const mediaMessages = messages.filter(
+        (m) => m.messageKind === 'media',
+      ).length
+      const tapbacks = messages.filter(
+        (m) => m.messageKind === 'tapback',
+      ).length
 
-      console.info(`\n📊 Message Summary:`)
-      console.info(`  Total: ${messages.length.toLocaleString()}`)
-      console.info(`  Text: ${textMessages.toLocaleString()}`)
-      console.info(`  Media: ${mediaMessages.toLocaleString()}`)
-      console.info(`  Tapbacks: ${tapbacks.toLocaleString()}`)
+      humanInfo(`\n📊 Message Summary:`)
+      humanInfo(`  Total: ${messages.length.toLocaleString()}`)
+      humanInfo(`  Text: ${textMessages.toLocaleString()}`)
+      humanInfo(`  Media: ${mediaMessages.toLocaleString()}`)
+      humanInfo(`  Tapbacks: ${tapbacks.toLocaleString()}`)
+      logEvent('render-summary', {
+        command: 'render-markdown',
+        phase: 'summary',
+        metrics: {
+          filesWritten,
+          totalMessages: messages.length,
+          textMessages,
+          mediaMessages,
+          tapbacks,
+        },
+        options: {
+          outputDir,
+          groupByTime,
+          nestedReplies,
+          maxNestingDepth: maxNestingDepthNum,
+        },
+        exitCode: 0,
+      })
 
       process.exit(0)
     } catch (error) {
-      console.error(
+      humanError(
         `❌ Failed to render markdown:`,
         error instanceof Error ? error.message : String(error),
       )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('render-error', {
+        command: 'render-markdown',
+        phase: 'error',
+        error: errorMeta,
+        options: { output, groupByTime, nestedReplies, maxNestingDepth },
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -871,16 +1341,17 @@ program
   .description('Validate JSON file against message schema')
   .requiredOption('-i, --input <path>', 'path to JSON file to validate')
   .option('-q, --quiet', 'suppress detailed error messages', false)
-  .action(async (options) => {
+  .action(async (options: ValidateOptions) => {
     const { input, quiet } = options
     const _verbose = program.opts().verbose
+    applyLogLevel(_verbose, program.opts().quiet)
 
     try {
       const fs = await import('fs')
 
       // Validate input file exists
       if (!fs.existsSync(input)) {
-        console.error(`❌ Input file not found: ${input}`)
+        humanError(`❌ Input file not found: ${input}`)
         process.exit(1)
       }
 
@@ -890,8 +1361,8 @@ program
       try {
         data = JSON.parse(content)
       } catch (e) {
-        console.error(`❌ Invalid JSON: ${input}`)
-        console.error(`  ${e instanceof Error ? e.message : String(e)}`)
+        humanError(`❌ Invalid JSON: ${input}`)
+        humanError(`  ${e instanceof Error ? e.message : String(e)}`)
         process.exit(1)
       }
 
@@ -905,45 +1376,78 @@ program
       const errors: Array<{ index: number; path: string; message: string }> = []
 
       for (let i = 0; i < messages.length; i++) {
-        const result = MessageSchema.safeParse(messages[i])
+        const result = MessageSchema.safeParse(messages[i] as unknown)
         if (result.success) {
           validCount++
         } else {
-          result.error.errors.forEach((err) => {
-            errors.push({
-              index: i,
-              path: err.path.join('.'),
-              message: err.message,
-            })
-          })
+          result.error.errors.forEach(
+            (err: { path: Array<string | number>; message: string }) => {
+              errors.push({
+                index: i,
+                path: err.path.join('.'),
+                message: err.message,
+              })
+            },
+          )
         }
       }
 
       // Output results
       if (!quiet) {
-        console.info(`📊 Validation Results:`)
-        console.info(`  Valid: ${validCount}/${messages.length}`)
+        humanInfo(`📊 Validation Results:`)
+        humanInfo(`  Valid: ${validCount}/${messages.length}`)
       }
+      logEvent('validate-results', {
+        command: 'validate',
+        phase: 'progress',
+        metrics: {
+          valid: validCount,
+          total: messages.length,
+          errors: errors.length,
+        },
+        options: { quiet },
+      })
 
       if (errors.length === 0) {
-        console.info(`✅ All ${messages.length} messages are valid`)
+        humanInfo(`✅ All ${messages.length} messages are valid`)
+        logEvent('validate-summary', {
+          command: 'validate',
+          phase: 'summary',
+          metrics: { valid: validCount, total: messages.length },
+          exitCode: 0,
+        })
         process.exit(0)
       } else {
-        console.error(`❌ ${errors.length} validation error(s) found`)
+        humanError(`❌ ${errors.length} validation error(s) found`)
+        logEvent('validate-error-summary', {
+          command: 'validate',
+          phase: 'error',
+          metrics: {
+            valid: validCount,
+            total: messages.length,
+            errors: errors.length,
+          },
+          exitCode: 1,
+        })
 
         if (!quiet) {
-          const grouped = new Map<number, Array<{ path: string; message: string }>>()
+          const grouped = new Map<
+            number,
+            Array<{ path: string; message: string }>
+          >()
           errors.forEach((err) => {
             if (!grouped.has(err.index)) grouped.set(err.index, [])
-            grouped.get(err.index)!.push({ path: err.path, message: err.message })
+            grouped
+              .get(err.index)!
+              .push({ path: err.path, message: err.message })
           })
 
           let shown = 0
           grouped.forEach((errs, index) => {
             if (shown < 10) {
-              console.error(`\n  Message ${index}:`)
+              humanError(`\n  Message ${index}:`)
               errs.forEach((err) => {
-                console.error(`    ${err.path || 'root'}: ${err.message}`)
+                humanError(`    ${err.path || 'root'}: ${err.message}`)
                 shown++
                 if (shown >= 10) return
               })
@@ -951,17 +1455,33 @@ program
           })
 
           if (shown < errors.length) {
-            console.error(`\n  ... and ${errors.length - shown} more errors`)
+            humanError(`\n  ... and ${errors.length - shown} more errors`)
           }
         }
 
         process.exit(1)
       }
     } catch (error) {
-      console.error(`❌ Validation failed:`, error instanceof Error ? error.message : String(error))
+      humanError(
+        `❌ Validation failed:`,
+        error instanceof Error ? error.message : String(error),
+      )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('validate-runtime-error', {
+        command: 'validate',
+        phase: 'error',
+        error: errorMeta,
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -972,16 +1492,22 @@ program
   .description('Show statistics for message file')
   .requiredOption('-i, --input <path>', 'path to message JSON file')
   .option('-v, --verbose', 'show detailed statistics', false)
-  .action(async (options) => {
+  .action(async (options: StatsOptions) => {
     const { input } = options
     const verbose = program.opts().verbose || options.verbose
+    applyLogLevel(verbose, program.opts().quiet)
+    logEvent('stats-start', {
+      command: 'stats',
+      phase: 'start',
+      options: { input },
+    })
 
     try {
       const fs = await import('fs')
 
       // Validate input file exists
       if (!fs.existsSync(input)) {
-        console.error(`❌ Input file not found: ${input}`)
+        humanError(`❌ Input file not found: ${input}`)
         process.exit(1)
       }
 
@@ -991,7 +1517,7 @@ program
       try {
         data = JSON.parse(content)
       } catch {
-        console.error(`❌ Invalid JSON: ${input}`)
+        humanError(`❌ Invalid JSON: ${input}`)
         process.exit(1)
       }
 
@@ -1043,39 +1569,41 @@ program
       })
 
       // Output summary
-      console.info(`📊 Message Statistics`)
-      console.info(`\n  Total messages: ${stats.total.toLocaleString()}`)
-      console.info(`\n  Message Types:`)
-      console.info(`    Text: ${stats.text}`)
-      console.info(`    Media: ${stats.media}`)
-      console.info(`    Tapbacks: ${stats.tapback}`)
-      console.info(`    Notifications: ${stats.notification}`)
+      humanInfo(`📊 Message Statistics`)
+      humanInfo(`\n  Total messages: ${stats.total.toLocaleString()}`)
+      humanInfo(`\n  Message Types:`)
+      humanInfo(`    Text: ${stats.text}`)
+      humanInfo(`    Media: ${stats.media}`)
+      humanInfo(`    Tapbacks: ${stats.tapback}`)
+      humanInfo(`    Notifications: ${stats.notification}`)
 
-      console.info(`\n  Enrichment:`)
-      console.info(`    Messages with media: ${stats.withMedia}`)
-      console.info(`    Messages with enrichment: ${stats.withEnrichment}`)
+      humanInfo(`\n  Enrichment:`)
+      humanInfo(`    Messages with media: ${stats.withMedia}`)
+      humanInfo(`    Messages with enrichment: ${stats.withEnrichment}`)
       if (stats.withEnrichment > 0) {
-        console.info(`    Total enrichments: ${totalEnrichments}`)
-        console.info(
+        humanInfo(`    Total enrichments: ${totalEnrichments}`)
+        humanInfo(
           `    Avg enrichments per message: ${(totalEnrichments / stats.withEnrichment).toFixed(2)}`,
         )
       }
 
-      console.info(`\n  Date Range:`)
+      humanInfo(`\n  Date Range:`)
       if (stats.dateRange.min && stats.dateRange.max) {
-        console.info(`    From: ${stats.dateRange.min}`)
-        console.info(`    To: ${stats.dateRange.max}`)
+        humanInfo(`    From: ${stats.dateRange.min}`)
+        humanInfo(`    To: ${stats.dateRange.max}`)
 
         const minDate = new Date(stats.dateRange.min)
         const maxDate = new Date(stats.dateRange.max)
-        const days = Math.floor((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
-        console.info(`    Duration: ${days + 1} days`)
+        const days = Math.floor(
+          (maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24),
+        )
+        humanInfo(`    Duration: ${days + 1} days`)
       } else {
-        console.info(`    None`)
+        humanInfo(`    None`)
       }
 
       if (verbose) {
-        console.info(`\n  Participants: ${senders.size}`)
+        humanInfo(`\n  Participants: ${senders.size}`)
         if (senders.size > 0 && senders.size <= 20) {
           Array.from(senders)
             .sort()
@@ -1084,17 +1612,50 @@ program
                 const msgSender = m.handle ?? (m.isFromMe ? 'Me' : 'Unknown')
                 return msgSender === sender
               }).length
-              console.info(`    ${sender}: ${count}`)
+              humanInfo(`    ${sender}: ${count}`)
             })
         }
       }
 
+      logEvent('stats-summary', {
+        command: 'stats',
+        phase: 'summary',
+        metrics: {
+          total: stats.total,
+          text: stats.text,
+          media: stats.media,
+          tapback: stats.tapback,
+          notification: stats.notification,
+          withMedia: stats.withMedia,
+          withEnrichment: stats.withEnrichment,
+          participants: senders.size,
+        },
+        options: { input, verbose },
+        exitCode: 0,
+      })
       process.exit(0)
     } catch (error) {
-      console.error(`❌ Stats failed:`, error instanceof Error ? error.message : String(error))
+      humanError(
+        `❌ Stats failed:`,
+        error instanceof Error ? error.message : String(error),
+      )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('stats-error', {
+        command: 'stats',
+        phase: 'error',
+        error: errorMeta,
+        options: { input, verbose },
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -1103,12 +1664,17 @@ program
 program
   .command('clean')
   .description('Remove temporary files and checkpoints')
-  .option('-c, --checkpoint-dir <path>', 'checkpoint directory to clean', './.checkpoints')
+  .option(
+    '-c, --checkpoint-dir <path>',
+    'checkpoint directory to clean',
+    './.checkpoints',
+  )
   .option('-f, --force', 'remove without confirmation', false)
   .option('--all', 'also remove backup files (.backup, .old)', false)
-  .action(async (options) => {
+  .action(async (options: CleanOptions) => {
     const { checkpointDir, force, all } = options
     const verbose = program.opts().verbose
+    applyLogLevel(verbose, program.opts().quiet)
 
     try {
       const fs = await import('fs')
@@ -1117,13 +1683,18 @@ program
       // Check if checkpoint dir exists
       if (!fs.existsSync(checkpointDir)) {
         if (verbose) {
-          console.info(`ℹ️  Checkpoint directory not found: ${checkpointDir}`)
+          humanInfo(`ℹ️  Checkpoint directory not found: ${checkpointDir}`)
         }
+        logEvent('clean-missing-dir', {
+          command: 'clean',
+          phase: 'progress',
+          options: { checkpointDir },
+        })
         process.exit(0)
       }
 
       if (!fs.statSync(checkpointDir).isDirectory()) {
-        console.error(`❌ Not a directory: ${checkpointDir}`)
+        humanError(`❌ Not a directory: ${checkpointDir}`)
         process.exit(1)
       }
 
@@ -1136,20 +1707,38 @@ program
       )
 
       if (toRemove.length === 0) {
-        console.info(`ℹ️  No checkpoint files to clean`)
+        humanInfo(`ℹ️  No checkpoint files to clean`)
+        logEvent('clean-none', {
+          command: 'clean',
+          phase: 'summary',
+          metrics: { removed: 0 },
+          options: { checkpointDir },
+          exitCode: 0,
+        })
         process.exit(0)
       }
 
       // Show what will be removed
-      console.info(`♻️  Files to be removed:`)
+      humanInfo(`♻️  Files to be removed:`)
       toRemove.forEach((f) => {
         const filepath = path.join(checkpointDir, f)
         const size = fs.statSync(filepath).size
-        console.info(`    ${f} (${(size / 1024).toFixed(1)} KB)`)
+        humanInfo(`    ${f} (${(size / 1024).toFixed(1)} KB)`)
+      })
+      logEvent('clean-list', {
+        command: 'clean',
+        phase: 'progress',
+        metrics: { count: toRemove.length },
+        options: { checkpointDir, all },
       })
 
       if (!force) {
-        console.info(`\nRun with --force to remove these files`)
+        humanInfo(`\nRun with --force to remove these files`)
+        logEvent('clean-requires-force', {
+          command: 'clean',
+          phase: 'progress',
+          options: { checkpointDir, all },
+        })
         process.exit(0)
       }
 
@@ -1161,20 +1750,54 @@ program
           fs.unlinkSync(filepath)
           removed++
           if (verbose) {
-            console.info(`✓ Removed ${f}`)
+            humanInfo(`✓ Removed ${f}`)
+            logEvent('clean-file-removed', {
+              command: 'clean',
+              phase: 'progress',
+              context: { file: f },
+            })
           }
         } catch {
-          console.warn(`⚠️  Failed to remove ${f}`)
+          humanWarn(`⚠️  Failed to remove ${f}`)
+          logEvent('clean-file-remove-failed', {
+            command: 'clean',
+            phase: 'warning',
+            context: { file: f },
+          })
         }
       })
 
-      console.info(`✅ Cleaned ${removed} checkpoint file(s)`)
+      humanInfo(`✅ Cleaned ${removed} checkpoint file(s)`)
+      logEvent('clean-summary', {
+        command: 'clean',
+        phase: 'summary',
+        metrics: { removed },
+        options: { checkpointDir, all },
+        exitCode: 0,
+      })
       process.exit(0)
     } catch (error) {
-      console.error(`❌ Clean failed:`, error instanceof Error ? error.message : String(error))
+      humanError(
+        `❌ Clean failed:`,
+        error instanceof Error ? error.message : String(error),
+      )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('clean-error', {
+        command: 'clean',
+        phase: 'error',
+        error: errorMeta,
+        options: { checkpointDir, all },
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -1184,15 +1807,17 @@ program
   .command('doctor')
   .description('Diagnose common configuration issues')
   .option('-v, --verbose', 'show detailed diagnostics', false)
-  .action(async (options) => {
+  .action(async (options: DoctorOptions) => {
     const verbose = program.opts().verbose || options.verbose
+    applyLogLevel(verbose, program.opts().quiet)
 
     try {
       const fs = await import('fs')
       const path = await import('path')
       const os = await import('os')
 
-      console.info(`🔍 iMessage Timeline Diagnostics\n`)
+      humanInfo(`🔍 iMessage Timeline Diagnostics\n`)
+      logEvent('doctor-start', { command: 'doctor', phase: 'start' })
 
       const checks: Array<{ name: string; pass: boolean; message: string }> = []
 
@@ -1212,16 +1837,26 @@ program
       checks.push({
         name: 'package.json',
         pass: packageJsonExists,
-        message: packageJsonExists ? `Found in ${cwd}` : 'Not found in current directory',
+        message: packageJsonExists
+          ? `Found in ${cwd}`
+          : 'Not found in current directory',
       })
 
       // Check 3: Config file
-      const configFormats = ['imessage-config.yaml', 'imessage-config.yml', 'imessage-config.json']
-      const foundConfig = configFormats.find((f) => fs.existsSync(path.join(cwd, f)))
+      const configFormats = [
+        'imessage-config.yaml',
+        'imessage-config.yml',
+        'imessage-config.json',
+      ]
+      const foundConfig = configFormats.find((f) =>
+        fs.existsSync(path.join(cwd, f)),
+      )
       checks.push({
         name: 'Config file',
         pass: Boolean(foundConfig),
-        message: foundConfig ? `Found: ${foundConfig}` : 'Not found (run: imessage-timeline init)',
+        message: foundConfig
+          ? `Found: ${foundConfig}`
+          : 'Not found (run: imessage-timeline init)',
       })
 
       // Check 4: API Keys
@@ -1230,7 +1865,9 @@ program
       checks.push({
         name: 'GEMINI_API_KEY',
         pass: Boolean(geminiKey),
-        message: geminiKey ? 'Set' : 'Not set (required for image/audio enrichment)',
+        message: geminiKey
+          ? 'Set'
+          : 'Not set (required for image/audio enrichment)',
       })
 
       checks.push({
@@ -1242,12 +1879,19 @@ program
       })
 
       // Check 5: Default attachment directory
-      const defaultAttachDir = path.join(os.homedir(), 'Library', 'Messages', 'Attachments')
+      const defaultAttachDir = path.join(
+        os.homedir(),
+        'Library',
+        'Messages',
+        'Attachments',
+      )
       const attachDirExists = fs.existsSync(defaultAttachDir)
       checks.push({
         name: 'Messages attachments',
         pass: attachDirExists,
-        message: attachDirExists ? `Found: ${defaultAttachDir}` : `Not found: ${defaultAttachDir}`,
+        message: attachDirExists
+          ? `Found: ${defaultAttachDir}`
+          : `Not found: ${defaultAttachDir}`,
       })
 
       // Check 6: Output directory permission
@@ -1264,49 +1908,103 @@ program
       checks.push({
         name: 'Write permission',
         pass: canWrite,
-        message: canWrite ? `Can write to ${cwd}` : `Cannot write to ${cwd} (check permissions)`,
+        message: canWrite
+          ? `Can write to ${cwd}`
+          : `Cannot write to ${cwd} (check permissions)`,
       })
 
       // Print results
       let passCount = 0
       checks.forEach((check) => {
         const icon = check.pass ? '✅' : '⚠️ '
-        console.info(`${icon} ${check.name.padEnd(25)} ${check.message}`)
+        humanInfo(`${icon} ${check.name.padEnd(25)} ${check.message}`)
         if (check.pass) passCount++
+        logEvent('doctor-check', {
+          command: 'doctor',
+          phase: 'progress',
+          context: { name: check.name },
+          metrics: { pass: check.pass },
+          message: check.message,
+        })
       })
 
-      console.info(`\n📊 Summary: ${passCount}/${checks.length} checks passed`)
+      humanInfo(`\n📊 Summary: ${passCount}/${checks.length} checks passed`)
+      logEvent('doctor-summary', {
+        command: 'doctor',
+        phase: 'summary',
+        metrics: { passed: passCount, total: checks.length },
+      })
 
       // Recommendations
       const failures = checks.filter((c) => !c.pass)
       if (failures.length > 0) {
-        console.info(`\n💡 Recommendations:`)
+        humanInfo(`\n💡 Recommendations:`)
         failures.forEach((check) => {
           if (check.name === 'Config file') {
-            console.info(`   • Run: imessage-timeline init`)
+            humanInfo(`   • Run: imessage-timeline init`)
           } else if (check.name === 'GEMINI_API_KEY') {
-            console.info(`   • Get API key from: https://ai.google.dev/tutorials/setup`)
-            console.info(`   • Set: export GEMINI_API_KEY=your_key`)
+            humanInfo(
+              `   • Get API key from: https://ai.google.dev/tutorials/setup`,
+            )
+            humanInfo(`   • Set: export GEMINI_API_KEY=your_key`)
           } else if (check.name === 'FIRECRAWL_API_KEY') {
-            console.info(`   • (Optional) Get from: https://www.firecrawl.dev`)
+            humanInfo(`   • (Optional) Get from: https://www.firecrawl.dev`)
           }
+          logEvent('doctor-recommendation', {
+            command: 'doctor',
+            phase: 'progress',
+            context: { name: check.name },
+            message: check.message,
+          })
         })
       }
 
       if (verbose) {
-        console.info(`\n📝 Environment:`)
-        console.info(`   Platform: ${os.platform()}`)
-        console.info(`   Arch: ${os.arch()}`)
-        console.info(`   Home: ${os.homedir()}`)
-        console.info(`   CWD: ${cwd}`)
+        humanInfo(`\n📝 Environment:`)
+        humanInfo(`   Platform: ${os.platform()}`)
+        humanInfo(`   Arch: ${os.arch()}`)
+        humanInfo(`   Home: ${os.homedir()}`)
+        humanInfo(`   CWD: ${cwd}`)
+        logEvent('doctor-environment', {
+          command: 'doctor',
+          phase: 'progress',
+          context: {
+            platform: os.platform(),
+            arch: os.arch(),
+            home: os.homedir(),
+            cwd,
+          },
+        })
       }
 
+      logEvent('doctor-exit', {
+        command: 'doctor',
+        phase: 'summary',
+        metrics: { failures: failures.length },
+        exitCode: failures.length > 0 ? 1 : 0,
+      })
       process.exit(failures.length > 0 ? 1 : 0)
     } catch (error) {
-      console.error(`❌ Doctor failed:`, error instanceof Error ? error.message : String(error))
+      humanError(
+        `❌ Doctor failed:`,
+        error instanceof Error ? error.message : String(error),
+      )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('doctor-error', {
+        command: 'doctor',
+        phase: 'error',
+        error: errorMeta,
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -1320,22 +2018,24 @@ program
   .description('Generate starter configuration file')
   .option('-f, --format <type>', 'config file format (json|yaml)', 'yaml')
   .option('--force', 'overwrite existing config file without prompting', false)
-  .option('-o, --output <path>', 'output file path (default: auto-detected from format)')
-  .action(async (options) => {
+  .option(
+    '-o, --output <path>',
+    'output file path (default: auto-detected from format)',
+  )
+  .action(async (options: InitOptions) => {
     const { format, force, output } = options
 
     // Validate format
     if (format !== 'json' && format !== 'yaml') {
-      console.error(`❌ Invalid format: ${format}`)
-      console.error('Supported formats: json, yaml')
+      humanError(`❌ Invalid format: ${format}`)
+      humanError('Supported formats: json, yaml')
       process.exit(1)
     }
 
     try {
       // Lazy import to avoid circular dependencies
-      const { generateConfigFile, getDefaultConfigPath, configFileExists } = await import(
-        './config/generator.js'
-      )
+      const { generateConfigFile, getDefaultConfigPath, configFileExists } =
+        await import('./config/generator.js')
 
       // Determine output path
       const filePath = output || getDefaultConfigPath(format)
@@ -1343,11 +2043,11 @@ program
       // CONFIG-T03-AC04: Check for existing file and prompt if needed
       const exists = await configFileExists(filePath)
       if (exists && !force) {
-        console.error(`❌ Config file already exists: ${filePath}`)
-        console.error('\nOptions:')
-        console.error('  • Use --force to overwrite')
-        console.error(`  • Use --output to specify different path`)
-        console.error(`  • Manually remove the existing file`)
+        humanError(`❌ Config file already exists: ${filePath}`)
+        humanError('\nOptions:')
+        humanError('  • Use --force to overwrite')
+        humanError(`  • Use --output to specify different path`)
+        humanError(`  • Manually remove the existing file`)
         process.exit(1)
       }
 
@@ -1359,25 +2059,55 @@ program
       })
 
       if (result.success) {
-        console.info(result.message)
-        console.info('\n📝 Next steps:')
-        console.info(`  1. Edit ${filePath} to add your API keys`)
-        console.info('  2. Set GEMINI_API_KEY environment variable')
-        console.info('  3. (Optional) Set FIRECRAWL_API_KEY for enhanced link scraping')
-        console.info('\n💡 See inline comments in the config file for details')
+        humanInfo(result.message)
+        humanInfo('\n📝 Next steps:')
+        humanInfo(`  1. Edit ${filePath} to add your API keys`)
+        humanInfo('  2. Set GEMINI_API_KEY environment variable')
+        humanInfo(
+          '  3. (Optional) Set FIRECRAWL_API_KEY for enhanced link scraping',
+        )
+        humanInfo('\n💡 See inline comments in the config file for details')
+        logEvent('init-summary', {
+          command: 'init',
+          phase: 'summary',
+          options: { format, filePath, force },
+          message: result.message,
+          exitCode: 0,
+        })
         process.exit(0)
       } else {
-        console.error(`❌ ${result.message}`)
+        humanError(`❌ ${result.message}`)
+        logEvent('init-error', {
+          command: 'init',
+          phase: 'error',
+          options: { format, filePath, force },
+          message: result.message,
+          exitCode: 1,
+        })
         process.exit(1)
       }
     } catch (error) {
-      console.error(
+      humanError(
         `❌ Failed to generate config:`,
         error instanceof Error ? error.message : String(error),
       )
       if (program.opts().verbose && error instanceof Error) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
+      const errorMeta: CLILogMeta['error'] = {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      }
+      logEvent('init-runtime-error', {
+        command: 'init',
+        phase: 'error',
+        error: errorMeta,
+        options: { format, output, force },
+        exitCode: 2,
+      })
       process.exit(2)
     }
   })
@@ -1386,19 +2116,41 @@ program
 // CLI--T01-AC04: Proper exit codes (0=success, 1=validation, 2=runtime)
 // ============================================================================
 
-// Global error handler for uncaught errors
-process.on('uncaughtException', (err) => {
-  console.error('❌ Fatal Error:', err.message)
-  if (program.opts().verbose) {
-    console.error(err.stack)
-  }
-  process.exit(2) // Runtime error
-})
+// Global error handler for uncaught errors (guard to prevent duplicate listeners)
+const globalAny = globalThis as unknown as Record<string, unknown>
+const listenersFlag = '__IMESSAGE_CLI_LISTENERS_ATTACHED__'
+if (!globalAny[listenersFlag]) {
+  globalAny[listenersFlag] = true
 
-process.on('unhandledRejection', (reason) => {
-  console.error('❌ Unhandled Promise Rejection:', reason)
-  process.exit(2) // Runtime error
-})
+  process.on('uncaughtException', (err) => {
+    humanError('❌ Fatal Error:', err.message)
+    if (program.opts().verbose) {
+      humanError(err.stack)
+    }
+    logEvent('fatal-error', {
+      command: 'global',
+      phase: 'error',
+      error: {
+        type: err.name,
+        message: err.message,
+        ...(err.stack ? { stack: err.stack } : {}),
+      },
+      exitCode: 2,
+    })
+    process.exit(2) // Runtime error
+  })
+
+  process.on('unhandledRejection', (reason: unknown) => {
+    humanError('❌ Unhandled Promise Rejection:', reason)
+    logEvent('unhandled-rejection', {
+      command: 'global',
+      phase: 'error',
+      error: { message: String(reason) },
+      exitCode: 2,
+    })
+    process.exit(2) // Runtime error
+  })
+}
 
 // ============================================================================
 // Main Execution
@@ -1409,13 +2161,25 @@ async function main() {
     await program.parseAsync(process.argv)
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`❌ Error: ${error.message}`)
+      humanError(`❌ Error: ${error.message}`)
       if (program.opts().verbose) {
-        console.error(error.stack)
+        humanError(error.stack)
       }
     } else {
-      console.error(`❌ Unknown error:`, error)
+      humanError(`❌ Unknown error:`, error as unknown as string)
     }
+    logEvent('cli-runtime-error', {
+      command: 'global',
+      phase: 'error',
+      error: {
+        type: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        ...(error instanceof Error && error.stack
+          ? { stack: error.stack }
+          : {}),
+      },
+      exitCode: 1,
+    })
     process.exit(1)
   }
 }

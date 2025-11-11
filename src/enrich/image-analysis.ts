@@ -21,11 +21,15 @@
  * - Pipeline never crashes on enrichment errors
  */
 
-import path from 'path'
 import { access, writeFile } from 'fs/promises'
-import sharp from 'sharp'
+import path from 'path'
+
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import sharp from 'sharp'
+
 import type { Message, MediaMeta, MediaEnrichment } from '#schema/message'
+
+import { createLogger } from '#utils/logger'
 
 type ImageAnalysisConfig = {
   enableVisionAnalysis: boolean
@@ -34,17 +38,7 @@ type ImageAnalysisConfig = {
   imageCacheDir: string
 }
 
-/**
- * Logger for structured output
- */
-function log(level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: Record<string, unknown>) {
-  const prefix = `[enrich:image-analysis] [${level.toUpperCase()}]`
-  if (context) {
-    console.log(`${prefix} ${message}`, context)
-  } else {
-    console.log(`${prefix} ${message}`)
-  }
-}
+const logger = createLogger('enrich:image-analysis')
 
 /**
  * Structured prompt for Gemini Vision analysis
@@ -75,7 +69,7 @@ shortDescription: [one sentence summary]`
 export async function convertToJpgPreview(
   inputPath: string,
   cacheDir: string,
-  quality: number = 90
+  quality: number = 90,
 ): Promise<string> {
   if (!inputPath || !cacheDir) {
     throw new Error('inputPath and cacheDir are required')
@@ -89,7 +83,7 @@ export async function convertToJpgPreview(
     // AC03: Check if preview already exists
     await access(previewPath)
     // If we get here, file exists - return cached path
-    log('debug', `Preview cache hit: ${previewPath}`)
+    logger.debug(`Preview cache hit: ${previewPath}`)
     return previewPath
   } catch {
     // File doesn't exist, proceed with conversion
@@ -104,11 +98,11 @@ export async function convertToJpgPreview(
 
     // Write to cache
     await writeFile(previewPath, imageBuffer)
-    log('info', `Generated preview: ${previewPath}`, { inputPath, quality })
+    logger.info(`Generated preview: ${previewPath}`, { inputPath, quality })
 
     return previewPath
   } catch (error) {
-    log('error', `Failed to convert image: ${inputPath}`, { error })
+    logger.error(`Failed to convert image: ${inputPath}`, { error })
     throw new Error(`Failed to convert image to JPG: ${inputPath}`)
   }
 }
@@ -120,7 +114,7 @@ export async function convertToJpgPreview(
  */
 export async function analyzeImageWithGemini(
   imagePath: string,
-  config: Partial<ImageAnalysisConfig>
+  config: Partial<ImageAnalysisConfig>,
 ): Promise<MediaEnrichment> {
   const apiKey = config.geminiApiKey
   const modelName = config.geminiModel || 'gemini-1.5-pro'
@@ -135,9 +129,7 @@ export async function analyzeImageWithGemini(
     const model = genAI.getGenerativeModel({ model: modelName })
 
     // Read image file
-    const imageData = await sharp(imagePath)
-      .toFormat('jpeg')
-      .toBuffer()
+    const imageData = await sharp(imagePath).toFormat('jpeg').toBuffer()
 
     const base64Image = imageData.toString('base64')
 
@@ -155,21 +147,24 @@ export async function analyzeImageWithGemini(
     ])
 
     const responseText = response.response.text()
-    log('debug', `Gemini response received: ${responseText.substring(0, 150)}...`)
+    logger.debug(
+      `Gemini response received: ${responseText.substring(0, 150)}...`,
+    )
 
     // AC05: Parse response
     const visionSummaryMatch = responseText.match(
-      /visionSummary:\s*(.+?)(?=\n(?:shortDescription|$))/is
+      /visionSummary:\s*(.+?)(?=\n(?:shortDescription|$))/is,
     )
     const shortDescriptionMatch = responseText.match(
-      /shortDescription:\s*(.+?)(?=\n|$)/is
+      /shortDescription:\s*(.+?)(?=\n|$)/is,
     )
 
     if (!visionSummaryMatch || !shortDescriptionMatch) {
-      log('warn', `Failed to parse Gemini response for ${imagePath}`)
+      logger.warn(`Failed to parse Gemini response for ${imagePath}`)
     }
 
-    const visionSummary = visionSummaryMatch?.[1]?.trim() || 'Image analysis unavailable'
+    const visionSummary =
+      visionSummaryMatch?.[1]?.trim() || 'Image analysis unavailable'
     const shortDescription = shortDescriptionMatch?.[1]?.trim() || 'Image'
 
     // AC06: Create enrichment entry with full provenance
@@ -184,10 +179,12 @@ export async function analyzeImageWithGemini(
       shortDescription,
     }
 
-    log('info', `Image analysis complete for ${imagePath}`, { kind: enrichment.kind })
+    logger.info(`Image analysis complete for ${imagePath}`, {
+      kind: enrichment.kind,
+    })
     return enrichment
   } catch (error) {
-    log('error', `Gemini API error for ${imagePath}`, { error })
+    logger.error(`Gemini API error for ${imagePath}`, { error })
     throw error
   }
 }
@@ -205,11 +202,11 @@ export async function analyzeImageWithGemini(
  */
 export async function analyzeImage(
   message: Message,
-  config: Partial<ImageAnalysisConfig>
+  config: Partial<ImageAnalysisConfig>,
 ): Promise<Message> {
   // Skip if not enabled
   if (!config.enableVisionAnalysis) {
-    log('debug', `Vision analysis disabled in config`)
+    logger.debug(`Vision analysis disabled in config`)
     return message
   }
 
@@ -220,13 +217,17 @@ export async function analyzeImage(
 
   // Skip if media is not an image
   if (message.media.mediaKind !== 'image') {
-    log('debug', `Skipping non-image media`, { mediaKind: message.media.mediaKind })
+    logger.debug(`Skipping non-image media`, {
+      mediaKind: message.media.mediaKind,
+    })
     return message
   }
 
   // Skip if path is missing
   if (!message.media.path) {
-    log('warn', `Skipping image with missing path`, { filename: message.media.filename })
+    logger.warn(`Skipping image with missing path`, {
+      filename: message.media.filename,
+    })
     return message
   }
 
@@ -236,12 +237,19 @@ export async function analyzeImage(
     // AC01-AC03: Generate preview (cached)
     let _previewPath: string | undefined
     try {
-      _previewPath = await convertToJpgPreview(message.media.path, imageCacheDir, 90)
+      _previewPath = await convertToJpgPreview(
+        message.media.path,
+        imageCacheDir,
+        90,
+      )
     } catch (err) {
-      log('warn', `Failed to create preview - continuing with Gemini analysis`, {
-        filename: message.media.filename,
-        error: err instanceof Error ? err.message : String(err),
-      })
+      logger.warn(
+        `Failed to create preview - continuing with Gemini analysis`,
+        {
+          filename: message.media.filename,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      )
       // Continue with Gemini analysis even if preview fails
     }
 
@@ -254,14 +262,17 @@ export async function analyzeImage(
       enrichment: [...(message.media.enrichment || []), enrichment],
     }
 
-    log('info', `Image enriched`, { filename: message.media.filename, guid: message.guid })
+    logger.info(`Image enriched`, {
+      filename: message.media.filename,
+      guid: message.guid,
+    })
 
     return {
       ...message,
       media: updatedMedia,
     }
   } catch (error) {
-    log('error', `Error analyzing image`, {
+    logger.error(`Error analyzing image`, {
       filename: message.media?.filename,
       guid: message.guid,
       error: error instanceof Error ? error.message : String(error),
@@ -278,7 +289,7 @@ export async function analyzeImage(
  */
 export async function analyzeImages(
   messages: Message[],
-  config: Partial<ImageAnalysisConfig>
+  config: Partial<ImageAnalysisConfig>,
 ): Promise<Message[]> {
   const results: Message[] = []
   let successCount = 0
@@ -289,7 +300,11 @@ export async function analyzeImages(
     try {
       const analyzed = await analyzeImage(message, config)
       // Track if enrichment was added
-      if (analyzed.media?.enrichment && analyzed.media.enrichment.length > (message.media?.enrichment?.length || 0)) {
+      if (
+        analyzed.media?.enrichment &&
+        analyzed.media.enrichment.length >
+          (message.media?.enrichment?.length || 0)
+      ) {
         successCount++
       } else {
         skipCount++
@@ -297,7 +312,7 @@ export async function analyzeImages(
       results.push(analyzed)
     } catch (err) {
       errorCount++
-      log('error', `Failed to analyze message`, {
+      logger.error(`Failed to analyze message`, {
         guid: message.guid,
         error: err instanceof Error ? err.message : String(err),
       })
@@ -306,6 +321,11 @@ export async function analyzeImages(
     }
   }
 
-  log('info', `Batch image analysis complete`, { successCount, skipCount, errorCount, total: messages.length })
+  logger.info(`Batch image analysis complete`, {
+    successCount,
+    skipCount,
+    errorCount,
+    total: messages.length,
+  })
   return results
 }

@@ -1,18 +1,28 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "declaration": true,
+    "declarationMap": true,
     "outDir": "dist",
-    "rootDir": "./src",
-    "sourceMap": true,
     "paths": {
-      "#schema/*": ["./src/schema/*"],
+      "#enrich/*": ["./src/enrich/*"],
       "#ingest/*": ["./src/ingest/*"],
       "#normalize/*": ["./src/normalize/*"],
-      "#enrich/*": ["./src/enrich/*"],
-      "#render/*": ["./src/render/*"]
-    }
+      "#render/*": ["./src/render/*"],
+      "#schema/*": ["./src/schema/*"],
+      "#utils/*": ["./src/utils/*"]
+    },
+    "rootDir": "./src",
+    "sourceMap": true
   },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    "__tests__"
+  ],
   "extends": "./tsconfig.base.json",
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "**/__tests__/**", "__tests__"]
+  "include": ["src/**/*.ts"]
 }

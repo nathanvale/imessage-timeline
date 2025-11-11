@@ -10,7 +10,15 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import type { Message } from '#schema/message'
+
+import {
+  createTestMessage as createTestMessageFactory,
+  createSmallDataset,
+  createMediumDataset,
+  createLargeDataset,
+  createHugeDataset,
+  normalizeSnapshotMap,
+} from '../../../tests/helpers'
 import {
   renderMessages,
   getMessageHash,
@@ -19,151 +27,26 @@ import {
   validateMarkdownStructure,
 } from '../index'
 
+import type { Message } from '#schema/message'
+
 describe('RENDER--T04: Determinism Test Suite', () => {
   // ============================================================================
   // Test Fixtures - Message Datasets of Various Sizes
   // ============================================================================
 
-  /**
-   * Create a test message with defaults
-   */
-  function createTestMessage(overrides: Partial<Message> = {}): Message {
-    const timestamp = overrides.date || '2025-01-15T10:00:00Z'
-    const guid = overrides.guid || `guid-${Date.now()}-${Math.random()}`
-    return {
-      guid,
-      messageKind: 'text',
-      date: timestamp,
-      handle: 'Test User',
-      text: 'Test message',
-      isFromMe: false,
-      ...overrides,
-    }
-  }
+  // Note: dataset factories and test message factory are imported from tests/helpers
 
-  /**
-   * Create a small dataset (10 messages)
-   */
-  function createSmallDataset(): Message[] {
-    const base = '2025-01-15T'
-    return [
-      createTestMessage({
-        guid: 'msg-001',
-        date: `${base}06:00:00Z`,
-        text: 'Good morning',
-      }),
-      createTestMessage({
-        guid: 'msg-002',
-        date: `${base}09:30:00Z`,
-        text: 'How are you?',
-      }),
-      createTestMessage({
-        guid: 'msg-003',
-        date: `${base}12:00:00Z`,
-        text: 'Lunch time',
-      }),
-      createTestMessage({
-        guid: 'msg-004',
-        date: `${base}14:30:00Z`,
-        text: 'Afternoon meeting',
-      }),
-      createTestMessage({
-        guid: 'msg-005',
-        date: `${base}18:00:00Z`,
-        text: 'Evening plans',
-      }),
-      createTestMessage({
-        guid: 'msg-006',
-        date: `${base}12:00:00Z`,
-        text: 'Same timestamp as msg-003',
-      }),
-      createTestMessage({
-        guid: 'msg-007',
-        date: `${base}12:00:00Z`,
-        text: 'Another same timestamp',
-      }),
-      createTestMessage({
-        guid: 'msg-008',
-        date: `${base}20:30:00Z`,
-        text: 'Late evening',
-      }),
-      createTestMessage({
-        guid: 'msg-009',
-        date: `${base}22:00:00Z`,
-        text: 'Night message',
-      }),
-      createTestMessage({
-        guid: 'msg-010',
-        date: `${base}23:59:59Z`,
-        text: 'End of day',
-      }),
-    ]
-  }
-
-  /**
-   * Create a medium dataset (100 messages)
-   */
-  function createMediumDataset(): Message[] {
-    const messages: Message[] = []
-    for (let i = 0; i < 100; i++) {
-      const hour = Math.floor(i / 10)
-      const date = `2025-01-15T${String(Math.min(hour, 23)).padStart(2, '0')}:${String((i * 6) % 60).padStart(2, '0')}:00Z`
-      messages.push(
-        createTestMessage({
-          guid: `msg-${String(i + 1).padStart(3, '0')}`,
-          date,
-          text: `Message ${i + 1}`,
-        }),
-      )
-    }
-    return messages
-  }
+  // medium dataset helper provided via tests/helpers
 
   /**
    * Create a large dataset (500 messages)
    */
-  function createLargeDataset(): Message[] {
-    const messages: Message[] = []
-    for (let i = 0; i < 500; i++) {
-      const dayOffset = Math.floor(i / 100)
-      const date = new Date('2025-01-15T00:00:00Z')
-      date.setDate(date.getDate() + dayOffset)
-      date.setHours(Math.floor((i % 100) / 4))
-      date.setMinutes((i * 7) % 60)
-
-      messages.push(
-        createTestMessage({
-          guid: `msg-${String(i + 1).padStart(4, '0')}`,
-          date: date.toISOString(),
-          text: `Message ${i + 1}`,
-        }),
-      )
-    }
-    return messages
-  }
+  // large/medium/small/huge dataset helpers provided via helpers
 
   /**
    * Create a huge dataset (1000 messages) for performance testing
    */
-  function createHugeDataset(): Message[] {
-    const messages: Message[] = []
-    for (let i = 0; i < 1000; i++) {
-      const dayOffset = Math.floor(i / 144)
-      const date = new Date('2025-01-15T00:00:00Z')
-      date.setDate(date.getDate() + dayOffset)
-      date.setHours(Math.floor((i % 144) / 6))
-      date.setMinutes((i * 11) % 60)
-
-      messages.push(
-        createTestMessage({
-          guid: `msg-${String(i + 1).padStart(4, '0')}`,
-          date: date.toISOString(),
-          text: `Message ${i + 1}`,
-        }),
-      )
-    }
-    return messages
-  }
+  // huge dataset helper provided via tests/helpers
 
   // ============================================================================
   // AC01: Snapshot Tests - Identical Output Across Runs
@@ -176,7 +59,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const output2 = renderMessages(messages)
 
       expect(output1).toEqual(output2)
-      expect(output1).toMatchSnapshot()
+      expect(normalizeSnapshotMap(output1)).toMatchSnapshot()
     })
 
     it('produces consistent output for medium dataset (100 messages)', () => {
@@ -185,7 +68,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const output2 = renderMessages(messages)
 
       expect(output1).toEqual(output2)
-      expect(output1).toMatchSnapshot()
+      expect(normalizeSnapshotMap(output1)).toMatchSnapshot()
     })
 
     it('produces consistent output for large dataset (500 messages)', () => {
@@ -194,7 +77,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const output2 = renderMessages(messages)
 
       expect(output1).toEqual(output2)
-      expect(output1).toMatchSnapshot()
+      expect(normalizeSnapshotMap(output1)).toMatchSnapshot()
     })
 
     it('produces identical hash across multiple renders of same input', () => {
@@ -223,7 +106,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
 
     it('snapshot remains stable for multiple invocations', () => {
       const messages = createSmallDataset()
-      const outputs: Array<Map<string, string>> = []
+      const outputs: any[] = []
 
       for (let i = 0; i < 5; i++) {
         outputs.push(renderMessages(messages))
@@ -287,17 +170,17 @@ describe('RENDER--T04: Determinism Test Suite', () => {
   describe('AC03: Deterministic ordering of same-timestamp messages (stable sort by guid)', () => {
     it('orders same-timestamp messages by GUID consistently', () => {
       const messages: Message[] = [
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'z-guid',
           date: '2025-01-15T12:00:00Z',
           text: 'Z message',
         }),
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'a-guid',
           date: '2025-01-15T12:00:00Z',
           text: 'A message',
         }),
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'm-guid',
           date: '2025-01-15T12:00:00Z',
           text: 'M message',
@@ -314,15 +197,15 @@ describe('RENDER--T04: Determinism Test Suite', () => {
 
     it('maintains stable sort across multiple invocations', () => {
       const baseMessages = [
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-3',
           date: '2025-01-15T12:00:00Z',
         }),
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-1',
           date: '2025-01-15T12:00:00Z',
         }),
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-2',
           date: '2025-01-15T12:00:00Z',
         }),
@@ -345,8 +228,8 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const messages: Message[] = []
       for (let i = 0; i < 100; i++) {
         messages.push(
-          createTestMessage({
-            guid: `msg-${String(i).padStart(3, '0')}`,
+          createTestMessageFactory({
+            guid: `msg-${i < 10 ? `00${i}` : i < 100 ? `0${i}` : `${i}`}`,
             date: '2025-01-15T12:00:00Z',
             text: `Message ${i}`,
           }),
@@ -368,9 +251,9 @@ describe('RENDER--T04: Determinism Test Suite', () => {
 
     it('interleaves different timestamps with GUID stability', () => {
       const messages: Message[] = [
-        createTestMessage({ guid: 'z-1', date: '2025-01-15T12:00:00Z' }),
-        createTestMessage({ guid: 'a-2', date: '2025-01-15T11:00:00Z' }),
-        createTestMessage({ guid: 'm-1', date: '2025-01-15T12:00:00Z' }),
+        createTestMessageFactory({ guid: 'z-1', date: '2025-01-15T12:00:00Z' }),
+        createTestMessageFactory({ guid: 'a-2', date: '2025-01-15T11:00:00Z' }),
+        createTestMessageFactory({ guid: 'm-1', date: '2025-01-15T12:00:00Z' }),
       ]
 
       const sorted = sortMessagesByTimestamp(messages)
@@ -392,7 +275,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const output = renderMessages(messages)
 
       expect(output.size).toBeGreaterThan(0)
-      for (const markdown of output.values()) {
+      for (const markdown of Array.from(output.values())) {
         validateMarkdownStructure(markdown)
       }
     })
@@ -406,8 +289,12 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       // Compare markdown content
       expect(output1.size).toBe(output2.size)
 
-      const keys1 = Array.from(output1.keys()).sort()
-      const keys2 = Array.from(output2.keys()).sort()
+      const keys1: string[] = []
+      for (const k of Array.from(output1.keys())) keys1.push(k)
+      keys1.sort()
+      const keys2: string[] = []
+      for (const k of Array.from(output2.keys())) keys2.push(k)
+      keys2.sort()
       expect(keys1).toEqual(keys2)
 
       for (const key of keys1) {
@@ -423,7 +310,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       expect(output.size).toBeGreaterThanOrEqual(1)
 
       // Each markdown should have proper structure
-      for (const [date, markdown] of output.entries()) {
+      for (const [date, markdown] of Array.from(output.entries())) {
         // Should have date in output
         expect(markdown).toContain(date)
         // Should have morning/afternoon/evening sections or be empty
@@ -442,8 +329,12 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const md1 = renderMessages(messages)
       const md2 = renderMessages(messages)
 
-      const concat1 = Array.from(md1.values()).join('\n---\n')
-      const concat2 = Array.from(md2.values()).join('\n---\n')
+      const concat1Parts: string[] = []
+      for (const v of Array.from(md1.values())) concat1Parts.push(v)
+      const concat1 = concat1Parts.join('\n---\n')
+      const concat2Parts: string[] = []
+      for (const v of Array.from(md2.values())) concat2Parts.push(v)
+      const concat2 = concat2Parts.join('\n---\n')
 
       expect(concat1).toBe(concat2)
     })
@@ -454,8 +345,12 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const output1 = renderMessages(messages)
       const output2 = renderMessages(messages)
 
-      const anchors1 = extractAnchors(Array.from(output1.values()).join('\n'))
-      const anchors2 = extractAnchors(Array.from(output2.values()).join('\n'))
+      const all1Parts: string[] = []
+      for (const v of Array.from(output1.values())) all1Parts.push(v)
+      const anchors1 = extractAnchors(all1Parts.join('\n'))
+      const all2Parts: string[] = []
+      for (const v of Array.from(output2.values())) all2Parts.push(v)
+      const anchors2 = extractAnchors(all2Parts.join('\n'))
 
       expect(anchors1.sort()).toEqual(anchors2.sort())
     })
@@ -589,7 +484,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
 
     it('complex messages with enrichments render deterministically', () => {
       const messages: Message[] = [
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-001',
           messageKind: 'media',
           date: '2025-01-15T10:00:00Z',
@@ -613,21 +508,21 @@ describe('RENDER--T04: Determinism Test Suite', () => {
             ],
           },
         }),
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-002',
           messageKind: 'text',
           date: '2025-01-15T12:00:00Z',
           text: 'Check this link',
         }),
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-003',
           messageKind: 'tapback',
           date: '2025-01-15T12:01:00Z',
-          sender: 'Other User',
+          handle: 'Other User',
           text: '',
-          replyTo: 'msg-002',
           tapback: {
             type: 'liked',
+            action: 'added',
           },
         }),
       ]
@@ -662,9 +557,10 @@ describe('RENDER--T04: Determinism Test Suite', () => {
     })
 
     it('handles very long text deterministically', () => {
-      const longText = 'x'.repeat(10000)
+      let longText = ''
+      for (let i = 0; i < 10000; i++) longText += 'x'
       const messages = [
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-001',
           date: '2025-01-15T10:00:00Z',
           text: longText,
@@ -679,7 +575,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
 
     it('handles special characters deterministically', () => {
       const messages = [
-        createTestMessage({
+        createTestMessageFactory({
           guid: 'msg-001',
           date: '2025-01-15T10:00:00Z',
           text: 'Special chars: !@#$%^&*()_+-=[]{}|;:"<>?,./~`',

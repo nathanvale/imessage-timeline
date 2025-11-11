@@ -1,15 +1,19 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import path from 'path'
 import { promises as fs } from 'fs'
+import path from 'path'
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
+import { MessageSchema } from '../schema/message'
 import {
   detectDelta,
   extractGuidsFromMessages,
   getDeltaStats,
   logDeltaSummary,
 } from '../utils/delta-detection'
-import { Message, MessageSchema } from '../schema/message'
-import type { IncrementalState } from '../utils/incremental-state'
 import { createIncrementalState } from '../utils/incremental-state'
+
+import type { Message } from '../schema/message'
+import type { IncrementalState } from '../utils/incremental-state'
 
 // ============================================================================
 // Test Fixtures
@@ -493,9 +497,7 @@ describe('Delta detection edge cases', () => {
     const stateFile = path.join(tmpDir, '.imessage-state.json')
 
     // First run with 5 messages
-    const messages1 = Array.from({ length: 5 }, (_, i) =>
-      createTestMessage({ guid: `msg-${i}` }),
-    )
+    const messages1 = Array.from({ length: 5 }, (_, i) => createTestMessage({ guid: `msg-${i}` }))
     const result1 = await detectDelta(messages1, stateFile)
     result1.state.enrichedGuids = messages1.map((m) => m.guid)
     await fs.writeFile(stateFile, JSON.stringify(result1.state, null, 2))

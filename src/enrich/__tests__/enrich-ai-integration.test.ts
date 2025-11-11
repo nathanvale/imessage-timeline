@@ -11,9 +11,10 @@
  * TDD approach: Red-Green-Refactor with Wallaby
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { readFileSync, existsSync } from 'fs'
 import path from 'path'
+
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
 // ============================================================================
 // Mock Provider Types and Interfaces
@@ -198,7 +199,9 @@ describe('AC02: Idempotency - No Duplicate Enrichments', () => {
     enrichmentState.enrichmentsByKind[kind] = 1
 
     // Check if already enriched
-    const alreadyEnriched = enrichmentLog.some((entry) => entry.guid === mediaId && entry.kind === kind)
+    const alreadyEnriched = enrichmentLog.some(
+      (entry) => entry.guid === mediaId && entry.kind === kind,
+    )
     expect(alreadyEnriched).toBe(true)
   })
 
@@ -209,9 +212,7 @@ describe('AC02: Idempotency - No Duplicate Enrichments', () => {
     ]
 
     // Deduplicate keeping latest
-    const deduped = Array.from(
-      new Map(enrichments.map((e) => [e.kind, e])).values()
-    )
+    const deduped = Array.from(new Map(enrichments.map((e) => [e.kind, e])).values())
     expect(deduped).toHaveLength(1)
     expect(deduped[0].content).toBe('second')
   })
@@ -225,7 +226,9 @@ describe('AC02: Idempotency - No Duplicate Enrichments', () => {
     expect(enrichmentLog).toHaveLength(enrichmentBefore.length + 1)
 
     // Second run - should not add duplicate
-    const alreadyExists = enrichmentLog.some((e) => e.guid === mediaId && e.kind === 'transcription')
+    const alreadyExists = enrichmentLog.some(
+      (e) => e.guid === mediaId && e.kind === 'transcription',
+    )
     if (!alreadyExists) {
       enrichmentLog.push({ kind: 'transcription', guid: mediaId, timestamp: Date.now() })
     }
@@ -244,7 +247,9 @@ describe('AC02: Idempotency - No Duplicate Enrichments', () => {
     // Second run with force-refresh
     if (forceRefresh) {
       // Remove old entry
-      enrichmentLog = enrichmentLog.filter((e) => !(e.guid === mediaId && e.kind === 'link_context'))
+      enrichmentLog = enrichmentLog.filter(
+        (e) => !(e.guid === mediaId && e.kind === 'link_context'),
+      )
       // Add new entry
       enrichmentLog.push({ kind: 'link_context', guid: mediaId, timestamp: Date.now() })
     }
@@ -260,7 +265,8 @@ describe('AC02: Idempotency - No Duplicate Enrichments', () => {
     ]
 
     items.forEach((item) => {
-      enrichmentState.enrichmentsByKind[item.kind] = (enrichmentState.enrichmentsByKind[item.kind] || 0) + 1
+      enrichmentState.enrichmentsByKind[item.kind] =
+        (enrichmentState.enrichmentsByKind[item.kind] || 0) + 1
       enrichmentState.processedCount++
     })
 
@@ -277,9 +283,7 @@ describe('AC02: Idempotency - No Duplicate Enrichments', () => {
     ]
 
     // Deduplicate by guid+kind
-    const deduped = Array.from(
-      new Map(batch.map((b) => [`${b.guid}:${b.kind}`, b])).values()
-    )
+    const deduped = Array.from(new Map(batch.map((b) => [`${b.guid}:${b.kind}`, b])).values())
 
     expect(deduped).toHaveLength(2)
     expect(deduped.map((d) => d.guid)).toEqual(['msg-a', 'msg-b'])
@@ -537,10 +541,11 @@ describe('AC04: Rate Limiting - Delay and Backoff Behavior', () => {
       await new Promise((resolve) => setTimeout(resolve, rateLimitDelay))
     }
 
-    // Check delays between calls
+    // Check delays between calls with small jitter tolerance (timer precision)
     for (let i = 1; i < callTimings.length; i++) {
       const delay = callTimings[i] - callTimings[i - 1]
-      expect(delay).toBeGreaterThanOrEqual(rateLimitDelay)
+      expect(delay).toBeGreaterThanOrEqual(rateLimitDelay - 5)
+      expect(delay).toBeLessThan(rateLimitDelay + 50)
     }
   })
 

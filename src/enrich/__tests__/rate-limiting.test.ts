@@ -12,12 +12,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import {
-  RateLimiter,
-  createRateLimiter,
-  isRetryableStatus,
-  is5xx,
-} from '../rate-limiting'
+
+import { RateLimiter, createRateLimiter, isRetryableStatus, is5xx } from '../rate-limiting'
 
 // ============================================================================
 // AC01: Configurable Rate Limit Delays

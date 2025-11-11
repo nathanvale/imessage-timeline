@@ -2,8 +2,9 @@
 // Zod validation layer for normalized messages
 // Spec §4.3, §9: Schema validation with comprehensive error reporting
 
-import type { Message } from '../schema/message'
 import { MessageSchema } from '../schema/message'
+
+import type { Message } from '../schema/message'
 import type { ZodIssue } from 'zod'
 
 export type ValidationError = {
@@ -33,7 +34,11 @@ export function validateNormalizedMessages(messages: unknown[]): Message[] {
     const message = messages[i]
 
     // AC04: Check for snake_case fields before schema validation
-    if (typeof message === 'object' && message !== null && hasSnakeCaseFields(message)) {
+    if (
+      typeof message === 'object' &&
+      message !== null &&
+      hasSnakeCaseFields(message)
+    ) {
       const snakeCaseFields = getSnakeCaseFields(message)
       const fieldList = snakeCaseFields.join(', ')
       errors.push({
@@ -62,7 +67,9 @@ export function validateNormalizedMessages(messages: unknown[]): Message[] {
 
   // If any errors occurred, throw with all collected errors (AC03)
   if (errors.length > 0) {
-    const errorSummary = errors.map((e) => `messages.${e.index}: ${e.message}`).join('\n')
+    const errorSummary = errors
+      .map((e) => `messages.${e.index}: ${e.message}`)
+      .join('\n')
     const error = new Error(`Validation failed:\n${errorSummary}`)
     error.name = 'ValidationError'
     throw error
@@ -78,7 +85,10 @@ export function validateNormalizedMessages(messages: unknown[]): Message[] {
  * @param zodErrors - Zod validation errors
  * @returns Formatted error message string
  */
-export function formatValidationErrors(messageIndex: number, zodErrors: ZodIssue[]): string {
+export function formatValidationErrors(
+  messageIndex: number,
+  zodErrors: ZodIssue[],
+): string {
   if (!Array.isArray(zodErrors) || zodErrors.length === 0) {
     return 'Unknown validation error'
   }
@@ -130,7 +140,11 @@ export function hasSnakeCaseFields(obj: unknown, depth = 0): boolean {
  * @param obj - Object to check
  * @returns Array of field names that use snake_case
  */
-export function getSnakeCaseFields(obj: unknown, prefix = '', depth = 0): string[] {
+export function getSnakeCaseFields(
+  obj: unknown,
+  prefix = '',
+  depth = 0,
+): string[] {
   if (depth > 10) return [] // Prevent infinite recursion
   if (typeof obj !== 'object' || obj === null) return []
 
@@ -161,6 +175,10 @@ export function getSnakeCaseFields(obj: unknown, prefix = '', depth = 0): string
  * @param errorList - List of validation errors
  * @returns Formatted error messages with indices
  */
-export function collectValidationErrors(errorList: ValidationError[]): string[] {
-  return errorList.map((e) => `messages.${e.index}.${e.fieldPath}: ${e.message}`)
+export function collectValidationErrors(
+  errorList: ValidationError[],
+): string[] {
+  return errorList.map(
+    (e) => `messages.${e.index}.${e.fieldPath}: ${e.message}`,
+  )
 }

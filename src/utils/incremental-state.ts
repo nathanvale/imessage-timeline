@@ -18,9 +18,12 @@
  * - verifyConfigHash: Detect config changes between runs
  */
 
+import crypto from 'crypto'
 import { promises as fs } from 'fs'
 import path from 'path'
-import crypto from 'crypto'
+
+import { humanWarn } from '#utils/human'
+import { createLogger } from '#utils/logger'
 
 // ============================================================================
 // Types (AC01, AC02)
@@ -78,7 +81,9 @@ export type CreateStateOptions = {
  * @param options - Optional initial values
  * @returns New IncrementalState with current timestamp and config hash
  */
-export function createIncrementalState(options: CreateStateOptions = {}): IncrementalState {
+export function createIncrementalState(
+  options: CreateStateOptions = {},
+): IncrementalState {
   return {
     version: '1.0',
     lastEnrichedAt: new Date().toISOString(),
@@ -125,7 +130,10 @@ function generateConfigHash(): string {
  * @param state - Previous state with enriched GUIDs
  * @returns Array of new GUID strings not in enriched set
  */
-export function detectNewMessages(currentGuids: Set<string>, state: IncrementalState): string[] {
+export function detectNewMessages(
+  currentGuids: Set<string>,
+  state: IncrementalState,
+): string[] {
   const enrichedSet = new Set(state.enrichedGuids)
   const newGuids: string[] = []
 
@@ -192,14 +200,19 @@ export async function saveIncrementalState(
  * @param filePath - Path to .imessage-state.json
  * @returns IncrementalState if valid, null if missing or corrupted
  */
-export async function loadIncrementalState(filePath: string): Promise<IncrementalState | null> {
+export async function loadIncrementalState(
+  filePath: string,
+): Promise<IncrementalState | null> {
   try {
     const content = await fs.readFile(filePath, 'utf-8')
     const parsed = JSON.parse(content) as IncrementalState
 
     // Validate schema version
     if (parsed.version !== '1.0') {
-      console.warn(`Unknown state version: ${parsed.version}. Ignoring.`)
+      const logger = createLogger('utils:incremental-state')
+      logger.warn('Unknown state version. Ignoring.', {
+        version: parsed.version,
+      })
       return null
     }
 
@@ -241,14 +254,25 @@ export function verifyConfigHash(
  * @param daysThreshold - Days before state is considered stale (default: 7)
  * @returns true if state is older than threshold
  */
-export function isStateOutdated(state: IncrementalState, daysThreshold: number = 7): boolean {
+export function isStateOutdated(
+  state: IncrementalState,
+  daysThreshold: number = 7,
+): boolean {
   const lastEnrichedTime = new Date(state.lastEnrichedAt).getTime()
   const now = Date.now()
   const ageMs = now - lastEnrichedTime
   const ageDays = ageMs / (1000 * 60 * 60 * 24)
 
   if (ageDays > daysThreshold) {
-    console.warn(`⚠️  State file is ${Math.floor(ageDays)} days old. Consider full re-enrichment.`)
+    const logger = createLogger('utils:incremental-state')
+    logger.warn('State file is old. Consider full re-enrichment.', {
+      ageDays: Math.floor(ageDays),
+      daysThreshold,
+    })
+    // Human-visible warning for tests & interactive CLI (console.warn spied in tests)
+    humanWarn(
+      `State file is old (ageDays=${Math.floor(ageDays)}, threshold=${daysThreshold}). Consider full re-enrichment.`,
+    )
     return true
   }
 
@@ -304,6 +328,8 @@ export function updateStateWithEnrichedGuids(
  * @param totalMessages - Total messages to initialize with
  * @returns Fresh IncrementalState with no enriched GUIDs
  */
-export function resetIncrementalState(totalMessages: number = 0): IncrementalState {
+export function resetIncrementalState(
+  totalMessages: number = 0,
+): IncrementalState {
   return createIncrementalState({ totalMessages })
 }

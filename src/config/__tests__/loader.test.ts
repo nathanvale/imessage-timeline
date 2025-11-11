@@ -9,10 +9,12 @@
  * - AC05: Cache loaded config to avoid repeated file reads
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { writeFile, unlink, mkdir } from 'fs/promises'
-import { join } from 'path'
 import { tmpdir } from 'os'
+import { join } from 'path'
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
 import {
   loadConfig,
   loadConfigFile,
@@ -22,6 +24,7 @@ import {
   clearConfigCache,
   isConfigCached,
 } from '../loader'
+
 import type { Config } from '../schema'
 
 describe('Config Loader', () => {
@@ -55,8 +58,8 @@ describe('Config Loader', () => {
         files.map((f) =>
           unlink(join(testDir, f)).catch(() => {
             /* ignore */
-          })
-        )
+          }),
+        ),
       )
     } catch {
       /* ignore cleanup errors */
@@ -245,41 +248,29 @@ gemini:
       const configPath = join(testDir, 'invalid.json')
       await writeFile(configPath, '{ invalid json')
 
-      await expect(loadConfigFile(configPath)).rejects.toThrow(
-        'Failed to parse JSON'
-      )
+      await expect(loadConfigFile(configPath)).rejects.toThrow('Failed to parse JSON')
     })
 
     it('should throw error for invalid YAML', async () => {
       const configPath = join(testDir, 'invalid.yaml')
       await writeFile(configPath, 'invalid: [yaml: syntax')
 
-      await expect(loadConfigFile(configPath)).rejects.toThrow(
-        'Failed to parse YAML'
-      )
+      await expect(loadConfigFile(configPath)).rejects.toThrow('Failed to parse YAML')
     })
 
     it('should throw error for unsupported format', async () => {
       const configPath = join(testDir, 'config.toml')
       await writeFile(configPath, 'key = "value"')
 
-      await expect(loadConfigFile(configPath)).rejects.toThrow(
-        'Unsupported config file format'
-      )
+      await expect(loadConfigFile(configPath)).rejects.toThrow('Unsupported config file format')
     })
   })
 
   // CONFIG-T02-AC01: Config file discovery
   describe('discoverConfigFile', () => {
     it('should find .yaml file first', async () => {
-      await writeFile(
-        join(testDir, 'imessage-config.yaml'),
-        'version: "1.0"'
-      )
-      await writeFile(
-        join(testDir, 'imessage-config.json'),
-        '{"version": "1.0"}'
-      )
+      await writeFile(join(testDir, 'imessage-config.yaml'), 'version: "1.0"')
+      await writeFile(join(testDir, 'imessage-config.json'), '{"version": "1.0"}')
 
       const result = await discoverConfigFile(testDir)
 
@@ -288,10 +279,7 @@ gemini:
 
     it('should find .yml file second', async () => {
       await writeFile(join(testDir, 'imessage-config.yml'), 'version: "1.0"')
-      await writeFile(
-        join(testDir, 'imessage-config.json'),
-        '{"version": "1.0"}'
-      )
+      await writeFile(join(testDir, 'imessage-config.json'), '{"version": "1.0"}')
 
       const result = await discoverConfigFile(testDir)
 
@@ -299,10 +287,7 @@ gemini:
     })
 
     it('should find .json file last', async () => {
-      await writeFile(
-        join(testDir, 'imessage-config.json'),
-        '{"version": "1.0"}'
-      )
+      await writeFile(join(testDir, 'imessage-config.json'), '{"version": "1.0"}')
 
       const result = await discoverConfigFile(testDir)
 
@@ -398,9 +383,7 @@ gemini:
       })
 
       expect(config.gemini.apiKey).toBe('env-key')
-      expect(config.attachmentRoots).toEqual([
-        '~/Library/Messages/Attachments',
-      ])
+      expect(config.attachmentRoots).toEqual(['~/Library/Messages/Attachments'])
     })
 
     it('should use explicit configPath if provided', async () => {
@@ -412,7 +395,7 @@ gemini:
         `
 gemini:
   apiKey: \${GEMINI_API_KEY}
-`
+`,
       )
 
       const config = await loadConfig({ configPath: customPath })
@@ -432,7 +415,7 @@ gemini:
       await writeFile(configPath, yamlContent)
 
       await expect(loadConfig({ configPath })).rejects.toThrow(
-        'Environment variable GEMINI_API_KEY is not set'
+        'Environment variable GEMINI_API_KEY is not set',
       )
     })
 
@@ -447,9 +430,7 @@ gemini:
       const configPath = join(testDir, 'imessage-config.yaml')
       await writeFile(configPath, yamlContent)
 
-      await expect(loadConfig({ configPath })).rejects.toThrow(
-        'Config validation failed'
-      )
+      await expect(loadConfig({ configPath })).rejects.toThrow('Config validation failed')
     })
   })
 

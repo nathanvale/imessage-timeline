@@ -1,6 +1,6 @@
-import type { SingleBar } from 'cli-progress'
-
 import { ProgressManager } from '../progress/progress-manager'
+
+import type { SingleBar } from 'cli-progress'
 
 /**
  * Types of enrichment operations tracked
@@ -70,12 +70,18 @@ export class EnrichmentProgressManager {
     if (this.quiet) return
 
     // AC01: Overall enrichment progress bar
-    this.overallBar = this.progressManager.createBar('Overall Enrichment', this.totalMessages)
+    this.overallBar = this.progressManager.createBar(
+      'Overall Enrichment',
+      this.totalMessages,
+    )
 
     // AC02: Per-type progress bars for each enrichment type
     const enrichmentTypes: EnrichmentType[] = ['image', 'audio', 'pdf', 'link']
     for (const type of enrichmentTypes) {
-      const typeBar = this.progressManager.createBar(`${this.capitalize(type)} Analysis`, 0)
+      const typeBar = this.progressManager.createBar(
+        `${this.capitalize(type)} Analysis`,
+        0,
+      )
       this.typeBars.set(type, typeBar)
     }
 
@@ -94,7 +100,10 @@ export class EnrichmentProgressManager {
 
     // Update current operation bar
     if (this.currentBar) {
-      this.progressManager.updateCurrent('Current Operation', `${type}: ${currentItem}`)
+      this.progressManager.updateCurrent(
+        'Current Operation',
+        `${type}: ${currentItem}`,
+      )
       this.progressManager.setProgress('Current Operation', 0)
     }
   }
@@ -122,7 +131,10 @@ export class EnrichmentProgressManager {
 
     // Increment overall progress
     if (this.overallBar) {
-      this.progressManager.setProgress('Overall Enrichment', this.processedMessages)
+      this.progressManager.setProgress(
+        'Overall Enrichment',
+        this.processedMessages,
+      )
       this.updateETADisplay()
     }
   }
@@ -223,7 +235,9 @@ export class EnrichmentProgressManager {
     return {
       processed: this.processedMessages,
       total: this.totalMessages,
-      percentage: Math.round((this.processedMessages / this.totalMessages) * 100),
+      percentage: Math.round(
+        (this.processedMessages / this.totalMessages) * 100,
+      ),
       averageDuration: this.getAverageDuration(),
       isCheckpointing: this.isCheckpointing,
     }

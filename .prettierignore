@@ -1,3 +1,19 @@
+# Build outputs
 dist
 coverage
+
+# Dependencies
 node_modules
+
+# Logs & caches (skip formatting)
+logs
+.logs
+.cache
+.parcel-cache
+.pack
+
+# Test artifacts
+test-results
+
+# Generated artifacts
+sbom.cdx.json

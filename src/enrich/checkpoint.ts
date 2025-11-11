@@ -18,9 +18,9 @@
  * - saveCheckpoint: Write checkpoint atomically
  */
 
-import path from 'path'
-import { writeFile, readFile, access } from 'fs/promises'
 import crypto from 'crypto'
+import { writeFile, readFile, access } from 'fs/promises'
+import path from 'path'
 
 // ============================================================================
 // Types
@@ -72,7 +72,7 @@ export type CheckpointInput = {
  */
 export function shouldWriteCheckpoint(
   itemIndex: number,
-  checkpointInterval: number = 100
+  checkpointInterval: number = 100,
 ): boolean {
   // Write checkpoint at multiples of interval (100, 200, 300, etc.)
   return itemIndex > 0 && itemIndex % checkpointInterval === 0
@@ -112,7 +112,10 @@ export function createCheckpoint(input: CheckpointInput): EnrichCheckpoint {
  * @param configHash - Config hash for uniqueness
  * @returns Path to checkpoint file
  */
-export function getCheckpointPath(checkpointDir: string, configHash: string): string {
+export function getCheckpointPath(
+  checkpointDir: string,
+  configHash: string,
+): string {
   return path.join(checkpointDir, `checkpoint-${configHash}.json`)
 }
 
@@ -124,7 +127,7 @@ export function getCheckpointPath(checkpointDir: string, configHash: string): st
  */
 export async function saveCheckpoint(
   checkpoint: EnrichCheckpoint,
-  checkpointPath: string
+  checkpointPath: string,
 ): Promise<void> {
   const tempPath = `${checkpointPath}.tmp`
 
@@ -154,7 +157,9 @@ export async function saveCheckpoint(
  * @param checkpointPath - Path to checkpoint file
  * @returns Loaded checkpoint or null if not found
  */
-export async function loadCheckpoint(checkpointPath: string): Promise<EnrichCheckpoint | null> {
+export async function loadCheckpoint(
+  checkpointPath: string,
+): Promise<EnrichCheckpoint | null> {
   try {
     await access(checkpointPath)
     const content = await readFile(checkpointPath, 'utf-8')
@@ -205,7 +210,10 @@ export function computeConfigHash(config: Record<string, unknown>): string {
  * @param currentHash - Hash of current config
  * @returns true if hashes match (config unchanged)
  */
-export function verifyConfigHash(checkpointHash: string, currentHash: string): boolean {
+export function verifyConfigHash(
+  checkpointHash: string,
+  currentHash: string,
+): boolean {
   return checkpointHash === currentHash
 }
 
@@ -229,7 +237,7 @@ export type CheckpointState = {
  */
 export function initializeCheckpointState(
   checkpoint: EnrichCheckpoint | null,
-  currentConfigHash: string
+  currentConfigHash: string,
 ): CheckpointState | Error {
   if (!checkpoint) {
     // No checkpoint, starting fresh
@@ -246,7 +254,7 @@ export function initializeCheckpointState(
     return new Error(
       `Config mismatch: checkpoint was created with config ${checkpoint.configHash.substring(0, 8)}, ` +
         `but current config is ${currentConfigHash.substring(0, 8)}. ` +
-        `Cannot resume with different configuration.`
+        `Cannot resume with different configuration.`,
     )
   }
 
@@ -276,7 +284,7 @@ export function prepareCheckpoint(
   totalFailed: number,
   batchStats: CheckpointStats,
   failedItems: FailedItem[],
-  configHash: string
+  configHash: string,
 ): EnrichCheckpoint {
   return createCheckpoint({
     lastProcessedIndex,

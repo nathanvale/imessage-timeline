@@ -4,7 +4,7 @@
   "baseBranch": "main",
   "changelog": [
     "@changesets/changelog-github",
-    {"repo": "nathanvale/modern-ts-cli-starter"}
+    { "repo": "nathanvale/imessage-timeline" }
   ],
   "commit": false,
   "fixed": [],

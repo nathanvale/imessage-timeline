@@ -24,11 +24,21 @@
 
 import type { Message, MediaEnrichment } from '#schema/message'
 
+import { createLogger } from '#utils/logger'
+
 type LinkContext = {
   url: string
   title?: string
   description?: string
-  provider: 'gemini' | 'firecrawl' | 'local' | 'youtube' | 'spotify' | 'twitter' | 'instagram' | 'generic'
+  provider:
+    | 'gemini'
+    | 'firecrawl'
+    | 'local'
+    | 'youtube'
+    | 'spotify'
+    | 'twitter'
+    | 'instagram'
+    | 'generic'
   usedFallback?: boolean
   failedProviders?: string[]
 }
@@ -46,20 +56,14 @@ type LinkEnrichmentConfig = {
 /**
  * Logger for structured output
  */
-function log(level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: Record<string, unknown>) {
-  const prefix = `[enrich:link-enrichment] [${level.toUpperCase()}]`
-  if (context) {
-    console.log(`${prefix} ${message}`, context)
-  } else {
-    console.log(`${prefix} ${message}`)
-  }
-}
+const logger = createLogger('enrich:link-enrichment')
 
 /**
  * URL detection patterns for different provider types
  */
 const URL_PATTERNS = {
-  youtube: /^https?:\/\/(www\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)/i,
+  youtube:
+    /^https?:\/\/(www\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)/i,
   spotify: /^https?:\/\/open\.spotify\.com\/(track|album|playlist|artist)/i,
   twitter: /^https?:\/\/(www\.)?(twitter\.com|x\.com)/i,
   instagram: /^https?:\/\/(www\.)?instagram\.com/i,
@@ -106,7 +110,7 @@ class FirecrawlProvider implements Provider {
         url,
       }
 
-      log('debug', `Firecrawl extracted metadata for ${url}`)
+      logger.debug(`Firecrawl extracted metadata for ${url}`)
       return {
         url,
         title: response.title,
@@ -114,7 +118,7 @@ class FirecrawlProvider implements Provider {
         provider: 'firecrawl',
       }
     } catch (error) {
-      log('error', `Firecrawl extraction failed for ${url}`, { error })
+      logger.error(`Firecrawl extraction failed for ${url}`, { error })
       throw error
     }
   }
@@ -134,7 +138,9 @@ class YouTubeProvider implements Provider {
   async extract(url: string): Promise<LinkContext> {
     try {
       // Extract video ID from URL
-      const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+      const videoIdMatch = url.match(
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+      )
       const videoId = videoIdMatch?.[1]
 
       if (!videoId) {
@@ -144,7 +150,7 @@ class YouTubeProvider implements Provider {
       // In production, would fetch from YouTube API or parse HTML
       const title = `YouTube Video: ${videoId}`
 
-      log('debug', `YouTube extracted metadata for ${url}`)
+      logger.debug(`YouTube extracted metadata for ${url}`)
       return {
         url,
         title,
@@ -153,7 +159,7 @@ class YouTubeProvider implements Provider {
         usedFallback: true,
       }
     } catch (error) {
-      log('error', `YouTube extraction failed for ${url}`, { error })
+      logger.error(`YouTube extraction failed for ${url}`, { error })
       throw error
     }
   }
@@ -185,7 +191,7 @@ class SpotifyProvider implements Provider {
       // In production, would fetch from Spotify API or parse OpenGraph
       const title = `Spotify ${resourceType}: ${resourceId}`
 
-      log('debug', `Spotify extracted metadata for ${url}`)
+      logger.debug(`Spotify extracted metadata for ${url}`)
       return {
         url,
         title,
@@ -194,7 +200,7 @@ class SpotifyProvider implements Provider {
         usedFallback: true,
       }
     } catch (error) {
-      log('error', `Spotify extraction failed for ${url}`, { error })
+      logger.error(`Spotify extraction failed for ${url}`, { error })
       throw error
     }
   }
@@ -224,7 +230,7 @@ class TwitterProvider implements Provider {
       // In production, would parse meta tags or use Twitter API
       const title = `Tweet: ${tweetId}`
 
-      log('debug', `Twitter extracted metadata for ${url}`)
+      logger.debug(`Twitter extracted metadata for ${url}`)
       return {
         url,
         title,
@@ -233,7 +239,7 @@ class TwitterProvider implements Provider {
         usedFallback: true,
       }
     } catch (error) {
-      log('error', `Twitter extraction failed for ${url}`, { error })
+      logger.error(`Twitter extraction failed for ${url}`, { error })
       throw error
     }
   }
@@ -263,7 +269,7 @@ class InstagramProvider implements Provider {
       // In production, would parse meta tags or use Instagram API
       const title = `Instagram Post: ${postId}`
 
-      log('debug', `Instagram extracted metadata for ${url}`)
+      logger.debug(`Instagram extracted metadata for ${url}`)
       return {
         url,
         title,
@@ -272,7 +278,7 @@ class InstagramProvider implements Provider {
         usedFallback: true,
       }
     } catch (error) {
-      log('error', `Instagram extraction failed for ${url}`, { error })
+      logger.error(`Instagram extraction failed for ${url}`, { error })
       throw error
     }
   }
@@ -294,7 +300,7 @@ class GenericProvider implements Provider {
       // Basic fallback - just use URL as title
       const title = new URL(url).hostname
 
-      log('debug', `Generic provider using fallback for ${url}`)
+      logger.debug(`Generic provider using fallback for ${url}`)
       return {
         url,
         title,
@@ -303,7 +309,7 @@ class GenericProvider implements Provider {
         usedFallback: true,
       }
     } catch (error) {
-      log('error', `Generic extraction failed for ${url}`, { error })
+      logger.error(`Generic extraction failed for ${url}`, { error })
       throw error
     }
   }
@@ -348,7 +354,7 @@ function extractUrls(text: string): string[] {
  */
 async function enrichUrl(
   url: string,
-  config: Partial<LinkEnrichmentConfig>
+  config: Partial<LinkEnrichmentConfig>,
 ): Promise<LinkContext | null> {
   const providers = createProviders(config)
   const failedProviders: string[] = []
@@ -357,12 +363,14 @@ async function enrichUrl(
   for (const provider of providers) {
     try {
       if (!provider.detect(url)) {
-        log('debug', `Provider ${provider.name} skipped (not applicable for URL)`)
+        logger.debug(
+          `Provider ${provider.name} skipped (not applicable for URL)`,
+        )
         continue
       }
 
       const context = await provider.extract(url)
-      log('info', `Link enrichment succeeded with ${provider.name}`, { url })
+      logger.info(`Link enrichment succeeded with ${provider.name}`, { url })
       const result: LinkContext = { ...context }
       if (failedProviders.length > 0) {
         result.failedProviders = failedProviders
@@ -370,7 +378,7 @@ async function enrichUrl(
       return result
     } catch (error) {
       failedProviders.push(provider.name)
-      log('warn', `Provider ${provider.name} failed for ${url}`, {
+      logger.warn(`Provider ${provider.name} failed for ${url}`, {
         error: error instanceof Error ? error.message : String(error),
       })
       // Continue to next provider
@@ -378,7 +386,7 @@ async function enrichUrl(
   }
 
   // AC05: All providers failed - return null but don't crash
-  log('warn', `All providers failed for URL ${url}`, { failedProviders })
+  logger.warn(`All providers failed for URL ${url}`, { failedProviders })
   return null
 }
 
@@ -388,11 +396,11 @@ async function enrichUrl(
  */
 export async function enrichLinkContext(
   message: Message,
-  config: Partial<LinkEnrichmentConfig>
+  config: Partial<LinkEnrichmentConfig>,
 ): Promise<Message> {
   // Skip if not enabled
   if (!config.enableLinkAnalysis) {
-    log('debug', `Link analysis disabled in config`)
+    logger.debug(`Link analysis disabled in config`)
     return message
   }
 
@@ -406,20 +414,20 @@ export async function enrichLinkContext(
     const urls = extractUrls(message.text)
 
     if (urls.length === 0) {
-      log('debug', `No URLs found in message`, { guid: message.guid })
+      logger.debug(`No URLs found in message`, { guid: message.guid })
       return message
     }
 
     // Process first URL found (could extend to handle multiple)
     const url = urls[0]
     if (!url) {
-      log('debug', `URL array is empty`, { guid: message.guid })
+      logger.debug(`URL array is empty`, { guid: message.guid })
       return message
     }
     const context = await enrichUrl(url, config)
 
     if (!context) {
-      log('debug', `Failed to enrich link for ${url}`, { guid: message.guid })
+      logger.debug(`Failed to enrich link for ${url}`, { guid: message.guid })
       return message
     }
 
@@ -441,13 +449,17 @@ export async function enrichLinkContext(
     if (context.description) enrichment.summary = context.description
     if (context.usedFallback) enrichment.usedFallback = context.usedFallback
 
-    log('info', `Link enriched`, { url, provider: context.provider, guid: message.guid })
+    logger.info(`Link enriched`, {
+      url,
+      provider: context.provider,
+      guid: message.guid,
+    })
 
     // Return message with enrichment appended to media.enrichment if media exists
     // For text messages, store in a different place or skip
     return message
   } catch (error) {
-    log('error', `Error enriching link`, {
+    logger.error(`Error enriching link`, {
       guid: message.guid,
       error: error instanceof Error ? error.message : String(error),
     })
@@ -462,7 +474,7 @@ export async function enrichLinkContext(
  */
 export async function enrichLinksContext(
   messages: Message[],
-  config: Partial<LinkEnrichmentConfig>
+  config: Partial<LinkEnrichmentConfig>,
 ): Promise<Message[]> {
   const results: Message[] = []
   let enrichedCount = 0
@@ -480,7 +492,7 @@ export async function enrichLinksContext(
       results.push(enriched)
     } catch (error) {
       failedCount++
-      log('error', `Failed to analyze message`, {
+      logger.error(`Failed to analyze message`, {
         guid: message.guid,
         error: error instanceof Error ? error.message : String(error),
       })
@@ -489,7 +501,7 @@ export async function enrichLinksContext(
     }
   }
 
-  log('info', `Batch link enrichment complete`, {
+  logger.info(`Batch link enrichment complete`, {
     enrichedCount,
     skippedCount,
     failedCount,

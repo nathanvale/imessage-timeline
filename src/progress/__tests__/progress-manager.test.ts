@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
 import { ProgressManager, createProgressManager, withProgress } from '../progress-manager.ts'
 
 describe('ProgressManager', () => {
@@ -322,7 +323,9 @@ describe('ProgressManager', () => {
 
       // Manually trigger the registered uncaughtException handler
       const calls = processOnSpy.mock.calls
-      const exceptionHandler = calls.find((call) => call[0] === 'uncaughtException')?.[1] as (error: Error) => void
+      const exceptionHandler = calls.find((call) => call[0] === 'uncaughtException')?.[1] as (
+        error: Error,
+      ) => void
       if (exceptionHandler) {
         exceptionHandler(new Error('Test error'))
       }

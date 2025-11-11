@@ -1,6 +1,7 @@
 import { existsSync } from 'fs'
-import * as path from 'path'
 import * as os from 'os'
+import * as path from 'path'
+
 import type { Message, MediaProvenance } from '../schema/message'
 
 type MessageWithMetadata = Message & { exportMetadata?: { source?: string } }
@@ -72,7 +73,7 @@ export function expandTildeInPath(filePath: string): string {
  */
 export function searchAttachmentInRoots(
   filename: string,
-  attachmentRoots: string[]
+  attachmentRoots: string[],
 ): string | null {
   if (!filename || attachmentRoots.length === 0) {
     return null
@@ -108,7 +109,7 @@ export function searchAttachmentInRoots(
  */
 export function inferSource(
   message: Message,
-  defaultSource: 'csv' | 'db' | 'merged'
+  defaultSource: 'csv' | 'db' | 'merged',
 ): 'csv' | 'db' {
   // Check guid pattern
   if (message.guid?.startsWith('p:')) {
@@ -138,7 +139,7 @@ export function inferSource(
  */
 export function createProvenance(
   message: Message,
-  source: 'csv' | 'db' | 'merged'
+  source: 'csv' | 'db' | 'merged',
 ): MediaProvenance {
   const now = new Date().toISOString()
   return {
@@ -158,7 +159,7 @@ export function createProvenance(
  */
 export function validateAndEnforcePaths(
   messages: Message[],
-  config: PathValidationConfig
+  config: PathValidationConfig,
 ): PathValidationResult {
   const result: PathValidationResult = {
     messages: [],
@@ -200,7 +201,10 @@ export function validateAndEnforcePaths(
 
     // If still not absolute, try searching in attachment roots
     if (!pathAbsolute && media.filename) {
-      const found = searchAttachmentInRoots(media.filename, config.attachmentRoots)
+      const found = searchAttachmentInRoots(
+        media.filename,
+        config.attachmentRoots,
+      )
       if (found) {
         resolvedPath = found
         pathAbsolute = true

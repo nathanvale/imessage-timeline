@@ -11,6 +11,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { z } from 'zod'
+
 import {
   ConfigSchema,
   validateConfig,
@@ -38,10 +39,7 @@ describe('ConfigSchema', () => {
     it('should validate full config with all fields', () => {
       const config: Config = {
         version: '1.0',
-        attachmentRoots: [
-          '~/Library/Messages/Attachments',
-          '/Volumes/Backup/old-attachments',
-        ],
+        attachmentRoots: ['~/Library/Messages/Attachments', '/Volumes/Backup/old-attachments'],
         gemini: {
           apiKey: 'test-gemini-key',
           model: 'gemini-1.5-pro',
@@ -89,9 +87,7 @@ describe('ConfigSchema', () => {
         expect(result.data.gemini.model).toBe('gemini-1.5-pro')
         expect(result.data.gemini.rateLimitDelay).toBe(1000)
         expect(result.data.gemini.maxRetries).toBe(3)
-        expect(result.data.attachmentRoots).toEqual([
-          '~/Library/Messages/Attachments',
-        ])
+        expect(result.data.attachmentRoots).toEqual(['~/Library/Messages/Attachments'])
         expect(result.data.enrichment.enableVisionAnalysis).toBe(true)
         expect(result.data.enrichment.checkpointInterval).toBe(100)
         expect(result.data.render.maxNestingDepth).toBe(10)
@@ -125,9 +121,7 @@ describe('ConfigSchema', () => {
       const result = ConfigSchema.safeParse(config)
       expect(result.success).toBe(false)
       if (!result.success) {
-        const apiKeyError = result.error.errors.find((err) =>
-          err.path.includes('apiKey')
-        )
+        const apiKeyError = result.error.errors.find((err) => err.path.includes('apiKey'))
         expect(apiKeyError).toBeDefined()
         expect(apiKeyError?.message).toContain('required')
       }
@@ -144,9 +138,7 @@ describe('ConfigSchema', () => {
       const result = ConfigSchema.safeParse(config)
       expect(result.success).toBe(false)
       if (!result.success) {
-        const rootsError = result.error.errors.find((err) =>
-          err.path.includes('attachmentRoots')
-        )
+        const rootsError = result.error.errors.find((err) => err.path.includes('attachmentRoots'))
         expect(rootsError).toBeDefined()
         expect(rootsError?.message).toContain('At least one')
       }
@@ -163,9 +155,7 @@ describe('ConfigSchema', () => {
       const result = ConfigSchema.safeParse(config)
       expect(result.success).toBe(false)
       if (!result.success) {
-        const pathError = result.error.errors.find(
-          (err) => err.path[0] === 'attachmentRoots'
-        )
+        const pathError = result.error.errors.find((err) => err.path[0] === 'attachmentRoots')
         expect(pathError).toBeDefined()
         expect(pathError?.message).toContain('cannot be empty')
       }
@@ -350,9 +340,7 @@ describe('ConfigSchema', () => {
     })
 
     it('should throw error for unsupported formats', () => {
-      expect(() => detectConfigFormat('./config.toml')).toThrow(
-        'Unsupported config file format'
-      )
+      expect(() => detectConfigFormat('./config.toml')).toThrow('Unsupported config file format')
       expect(() => detectConfigFormat('./config.txt')).toThrow()
     })
   })
@@ -360,9 +348,7 @@ describe('ConfigSchema', () => {
   describe('DEFAULT_CONFIG', () => {
     it('should provide sensible defaults', () => {
       expect(DEFAULT_CONFIG.version).toBe('1.0')
-      expect(DEFAULT_CONFIG.attachmentRoots).toEqual([
-        '~/Library/Messages/Attachments',
-      ])
+      expect(DEFAULT_CONFIG.attachmentRoots).toEqual(['~/Library/Messages/Attachments'])
       expect(DEFAULT_CONFIG.enrichment?.checkpointInterval).toBe(100)
       expect(DEFAULT_CONFIG.render?.maxNestingDepth).toBe(10)
     })

@@ -11,12 +11,14 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import type { Message, MediaEnrichment } from '#schema/message'
+
 import {
   addEnrichmentIdempotent,
   shouldSkipEnrichment,
   deduplicateEnrichmentByKind,
 } from '../idempotency'
+
+import type { Message, MediaEnrichment } from '#schema/message'
 
 describe('Enrichment Idempotency - Integration Scenarios', () => {
   let mediaMessage: Message
@@ -62,10 +64,14 @@ describe('Enrichment Idempotency - Integration Scenarios', () => {
         shortDescription: 'Different',
       }
 
-      mediaMessage = addEnrichmentIdempotent(mediaMessage, imageEnrichment2, { forceRefresh: false })
+      mediaMessage = addEnrichmentIdempotent(mediaMessage, imageEnrichment2, {
+        forceRefresh: false,
+      })
       expect(mediaMessage.media?.enrichment).toHaveLength(1)
       // Should still have original
-      expect(mediaMessage.media?.enrichment?.[0].visionSummary).toBe('A photo of a mountain landscape')
+      expect(mediaMessage.media?.enrichment?.[0].visionSummary).toBe(
+        'A photo of a mountain landscape',
+      )
 
       // Run 3: Add transcription (different kind, should add)
       const transcriptionEnrichment: MediaEnrichment = {
@@ -93,7 +99,9 @@ describe('Enrichment Idempotency - Integration Scenarios', () => {
         shortDescription: 'Original',
       }
 
-      mediaMessage = addEnrichmentIdempotent(mediaMessage, imageEnrichment1, { forceRefresh: false })
+      mediaMessage = addEnrichmentIdempotent(mediaMessage, imageEnrichment1, {
+        forceRefresh: false,
+      })
       expect(mediaMessage.media?.enrichment?.[0].visionSummary).toBe('Original analysis')
 
       // Run 2: Try to add same kind with force-refresh

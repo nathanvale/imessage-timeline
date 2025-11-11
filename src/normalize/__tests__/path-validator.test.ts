@@ -1,13 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+
 import {
   validateAndEnforcePaths,
   searchAttachmentInRoots,
   isAbsolutePath,
   PathValidationStats,
 } from '../path-validator'
+
 import type { Message } from '../../schema/message'
 
 describe('path-validator', () => {
@@ -115,7 +118,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.messages[0]?.media?.path).toBe(tempFile1)
       expect(result.messages[0]?.media?.path).toMatch(/^\//)
@@ -138,7 +144,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.messages[0]?.media?.path).toBe(tempFile1)
     })
@@ -154,7 +163,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.messages[0]?.messageKind).toBe('text')
       expect(result.messages[0]?.text).toBe('Hello world')
@@ -180,7 +192,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.messages[0]?.media?.filename).toBe('missing-file.jpg')
     })
@@ -202,7 +217,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.messages[0]?.media?.provenance).toBeDefined()
       expect(result.messages[0]?.media?.provenance?.source).toBe('csv')
@@ -250,7 +268,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
       const provenance = result.messages[0]?.media?.provenance
 
       expect(provenance?.lastSeen).toBe('2025-10-17T10:00:00.000Z')
@@ -263,7 +284,10 @@ describe('path-validator', () => {
     it('should return stats object', () => {
       const messages: Message[] = []
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.stats).toBeDefined()
       expect(result.stats.found).toBe(0)
@@ -301,7 +325,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.stats.found).toBe(2)
       expect(result.stats.missing).toBe(0)
@@ -338,7 +365,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.stats.found).toBe(0)
       expect(result.stats.missing).toBe(2)
@@ -382,7 +412,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.stats.found).toBe(1)
       expect(result.stats.missing).toBe(1)
@@ -411,7 +444,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.stats.found).toBe(0)
       expect(result.stats.missing).toBe(0)
@@ -552,7 +588,10 @@ describe('path-validator', () => {
         } as Message)
       }
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.messages).toHaveLength(100)
       expect(result.stats.found).toBe(50)
@@ -597,7 +636,10 @@ describe('path-validator', () => {
         } as Message,
       ]
 
-      const result = validateAndEnforcePaths(messages, { attachmentRoots: [tempDir], source: 'csv' })
+      const result = validateAndEnforcePaths(messages, {
+        attachmentRoots: [tempDir],
+        source: 'csv',
+      })
 
       expect(result.messages[0]?.guid).toBe('csv:1:0:media')
       expect(result.messages[1]?.guid).toBe('csv:2:0')

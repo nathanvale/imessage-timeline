@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import type { Message, MediaEnrichment } from '#schema/message'
+
 import {
   shouldSkipEnrichment,
   deduplicateEnrichmentByKind,
@@ -19,6 +19,8 @@ import {
   clearEnrichmentByKind,
   addEnrichmentsIdempotent,
 } from '../idempotency'
+
+import type { Message, MediaEnrichment } from '#schema/message'
 
 describe('Enrichment Idempotency (ENRICH--T05)', () => {
   let mediaMessage: Message

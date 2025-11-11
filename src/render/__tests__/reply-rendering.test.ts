@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import type { Message } from '#schema/message'
+
 import {
   findRepliesForMessage,
   findTapbacksForMessage,
@@ -14,8 +14,15 @@ import {
   type TapbackContext,
 } from '../reply-rendering'
 
+import type { Message } from '#schema/message'
+
 describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
-  const createTestMessage = (guid: string, text: string, replyTo?: string, tapback?: any): Message => ({
+  const createTestMessage = (
+    guid: string,
+    text: string,
+    replyTo?: string,
+    tapback?: any,
+  ): Message => ({
     guid,
     messageKind: replyTo ? 'text' : tapback ? 'tapback' : 'text',
     isFromMe: false,

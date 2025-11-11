@@ -1,14 +1,23 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "#enrich/*": ["./src/enrich/*"],
+      "#ingest/*": ["./src/ingest/*"],
+      "#normalize/*": ["./src/normalize/*"],
+      "#render/*": ["./src/render/*"],
+      "#schema/*": ["./src/schema/*"],
+      "#utils/*": ["./src/utils/*"]
+    }
   },
-  "include": [
-    "src/**/*.ts",
-    "scripts/**/*.ts",
-    "__tests__/**/*.ts",
-    "tests/**/*.ts",
-    "vitest.config.ts"
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    "__tests__/**"
   ],
-  "exclude": ["node_modules", "dist"]
+  "extends": "./tsconfig.base.json",
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "vitest.config.ts"]
 }

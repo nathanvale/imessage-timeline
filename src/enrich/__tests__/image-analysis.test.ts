@@ -1,7 +1,10 @@
-import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
+
+import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
+
 import { analyzeImage, convertToJpgPreview } from '../image-analysis'
+
 import type { MediaMeta, Message } from '#schema/message'
 
 // Mock Gemini API
@@ -33,12 +36,14 @@ vi.mock('sharp', () => {
 
 // Mock fs promises
 vi.mock('fs/promises', async (importOriginal) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await importOriginal<typeof import('fs/promises')>()
   return {
     ...actual,
     access: vi.fn().mockResolvedValue(undefined),
     writeFile: vi.fn().mockResolvedValue(undefined),
     stat: vi.fn().mockResolvedValue({ size: 45000 }),
+    default: actual,
   }
 })
 
