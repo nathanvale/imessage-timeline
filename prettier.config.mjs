@@ -20,7 +20,13 @@ export default {
   overrides: [
     {
       files: ['package.json', '**/package.json'],
-      options: { parser: 'json-stringify', printWidth: 80 },
+      // Disable JSON key sorting for package.json to preserve exports order
+      options: {
+        parser: 'json-stringify',
+        printWidth: 80,
+        plugins: [],
+        jsonRecursiveSort: false,
+      },
     },
     {
       files: ['*.json', '*.jsonc'],
