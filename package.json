@@ -19,23 +19,25 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist/**",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "bunx --bun tsc -p tsconfig.json",
     "clean": "rimraf dist .tsbuildinfo 2>/dev/null || true",
-    "dev": "pnpm build && node ./dist/cli.js",
+    "dev": "bun src/cli.ts",
     "cli": "node ./dist/cli.js",
     "start": "node ./dist/cli.js",
-    "watch": "tsc -p tsconfig.json --watch",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier -w .",
+    "watch": "bunx --bun tsc -p tsconfig.json --watch",
+    "lint": "bunx --bun eslint .",
+    "lint:fix": "bunx --bun eslint . --fix",
+    "format": "bunx --bun prettier -w .",
     "prepare": "husky",
     "version:gen": "changeset",
     "release": "changeset publish",
@@ -45,10 +47,10 @@
     "test:ci": "TF_BUILD=true vitest run",
     "coverage": "vitest run --coverage",
     "test:coverage": "vitest run --coverage",
-    "validate:json": "tsx scripts/validate-json.ts",
-    "commitlint": "commitlint --edit $GIT_PARAMS || true",
+    "validate:json": "bun scripts/validate-json.ts",
     "quality-check": "quality-check",
-    "quality-check:ci": "quality-check --since origin/main --safe --fix"
+    "quality-check:ci": "quality-check --since origin/main --safe --fix",
+    "typecheck": "bunx --bun tsc -p tsconfig.eslint.json --noEmit"
   },
   "engines": {
     "node": ">=22.20"
@@ -57,6 +59,7 @@
     "access": "public",
     "provenance": true
   },
+  "sideEffects": false,
   "license": "MIT",
   "keywords": [
     "imessage",
@@ -79,6 +82,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^9.38.0",
@@ -92,8 +96,10 @@
     "better-sqlite3": "^12.4.1",
     "changesets": "^1.0.2",
     "eslint": "^9.38.0",
+    "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
-    "jsdom": "^27.0.1",
+    "jsdom": "^25.0.1",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.6.2",
     "prettier-plugin-sort-json": "^4.1.1",
     "rimraf": "^6.0.1",
@@ -101,5 +107,14 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.1",
     "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mts,cts}": [
+      "eslint --fix",
+      "prettier -w"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier -w"
+    ]
   }
 }
