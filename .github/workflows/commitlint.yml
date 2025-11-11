@@ -14,14 +14,16 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@v4
+      - name: Enable Corepack (pnpm)
+        run: corepack enable
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
       - name: Use Node 22.20
         uses: actions/setup-node@v4
         with:
           node-version: 22.20
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint commit messages
