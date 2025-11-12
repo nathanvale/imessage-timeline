@@ -74,7 +74,7 @@ jobs:
         run: pnpm test:ci
 
       - name: Annotate tests (JUnit)
-        if: always()
+        if: ${{ always() }}
         uses: dorny/test-reporter@v1
         with:
           name: Vitest JUnit
@@ -82,7 +82,7 @@ jobs:
           reporter: java-junit
 
       - name: Upload JUnit test results
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: junit
@@ -91,7 +91,7 @@ jobs:
           retention-days: 14
 
       - name: Upload coverage report (HTML + lcov)
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: coverage
@@ -100,7 +100,7 @@ jobs:
           retention-days: 14
 
       - name: Append coverage summary to job summary
-        if: always()
+        if: ${{ always() }}
         run: |
           if [ -f ./test-results/coverage/lcov.info ]; then
             node -e "const fs=require('fs');const data=fs.readFileSync('test-results/coverage/lcov.info','utf8');let total={lines:{found:0,hit:0},branches:{found:0,hit:0},functions:{found:0,hit:0}};for(const rec of data.split('end_of_record')){if(!/SF:/.test(rec)) continue;const lines=rec.match(/LF:(\d+)/);const lhit=rec.match(/LH:(\d+)/);const brfound=rec.match(/BRF:(\d+)/);const brhit=rec.match(/BRH:(\d+)/);const ffound=rec.match(/FNF:(\d+)/);const fhit=rec.match(/FNH:(\d+)/);if(lines) total.lines.found+=+lines[1];if(lhit) total.lines.hit+=+lhit[1];if(brfound) total.branches.found+=+brfound[1];if(brhit) total.branches.hit+=+brhit[1];if(ffound) total.functions.found+=+ffound[1];if(fhit) total.functions.hit+=+fhit[1];}function pct(hit,found){return found? (hit/found*100).toFixed(2):'0.00'};const summary=`## Coverage Summary\n\n| Metric | % | Covered / Total |\n|---|---|---|\n| Lines | ${pct(total.lines.hit,total.lines.found)} | ${total.lines.hit} / ${total.lines.found} |\n| Branches | ${pct(total.branches.hit,total.branches.found)} | ${total.branches.hit} / ${total.branches.found} |\n| Functions | ${pct(total.functions.hit,total.functions.found)} | ${total.functions.hit} / ${total.functions.found} |\n`;fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);";
@@ -109,7 +109,7 @@ jobs:
           fi
 
       - name: Comment coverage summary on PR
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' }}
         uses: ./.github/actions/coverage-comment
         with:
           lcov-path: ./test-results/coverage/lcov.info
