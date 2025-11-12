@@ -26,4 +26,4 @@ jobs:
         uses: actions/dependency-review-action@4081bf99e2866ebe428fc0477b69eb4fcda7220a # v4.4.0
         continue-on-error: true
         with:
-          comment-summary-in-pr: true
+          comment-summary-in-pr: 'always'

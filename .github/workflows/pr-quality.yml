@@ -80,7 +80,7 @@ jobs:
           name: Vitest JUnit
           path: ./test-results/junit.xml
           reporter: java-junit
-          fail-on-error: false
+          fail-on-error: 'false'
 
       - name: Upload JUnit test results
         if: always()
