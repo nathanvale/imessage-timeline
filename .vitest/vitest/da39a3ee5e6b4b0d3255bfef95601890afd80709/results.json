@@ -139,6 +139,10 @@
     [
       ":src/__tests__/human-logging-toggle.test.ts",
       { "duration": 5.329334000000017, "failed": false }
+    ],
+    [
+      ":src/render/__tests__/utc-classification.test.ts",
+      { "duration": 1.9284999999999854, "failed": false }
     ]
   ],
   "version": "3.2.4"

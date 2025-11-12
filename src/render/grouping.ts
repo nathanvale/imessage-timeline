@@ -12,6 +12,18 @@
 import type { Message } from '#schema/message'
 
 /**
+ * Normalize any ISO-like timestamp to canonical UTC ISO format.
+ * - If no timezone designator (no 'Z' and no +/- offset), treat as UTC by appending 'Z'.
+ * - Then return Date.toISOString() to canonicalize milliseconds and Z suffix.
+ */
+function normalizeIsoUtc(input: string): string {
+  const hasZ = /Z$/.test(input)
+  const hasOffset = /[+-]\d{2}:?\d{2}$/.test(input)
+  const coerced = hasZ || hasOffset ? input : `${input.replace(/\s+$/, '')}Z`
+  return new Date(coerced).toISOString()
+}
+
+/**
  * Time-of-day classification
  */
 export type TimeOfDay = 'morning' | 'afternoon' | 'evening'
@@ -40,7 +52,7 @@ export type GroupedMessages = {
  * Evening: 18:00-23:59
  */
 export function classifyTimeOfDay(isoTimestamp: string): TimeOfDay {
-  const date = new Date(isoTimestamp)
+  const date = new Date(normalizeIsoUtc(isoTimestamp))
   const hours = date.getUTCHours()
 
   if (hours < 12) {
@@ -64,7 +76,7 @@ export function generateAnchorId(guid: string): string {
  * AC01: Extract date from ISO timestamp in YYYY-MM-DD format
  */
 export function extractDate(isoTimestamp: string): string {
-  const date = new Date(isoTimestamp)
+  const date = new Date(normalizeIsoUtc(isoTimestamp))
   const year = date.getUTCFullYear()
   const month = String(date.getUTCMonth() + 1).padStart(2, '0')
   const day = String(date.getUTCDate()).padStart(2, '0')
@@ -77,8 +89,8 @@ export function extractDate(isoTimestamp: string): string {
  */
 export function sortByTimestamp(messages: Message[]): Message[] {
   return [...messages].sort((a, b) => {
-    const timeA = new Date(a.date).getTime()
-    const timeB = new Date(b.date).getTime()
+    const timeA = new Date(normalizeIsoUtc(a.date)).getTime()
+    const timeB = new Date(normalizeIsoUtc(b.date)).getTime()
     return timeA - timeB
   })
 }
