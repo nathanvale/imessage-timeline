@@ -37,13 +37,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Publish readiness
+        run: |
+          if [ -z "${NPM_TOKEN:-}" ]; then
+            echo "::warning::NPM_TOKEN not set; publish will be skipped. Configure repository secret 'NPM_TOKEN' to enable publishing."
+          else
+            echo "::notice::NPM_TOKEN detected; publish enabled."
+          fi
+
       # This action will:
       # - open/update the "Version Packages" PR when there are pending changesets
       # - OR if this commit is the merged version commit, run the publish command
       - name: Changesets - open PR or publish
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
-          publish: pnpm release
+          # Guard publish to avoid failing main when NPM_TOKEN isn't configured
+          publish: bash .github/scripts/changesets-publish.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

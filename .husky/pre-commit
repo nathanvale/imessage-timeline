@@ -2,17 +2,15 @@
 pnpm exec lint-staged
 pnpm quality-check --staged --fix
 
-# If workflow files are staged and actionlint is available, run it for fast feedback
-if git diff --name-only --cached | grep -E '^\.github/workflows/.*\.(yml|yaml)$' >/dev/null 2>&1; then
+# If workflow files are staged, and actionlint is available, run quick lint.
+if git diff --name-only --cached | grep -qE '^\.github/workflows/'; then
 	if command -v actionlint >/dev/null 2>&1; then
-		echo "Running actionlint on staged workflow files..."
-		STAGED_FILES=$(git diff --name-only --cached | grep -E '^\.github/workflows/.*\.(yml|yaml)$' || true)
-		if [ -n "$STAGED_FILES" ]; then
-			# shellcheck disable=SC2086
-			actionlint -no-color -oneline $STAGED_FILES || exit 1
+		echo "actionlint: detected workflow changes; running lint (non-blocking)..."
+		if ! pnpm run -s lint:workflows; then
+			echo "actionlint reported issues. This is a heads-up only; commit not blocked."
+			echo "Tip: brew install shellcheck to see inline shell suggestions locally."
 		fi
 	else
-		echo "actionlint is not installed. Skipping workflow lint."
-		echo "Install it: brew install actionlint"
+		echo "actionlint not found. Hint: brew install actionlint (or run 'pnpm run lint:workflows' manually)."
 	fi
 fi

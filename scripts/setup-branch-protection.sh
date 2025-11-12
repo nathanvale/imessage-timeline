@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Disable pagers that may hijack output in some environments
+export GH_PAGER=""
+export PAGER=""
+export GIT_PAGER=""
+
 OWNER=${1:-nathanvale}
 REPO=${2:-imessage-timeline}
 BRANCH=${3:-main}
@@ -17,22 +22,18 @@ if ! gh auth status -h github.com >/dev/null 2>&1; then
 fi
 
 REPO_SLUG="$OWNER/$REPO"
-echo "Configuring repo: $REPO_SLUG (branch: $BRANCH)"
+echo "Configuring repo: $REPO_SLUG (branch: $BRANCH) [aggregate required checks]"
 
 echo "Enabling auto-merge on repository..."
-# --enable-auto-merge is idempotent
 gh repo edit "$REPO_SLUG" --enable-auto-merge >/dev/null
 
-echo "Applying branch protection (required checks, reviews, linear history, signed commits)..."
+echo "Applying branch protection (aggregate gate job + reviews, linear history, signed commits)..."
 read -r -d '' BODY <<'JSON'
 {
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "PR quality / Lint",
-      "PR quality / Typecheck",
-      "PR quality / Tests + Coverage",
-      "PR quality / Repo quality checks",
+      "PR quality / gate",
       "Commitlint / commitlint",
       "PR Title Lint / lint"
     ]
@@ -43,11 +44,7 @@ read -r -d '' BODY <<'JSON'
     "require_code_owner_reviews": false,
     "required_approving_review_count": 1
   },
-  "restrictions": {
-    "users": [],
-    "teams": [],
-    "apps": ["github-actions"]
-  },
+  "restrictions": null,
   "required_linear_history": true,
   "allow_force_pushes": false,
   "allow_deletions": false,
@@ -56,7 +53,6 @@ read -r -d '' BODY <<'JSON'
 }
 JSON
 
-# Apply protection
 printf '%s' "$BODY" | gh api \
   -X PUT \
   -H "Accept: application/vnd.github+json" \
@@ -64,9 +60,7 @@ printf '%s' "$BODY" | gh api \
   --input - >/dev/null
 
 echo "Enforcing signed commits on branch..."
-# Separate endpoint for required signatures
-# This is idempotent; returns 204 when enabling, 201 in some scenarios.
 gh api -X POST -H "Accept: application/vnd.github+json" \
   "repos/$REPO_SLUG/branches/$BRANCH/protection/required_signatures" >/dev/null || true
 
-echo "Done. Branch protection and auto-merge configured."
+echo "Done. Branch protection (aggregate) configured."

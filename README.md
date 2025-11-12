@@ -53,6 +53,38 @@ high-signal, low-noise pipeline.
 - Nightly snapshots (alpha): gated to run only while pre‑mode is active to avoid
   confusion with stable releases.
 
+#### Publishing and NPM_TOKEN
+
+This repo uses Changesets to open a "Version Packages" PR and publish on merge.
+
+- If an npm token is configured (repository secret `NPM_TOKEN`):
+  - The Changesets workflow authenticates to npm and runs `pnpm release`
+  - A GitHub Release is created for the tagged version
+- If no npm token is configured:
+  - The workflow does NOT fail main
+  - It surfaces a clear warning in the logs and Job Summary:
+    - "NPM_TOKEN not set; skipping publish. Configure repository secret
+      'NPM_TOKEN' to enable publishing."
+  - Versioning PR behavior still works; only publish is skipped
+
+How to enable publishing:
+
+1. Create an npm access token with publish rights
+2. In GitHub → Settings → Secrets and variables → Actions → New repository
+   secret
+3. Name: `NPM_TOKEN`, Value: your token
+4. Re-run the "Changesets Manage & Publish" workflow on `main`
+
+Tip: You can trigger the workflow manually from the Actions tab or by:
+
+```bash
+gh workflow run "Changesets Manage & Publish" -r main
+```
+
+Note: The workflow also posts an annotation and adds a short section to the Job
+Summary whenever publish is skipped so it's visible in the GitHub UI without
+failing the pipeline.
+
 Docs:
 
 - Canonical flow: `docs/releases/changesets-canonical.md`

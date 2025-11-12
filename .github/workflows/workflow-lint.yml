@@ -35,6 +35,7 @@ jobs:
           flags: -no-color -oneline
           fail-on-error: true
           group-result: true
+
       - name: Validate workflow schema (basic)
         run: |
           echo "Checking for forbidden blank env blocks..."

@@ -40,11 +40,6 @@ workflow. Check items off as we implement them.
 - [x] Add Bun scripts without changing pnpm as the package manager
 - [x] Document Node/Vitest as primary; Bun as optional speedup
 - [x] (Optional CI) Add a Bun canary job to run `smoke:bun`
-- [x] Add Firecrawl Bun smoke script (`scripts/smoke-firecrawl-bun.ts`) What?
-      So... ESLint... So... So typescript doesn't... Typecheck text files at
-      all. Test files at all.What? So... ESLint... So... So typescript
-      doesn't... Typecheck text files at all. Test files at all.So we do no type
-      checking on test files at all?
 
 ## CI Canary Tasks
 

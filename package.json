@@ -121,6 +121,7 @@
     "hygiene": "pnpm run -s check:publint && pnpm run -s check:types",
     "lint": "pnpm exec eslint .",
     "lint:fix": "pnpm exec eslint . --fix",
+    "lint:workflows": "actionlint -color -verbose",
     "pack:dry": "pnpm pack --pack-destination ./.pack && ls -lah ./.pack && tar -tf ./.pack/*.tgz | sort | sed 's/^/ - /'",
     "pre:enter:beta": "changeset pre enter beta",
     "pre:enter:next": "changeset pre enter next",
