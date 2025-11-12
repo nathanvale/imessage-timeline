@@ -40,7 +40,7 @@ checkout & Node setup):
   run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
 - name: Cache pnpm store
-  uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+  uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
   with:
     path: ${{ env.PNPM_STORE_PATH }}
     key:
