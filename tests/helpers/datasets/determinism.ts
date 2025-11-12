@@ -114,9 +114,9 @@ export function createLargeDataset(): Array<Message> {
   for (let i = 0; i < 500; i++) {
     const dayOffset = Math.floor(i / 100)
     const dateObj = new Date('2025-01-15T00:00:00Z')
-    dateObj.setDate(dateObj.getDate() + dayOffset)
-    dateObj.setHours(Math.floor((i % 100) / 4))
-    dateObj.setMinutes((i * 7) % 60)
+    dateObj.setUTCDate(dateObj.getUTCDate() + dayOffset)
+    dateObj.setUTCHours(Math.floor((i % 100) / 4))
+    dateObj.setUTCMinutes((i * 7) % 60)
     const idx = i + 1
     const guidNum = zeroPad(idx, 4)
     messages.push(
@@ -136,9 +136,9 @@ export function createHugeDataset(): Array<Message> {
   for (let i = 0; i < 1000; i++) {
     const dayOffset = Math.floor(i / 144)
     const dateObj = new Date('2025-01-15T00:00:00Z')
-    dateObj.setDate(dateObj.getDate() + dayOffset)
-    dateObj.setHours(Math.floor((i % 144) / 6))
-    dateObj.setMinutes((i * 11) % 60)
+    dateObj.setUTCDate(dateObj.getUTCDate() + dayOffset)
+    dateObj.setUTCHours(Math.floor((i % 144) / 6))
+    dateObj.setUTCMinutes((i * 11) % 60)
     const idx = i + 1
     const guidNum = zeroPad(idx, 4)
     messages.push(

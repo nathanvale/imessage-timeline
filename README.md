@@ -43,6 +43,22 @@ This repository is continuously checked by:
 Badges surface current status; failing checks block merges ensuring a
 high-signal, low-noise pipeline.
 
+### Releases and automation
+
+- Zero‑touch, canonical Changesets flow: CI opens a "Version Packages" PR,
+  auto‑merges it after required checks, publishes to npm (with tags), and
+  creates GitHub Releases with SBOM.
+- Pre‑releases: enter/exit beta/rc via a workflow; CI publishes -beta.N/-rc.N to
+  the matching npm dist‑tag.
+- Nightly snapshots (alpha): gated to run only while pre‑mode is active to avoid
+  confusion with stable releases.
+
+Docs:
+
+- Canonical flow: `docs/releases/changesets-canonical.md`
+- Branch protection policy: `docs/branch-protection-policy.md`
+- CI standards: `docs/ci-workflow-standards.md`
+
 ### CI performance (optional)
 
 - setup-node already caches pnpm. If installs become a bottleneck, consider

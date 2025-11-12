@@ -86,6 +86,26 @@ Normally automatic. Manually invalidate if:
 For language additions (e.g., Python tooling) keep caches orthogonal: avoid
 mixing paths in a single cache entry.
 
+## Composite action shortcut (preferred)
+
+To keep workflows DRY, use the composite action that encapsulates the pattern
+above, plus built-in caching and Node setup from `.nvmrc`:
+
+```yaml
+- name: Standard CI Env
+  uses: ./.github/actions/standard-ci-env
+
+- name: Setup pnpm toolchain
+  uses: ./.github/actions/setup-pnpm
+  with:
+    # Only needed for authenticated publish flows
+    registry-url: 'https://registry.npmjs.org'
+```
+
+This sets `TZ=UTC` and `TF_BUILD=true`, enables Corepack, installs pnpm,
+configures Node from `.nvmrc`, and caches the pnpm store keyed by `.nvmrc` and
+`pnpm-lock.yaml`.
+
 ## Security Notes
 
 - All cache-producing steps run _after_ checkout but before arbitrary build

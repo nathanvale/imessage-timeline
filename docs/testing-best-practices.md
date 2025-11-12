@@ -22,6 +22,11 @@ readable, and fast.
   environment-dependent parsing
 - Enforce `process.env.TZ = 'UTC'` in `tests/vitest/vitest-setup.ts`
 
+Note: We normalize timezone-less ISO strings by appending `Z` and then
+canonicalizing with `toISOString()`. This guarantees UTC interpretation and
+prevents environment-dependent parsing. Grouping utilities and render logic
+apply this normalization before any date math or comparisons.
+
 References: Vitest sequence docs (shuffle/seed), reporters and CI usage.
 
 ## Isolation and hygiene
@@ -34,6 +39,9 @@ References: Vitest sequence docs (shuffle/seed), reporters and CI usage.
     - `import '@testing-library/jest-dom/vitest'`
   - Raise listener limit to avoid EventEmitter warnings in parallel runs:
     - `process.setMaxListeners(64)`
+    - Rationale: multiple suites attach process-level listeners (e.g., SIGINT,
+      SIGTERM) under parallel execution. Raising the cap removes noisy
+      MaxListeners warnings without masking legitimate errors.
 - Prefer module-level pure helpers over process-level shared state
 
 References: jest-dom “With Vitest” usage notes.
@@ -68,6 +76,11 @@ References: Vitest coverage config and reporters.
 - Concurrency: threads pool, capped at 8 workers
 - Determinism: stable seed and `allowOnly = false`
 - Retries: enabled only in CI (`retry = 2`) for transient flake
+
+Standard CI env is exported via the composite action
+`./.github/actions/standard-ci-env`, which sets `TZ=UTC` and `TF_BUILD=true`
+before running installs/build/tests. This keeps CI output and snapshot behavior
+consistent across jobs.
 
 References: Vitest reporters, sequence, retries.
 

@@ -1,0 +1,82 @@
+name: Changesets Pre-Mode Toggle
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'enter or exit'
+        required: true
+        default: 'enter'
+      channel:
+        description: 'beta | rc | next'
+        required: true
+        default: 'beta'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  toggle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Standard CI Env
+        uses: ./.github/actions/standard-ci-env
+      - name: Setup pnpm toolchain
+        uses: ./.github/actions/setup-pnpm
+      - name: Configure Git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Create pre-mode toggle branch
+        id: prep
+        run: |
+          BRANCH="pre/${{ inputs.action }}-${{ inputs.channel }}-${{ github.run_id }}"
+          echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT
+          git checkout -b "$BRANCH"
+          if [ "${{ inputs.action }}" = "enter" ]; then
+            pnpm changeset pre enter ${{ inputs.channel }}
+          else
+            pnpm changeset pre exit
+          fi
+          if git diff --quiet; then
+            echo "No pre-mode changes to commit"
+            exit 0
+          fi
+          git add .
+          git commit -m "chore(pre): ${{ inputs.action }} ${{ inputs.channel }} channel"
+          git push --set-upstream origin "$BRANCH"
+      - name: Open PR to toggle pre-mode
+        if: steps.prep.outcome == 'success'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          env:
+            HEAD_REF: ${{ steps.prep.outputs.BRANCH }}
+          script: |
+            const title = `chore(pre): ${{ inputs.action }} ${{ inputs.channel }} channel`
+            const body = 'Automated Changesets pre-mode toggle PR.'
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: process.env.HEAD_REF,
+              base: 'main',
+              title,
+              body,
+              maintainer_can_modify: true,
+            })
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['release:pre-toggle']
+            })
+            core.info(`Opened PR #${pr.number} for pre-mode toggle`)

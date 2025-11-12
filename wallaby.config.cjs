@@ -18,29 +18,32 @@ module.exports = function (wallaby) {
       '__tests__/fixtures/**/*.ts',
       'tsconfig.base.json',
       'tsconfig.json',
-      'package.json'
+      'package.json',
     ],
     tests: [
       'src/**/__tests__/**/*.test.ts',
       'src/**/*.test.ts',
-      '__tests__/**/*.ts'
+      '__tests__/**/*.ts',
     ],
     env: {
       type: 'node',
-      runner: 'node'
+      runner: 'node',
     },
-    setup () {
+    setup() {
       const { vi } = require('vitest')
       vi.resetAllMocks()
       vi.clearAllMocks()
       vi.useRealTimers()
     },
     compilers: {
-      '**/*.ts': wallaby.compilers.typeScript({ module: 'esnext', target: 'es2022' })
+      '**/*.ts': wallaby.compilers.typeScript({
+        module: 'esnext',
+        target: 'es2022',
+      }),
     },
     slowTestThreshold: 750,
     hints: { ignoreCoverage: [/node_modules/] },
     workers: { initial: 2, regular: 2 },
-    debug: false
+    debug: false,
   }
 }
