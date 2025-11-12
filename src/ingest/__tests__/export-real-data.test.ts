@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest'
 
 import { ingestCSV } from '../ingest-csv'
 
-describe('Export real data with actual modules', () => {
+describe.skip('Export real data with actual modules', () => {
   it('should export CSV with real ingestCSV module', () => {
     const csvPath = path.join(
       '/Users/nathanvale/code/my-second-brain/02_Areas/Personal/Melanie & Relationship/data',

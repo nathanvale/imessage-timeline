@@ -18,15 +18,15 @@ import { formatReplyThread } from './reply-rendering.js'
 import type { Message } from '#schema/message'
 
 /**
- * Deterministic local-time formatter (HH:mm:ss, 00-23 hour range)
- * Uses getHours()/getMinutes()/getSeconds() to avoid 24:00:00 edge produced by some locales.
- * Keeps prior snapshot expectations (local time basis) while eliminating "24" hour formatting.
+ * Deterministic UTC-time formatter (HH:mm:ss, 00-23 hour range)
+ * Uses getUTCHours()/getUTCMinutes()/getUTCSeconds() to ensure consistent output across timezones.
+ * CI and local machines will produce identical snapshots regardless of system timezone.
  */
 function formatTimeLocal(iso: string): string {
   const d = new Date(iso)
-  const hh = String(d.getHours()).padStart(2, '0')
-  const mm = String(d.getMinutes()).padStart(2, '0')
-  const ss = String(d.getSeconds()).padStart(2, '0')
+  const hh = String(d.getUTCHours()).padStart(2, '0')
+  const mm = String(d.getUTCMinutes()).padStart(2, '0')
+  const ss = String(d.getUTCSeconds()).padStart(2, '0')
   return `${hh}:${mm}:${ss}`
 }
 

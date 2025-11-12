@@ -327,7 +327,12 @@ describe('ProgressManager', () => {
         error: Error,
       ) => void
       if (exceptionHandler) {
-        exceptionHandler(new Error('Test error'))
+        // Wrap in try-catch to prevent test failure from re-thrown error
+        try {
+          exceptionHandler(new Error('Test error'))
+        } catch {
+          // Expected: handler re-throws after cleanup
+        }
       }
 
       expect(stopAllSpy).toHaveBeenCalled()
