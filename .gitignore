@@ -30,7 +30,7 @@ report.*.json
 # Caches & tooling
 .cache/
 .eslintcache
-.parcel-cache/
+.parcel-cache/g
 .pack/
 
 # OS
@@ -38,3 +38,7 @@ report.*.json
 
 # Test artifacts
 test-results/
+
+#Obsidian vault
+.vault/
+.valut-id
