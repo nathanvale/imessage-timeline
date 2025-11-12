@@ -1230,6 +1230,27 @@ pnpm test --watch
 pnpm quality-check
 ```
 
+### Branch protection and local push guard
+
+To configure GitHub branch protection on `main` using our aggregate gate:
+
+```bash
+bash scripts/setup-branch-protection.sh nathanvale imessage-timeline main
+```
+
+This script enables auto-merge, enforces required checks (PR quality / gate,
+Commitlint / commitlint, PR Title Lint / lint), requires signed commits, and
+keeps history linear.
+
+Local safeguard: direct pushes to `main`/`master` are blocked by a Husky
+pre-push hook. Create a feature branch and open a PR instead.
+
+If you absolutely must override locally (not recommended):
+
+```bash
+ALLOW_PUSH_PROTECTED=1 git push
+```
+
 ### Code Style
 
 - **TypeScript**: Strict mode, no `any`

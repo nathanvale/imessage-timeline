@@ -29,9 +29,9 @@ jobs:
         shell: bash
         run: |
           if [ -f .changeset/pre.json ]; then
-            echo "active=true" >> $GITHUB_OUTPUT
+            echo "active=true" >> "$GITHUB_OUTPUT"
           else
-            echo "active=false" >> $GITHUB_OUTPUT
+            echo "active=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Skip when pre-mode is not active
         if: steps.pre.outputs.active == 'false'

@@ -39,12 +39,16 @@ jobs:
           git config user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Create pre-mode toggle branch
         id: prep
+        env:
+          ACTION: ${{ inputs.action }}
+          CHANNEL: ${{ inputs.channel }}
+          RUN_ID: ${{ github.run_id }}
         run: |
-          BRANCH="pre/${{ inputs.action }}-${{ inputs.channel }}-${{ github.run_id }}"
-          echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT
+          BRANCH="pre/${ACTION}-${CHANNEL}-${RUN_ID}"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_OUTPUT"
           git checkout -b "$BRANCH"
-          if [ "${{ inputs.action }}" = "enter" ]; then
-            pnpm changeset pre enter ${{ inputs.channel }}
+          if [ "$ACTION" = "enter" ]; then
+            pnpm changeset pre enter "$CHANNEL"
           else
             pnpm changeset pre exit
           fi
@@ -53,16 +57,18 @@ jobs:
             exit 0
           fi
           git add .
-          git commit -m "chore(pre): ${{ inputs.action }} ${{ inputs.channel }} channel"
+          git commit -m "chore(pre): $ACTION $CHANNEL channel"
           git push --set-upstream origin "$BRANCH"
       - name: Open PR to toggle pre-mode
         if: steps.prep.outcome == 'success'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        env:
+          HEAD_REF: ${{ steps.prep.outputs.BRANCH }}
+          ACTION: ${{ inputs.action }}
+          CHANNEL: ${{ inputs.channel }}
         with:
-          env:
-            HEAD_REF: ${{ steps.prep.outputs.BRANCH }}
           script: |
-            const title = `chore(pre): ${{ inputs.action }} ${{ inputs.channel }} channel`
+            const title = `chore(pre): ${process.env.ACTION} ${process.env.CHANNEL} channel`
             const body = 'Automated Changesets pre-mode toggle PR.'
             const { data: pr } = await github.rest.pulls.create({
               owner: context.repo.owner,

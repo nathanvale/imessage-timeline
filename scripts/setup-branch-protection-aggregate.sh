@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Disable pagers that may hijack output in some environments
+export GH_PAGER=""
+export PAGER=""
+export GIT_PAGER=""
+
 OWNER=${1:-nathanvale}
 REPO=${2:-imessage-timeline}
 BRANCH=${3:-main}
@@ -22,13 +27,13 @@ echo "Configuring repo: $REPO_SLUG (branch: $BRANCH) [aggregate required checks]
 echo "Enabling auto-merge on repository..."
 gh repo edit "$REPO_SLUG" --enable-auto-merge >/dev/null
 
-echo "Applying branch protection (aggregate workflow check + reviews, linear history, signed commits)..."
+echo "Applying branch protection (aggregate gate job + reviews, linear history, signed commits)..."
 read -r -d '' BODY <<'JSON'
 {
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "PR quality",
+      "PR quality / gate",
       "Commitlint / commitlint",
       "PR Title Lint / lint"
     ]
@@ -39,11 +44,7 @@ read -r -d '' BODY <<'JSON'
     "require_code_owner_reviews": false,
     "required_approving_review_count": 1
   },
-  "restrictions": {
-    "users": [],
-    "teams": [],
-    "apps": ["github-actions"]
-  },
+  "restrictions": null,
   "required_linear_history": true,
   "allow_force_pushes": false,
   "allow_deletions": false,

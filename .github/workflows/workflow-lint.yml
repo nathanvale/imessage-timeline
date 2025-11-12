@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   actionlint:
@@ -30,4 +31,19 @@ jobs:
       - name: Run actionlint
         uses: raven-actions/actionlint@3a24062651993d40fed1019b58ac6fbdfbf276cc # v2.0.1
         with:
+          version: latest
+          flags: -no-color -oneline
           fail-on-error: true
+          group-result: true
+      - name: Validate workflow schema (basic)
+        run: |
+          echo "Checking for forbidden blank env blocks..."
+          # Fail if we find an `env:` that is immediately followed by a `with:` block,
+          # which usually indicates mis-indentation (the `env:` block is empty).
+          # Use PCRE with dotall and NUL-data mode so the pattern can span newlines across files.
+          if grep -RPzo "(?s)^\s*env:\s*\n\s*with:" .github/workflows/*.yml; then
+            echo "Potential mis-indented env found: 'env:' immediately followed by 'with:'"
+            exit 1
+          else
+            echo "No mis-indented env blocks found."
+          fi
