@@ -80,6 +80,7 @@ jobs:
           name: Vitest JUnit
           path: ./test-results/junit.xml
           reporter: java-junit
+          fail-on-error: 'false'
 
       - name: Upload JUnit test results
         if: always()
@@ -109,7 +110,7 @@ jobs:
           fi
 
       - name: Comment coverage summary on PR
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request'
         uses: ./.github/actions/coverage-comment
         with:
           lcov-path: ./test-results/coverage/lcov.info

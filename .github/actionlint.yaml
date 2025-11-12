@@ -1,0 +1,5 @@
+# Actionlint configuration
+# Ignore ShellCheck SC2209 warnings in inline scripts. We intentionally assign strings
+# and use bash parameter expansion to avoid brittle substitutions.
+ignore:
+  - 'SC2209:'
