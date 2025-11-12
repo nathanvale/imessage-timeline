@@ -24,6 +24,7 @@
   "description": "Extract, transform, and analyze iMessage conversations with AI-powered enrichment and timeline rendering.",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
+    "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.7",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
@@ -106,7 +107,6 @@
     "url": "git+https://github.com/nathanvale/imessage-timeline.git"
   },
   "scripts": {
-    "research:actionlint": "tsx scripts/firecrawl/actionlint-best-practices.ts",
     "build": "pnpm exec tsc -p tsconfig.json",
     "check:publint": "publint",
     "check:types": "attw --pack",
