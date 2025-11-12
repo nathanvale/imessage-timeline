@@ -109,7 +109,7 @@ jobs:
           fi
 
       - name: Comment coverage summary on PR
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request'
         uses: ./.github/actions/coverage-comment
         with:
           lcov-path: ./test-results/coverage/lcov.info
