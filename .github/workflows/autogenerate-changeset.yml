@@ -43,10 +43,12 @@ jobs:
           set -eu
           # shellcheck disable=SC2209 # string assignment from env is intentional
           TITLE="${PR_TITLE:-}"
+          # shellcheck disable=SC2209
           LOWER=$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')
           TYPE=patch
           if printf '%s' "$LOWER" | grep -q '^feat'; then TYPE=minor; fi
           if printf '%s' "$LOWER" | grep -q 'breaking'; then TYPE=major; fi
+          # shellcheck disable=SC2209
           SAFE_NAME=$(printf '%s' "$TITLE" | tr -cd '[:alnum:] -' | tr ' ' '-')
           FILE=".changeset/auto-${SAFE_NAME:-change}.md"
           {
