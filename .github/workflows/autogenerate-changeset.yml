@@ -35,6 +35,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
+          # shellcheck disable=SC2209
           TITLE="$PR_TITLE"
           LOWER=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]')
           TYPE=patch
