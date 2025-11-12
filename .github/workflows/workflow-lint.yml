@@ -34,5 +34,13 @@ jobs:
           fail-on-error: true
       - name: Validate workflow schema (basic)
         run: |
-          echo "Checking for forbidden blank env blocks...";
-          ! grep -R "env:\n\s*with:" -n .github/workflows || echo "Potential mis-indented env found";
+          echo "Checking for forbidden blank env blocks..."
+          # Fail if we find an `env:` that is immediately followed by a `with:` block,
+          # which usually indicates mis-indentation (the `env:` block is empty).
+          # Use PCRE with dotall and NUL-data mode so the pattern can span newlines across files.
+          if grep -RPzo "(?s)^\s*env:\s*\n\s*with:" .github/workflows/*.yml; then
+            echo "Potential mis-indented env found: 'env:' immediately followed by 'with:'"
+            exit 1
+          else
+            echo "No mis-indented env blocks found."
+          fi
