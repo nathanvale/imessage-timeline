@@ -22,8 +22,12 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Detect existing changeset
         id: detect
+        shell: bash
         run: |
-          COUNT=$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ' || true)
+          set -eu
+          # Count files safely; allow directory to be absent and strip whitespace
+          COUNT=$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l || true)
+          COUNT=${COUNT//[[:space:]]/}
           echo "found=$COUNT" >> "$GITHUB_OUTPUT"
       - name: Setup pnpm toolchain
         uses: ./.github/actions/setup-pnpm
@@ -31,19 +35,26 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Generate changeset if missing
         if: steps.detect.outputs.found == '0'
+        shell: bash
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # shellcheck disable=SC2209
-          TITLE="${PR_TITLE}"
-          LOWER=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]')
+          set -eu
+          # shellcheck disable=SC2209 # string assignment from env is intentional
+          TITLE="${PR_TITLE:-}"
+          LOWER=$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')
           TYPE=patch
-          if echo "$LOWER" | grep -q '^feat'; then TYPE=minor; fi
-          if echo "$LOWER" | grep -q 'breaking'; then TYPE=major; fi
-          SAFE_NAME=$(echo "$TITLE" | tr -cd '[:alnum:] -' | tr ' ' '-')
+          if printf '%s' "$LOWER" | grep -q '^feat'; then TYPE=minor; fi
+          if printf '%s' "$LOWER" | grep -q 'breaking'; then TYPE=major; fi
+          SAFE_NAME=$(printf '%s' "$TITLE" | tr -cd '[:alnum:] -' | tr ' ' '-')
           FILE=".changeset/auto-${SAFE_NAME:-change}.md"
-          { echo "---"; echo "imessage-timeline: $TYPE"; echo "---"; echo; echo "$TITLE"; } > "$FILE"
+          {
+            printf '---\n'
+            printf 'imessage-timeline: %s\n' "$TYPE"
+            printf '---\n\n'
+            printf '%s\n' "$TITLE"
+          } > "$FILE"
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add "$FILE"
