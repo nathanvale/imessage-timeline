@@ -13,6 +13,15 @@ readable, and fast.
   - `test.sequence.seed = 20251111` when `TF_BUILD` is set
 - Prefer isolated tests; avoid reliance on execution order
 
+### Deterministic date handling (UTC)
+
+- Treat timezone-less ISO strings as UTC and append `Z` before parsing
+  - Canonicalize with `new Date(iso).toISOString()` to normalize output
+- Use UTC getters (`getUTCHours`, `getUTCFullYear`, etc.) consistently
+- Prefer lexicographic sorting for date-only keys (`YYYY-MM-DD`) to avoid
+  environment-dependent parsing
+- Enforce `process.env.TZ = 'UTC'` in `tests/vitest/vitest-setup.ts`
+
 References: Vitest sequence docs (shuffle/seed), reporters and CI usage.
 
 ## Isolation and hygiene
@@ -23,6 +32,8 @@ References: Vitest sequence docs (shuffle/seed), reporters and CI usage.
   - `vi.useRealTimers()` to avoid timer leakage
   - Register matchers with Vitest-friendly import:
     - `import '@testing-library/jest-dom/vitest'`
+  - Raise listener limit to avoid EventEmitter warnings in parallel runs:
+    - `process.setMaxListeners(64)`
 - Prefer module-level pure helpers over process-level shared state
 
 References: jest-dom “With Vitest” usage notes.
