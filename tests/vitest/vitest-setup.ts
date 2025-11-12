@@ -23,6 +23,12 @@ import { beforeEach, afterEach, vi } from 'vitest'
 // Force UTC timezone for consistent date parsing/formatting across environments
 process.env.TZ = 'UTC'
 
+// Silence EventEmitter MaxListeners warnings that can appear due to
+// multiple test suites attaching process-level listeners in parallel.
+// This does not mask real errors; it simply raises the limit.
+// See: https://nodejs.org/api/events.html#emittersetmaxlistenersn
+process.setMaxListeners(64)
+
 beforeEach(() => {
   // Reset any global state if needed
   vi.resetAllMocks()
