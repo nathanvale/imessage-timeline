@@ -25,8 +25,11 @@ jobs:
         shell: bash
         run: |
           set -eu
-          # Count files safely; allow directory to be absent and strip whitespace
-          COUNT="$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l)"
+          # Count files safely; allow directory to be absent. Use NUL delimiters.
+          COUNT=0
+          while IFS= read -r -d '' _file; do
+            COUNT=$((COUNT + 1))
+          done < <(find .changeset -type f -name '*.md' -print0 2>/dev/null)
           COUNT="${COUNT//[[:space:]]/}"
           echo "found=$COUNT" >> "$GITHUB_OUTPUT"
       - name: Setup pnpm toolchain
