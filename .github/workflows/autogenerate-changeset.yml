@@ -36,7 +36,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           # shellcheck disable=SC2209
-          TITLE="$PR_TITLE"
+          TITLE="${PR_TITLE}"
           LOWER=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]')
           TYPE=patch
           if echo "$LOWER" | grep -q '^feat'; then TYPE=minor; fi
