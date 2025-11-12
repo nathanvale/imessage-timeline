@@ -1,6 +1,8 @@
 # Automated Release Workflow
 
-> **Status**: ✅ **FULLY CONFIGURED** - This project has a production-ready automated release workflow with Changesets, conventional commits, and Git hooks.
+> **Status**: ✅ **FULLY CONFIGURED** - This project has a production-ready
+> automated release workflow with Changesets, conventional commits, and Git
+> hooks.
 
 ## Table of Contents
 
@@ -70,18 +72,19 @@ This project uses a comprehensive automated release workflow that ensures:
 - ✅ Main branch as release branch
 - ✅ No automatic commits (manual control)
 
-#### 2. Commitlint Configuration (`commitlint.config.js`)
+#### 2. Commitlint Configuration (`commitlint.config.mjs`)
 
 ```javascript
 export default {
-  extends: ["@commitlint/config-conventional"],
+  extends: ['@commitlint/config-conventional'],
 }
 ```
 
 **Enforces:**
 
 - Conventional Commits specification
-- Valid commit types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+- Valid commit types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`,
+  `test`, `build`, `ci`, `chore`, `revert`
 - Commit message format: `<type>(<scope>): <subject>`
 
 #### 3. Husky Git Hooks (`.husky/`)
@@ -280,7 +283,7 @@ Add JSON export format for timeline rendering
 
 ```markdown
 ---
-"imessage-timeline": minor
+'imessage-timeline': minor
 ---
 
 Add JSON export format for timeline rendering
@@ -434,7 +437,7 @@ Changesets are stored in `.changeset/` directory:
 
 ```markdown
 ---
-"imessage-timeline": minor
+'imessage-timeline': minor
 ---
 
 Add JSON export format for timeline rendering. This allows users to export
@@ -552,7 +555,8 @@ git commit -m "..."
 unset HUSKY
 ```
 
-⚠️ **Warning:** Only skip hooks when absolutely necessary (e.g., reverting broken commits). Your PR will still be validated by CI.
+⚠️ **Warning:** Only skip hooks when absolutely necessary (e.g., reverting
+broken commits). Your PR will still be validated by CI.
 
 ### Disabling Hooks in CI
 
@@ -593,7 +597,7 @@ steps:
   - uses: actions/setup-node@v4
     with:
       node-version: 22.20
-      registry-url: "https://registry.npmjs.org"
+      registry-url: 'https://registry.npmjs.org'
   - uses: pnpm/action-setup@v4
     with:
       version: 9
@@ -650,8 +654,8 @@ steps:
     run: pnpm install --frozen-lockfile
   - name: Lint commit messages
     uses: wagoid/commitlint-github-action@v6
-    with:
-      configFile: commitlint.config.js
+      with:
+         configFile: commitlint.config.mjs
 ```
 
 **If commits are invalid:** PR check fails with detailed error message.
@@ -884,7 +888,8 @@ npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/imessage-timeline
 **Solutions:**
 
 1. **Verify NPM token:**
-   - Visit: https://github.com/nathanvale/imessage-timeline/settings/secrets/actions
+   - Visit:
+     https://github.com/nathanvale/imessage-timeline/settings/secrets/actions
    - Ensure `NPM_TOKEN` is set and valid
    - Generate new token: https://www.npmjs.com/settings/~/tokens
 
@@ -956,12 +961,12 @@ npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/imessage-timeline
 **Solution:** Configure commitlint to ignore bot commits:
 
 ```javascript
-// commitlint.config.js
+// commitlint.config.mjs
 export default {
-  extends: ["@commitlint/config-conventional"],
+  extends: ['@commitlint/config-conventional'],
   ignores: [
-    (message) => message.includes("[skip ci]"),
-    (message) => message.startsWith("chore(release):"),
+    (message) => message.includes('[skip ci]'),
+    (message) => message.startsWith('chore(release):'),
   ],
 }
 ```
@@ -1039,12 +1044,12 @@ export default {
 
 ```markdown
 ---
-"imessage-timeline": minor
+'imessage-timeline': minor
 ---
 
 Add JSON export format for timeline rendering. This allows users to export
-processed timelines as structured JSON for integration with external tools
-like Elasticsearch or custom visualization platforms.
+processed timelines as structured JSON for integration with external tools like
+Elasticsearch or custom visualization platforms.
 ```
 
 ---
@@ -1069,7 +1074,8 @@ like Elasticsearch or custom visualization platforms.
 - Removed features
 - Changed function signatures
 
-**Pre-1.0 exception:** While `version < 1.0.0`, treat minor as major and patch as minor (semver convention).
+**Pre-1.0 exception:** While `version < 1.0.0`, treat minor as major and patch
+as minor (semver convention).
 
 ---
 
@@ -1107,15 +1113,17 @@ Changesets automatically generates release notes from changeset summaries:
 
 ### Minor Changes
 
-- a1b2c3d: Add JSON export format for timeline rendering. This allows users to export
-  processed timelines as structured JSON for integration with external tools.
+- a1b2c3d: Add JSON export format for timeline rendering. This allows users to
+  export processed timelines as structured JSON for integration with external
+  tools.
 
 ### Patch Changes
 
 - e4f5g6h: Fix CSV parsing for empty quoted fields
 ```
 
-**Customize release notes:** Edit the "Version Packages" PR description before merging.
+**Customize release notes:** Edit the "Version Packages" PR description before
+merging.
 
 ---
 
@@ -1124,7 +1132,7 @@ Changesets automatically generates release notes from changeset summaries:
 This project uses **NPM provenance** for supply chain security:
 
 ```yaml
-publishConfig: { "access": "public", "provenance": true }
+publishConfig: { 'access': 'public', 'provenance': true }
 ```
 
 **Benefits:**
@@ -1292,7 +1300,8 @@ git log --oneline --format="%s"
 
 This project has a **complete, production-ready automated release workflow**:
 
-✅ **Conventional commits** enforced locally (Husky) and in CI (commitlint.yml)  
+✅ **Conventional commits** enforced locally (Husky) and in CI
+(commitlint.yml)  
 ✅ **Changesets** for version management and changelog generation  
 ✅ **GitHub Actions** for automated releases with NPM provenance  
 ✅ **Quality gates** with pre-commit hooks and quality-check  

@@ -1,2 +1,3 @@
-pnpm lint-staged
+# Run fast, local formatting and linting on changed files
+pnpm exec lint-staged
 pnpm quality-check --staged --fix
