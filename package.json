@@ -139,6 +139,7 @@
     "test:watch": "vitest",
     "typecheck": "pnpm exec tsc -p tsconfig.eslint.json --noEmit",
     "upgrade:minor": "pnpm up --latest --recursive --filter='.'",
+    "validate": "pnpm -s lint && pnpm -s typecheck && pnpm -s build && TF_BUILD=true pnpm -s test",
     "validate:json": "bun scripts/validate-json.ts",
     "version:gen": "changeset",
     "version:pre": "changeset version",
