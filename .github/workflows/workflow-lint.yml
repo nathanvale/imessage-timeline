@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   actionlint:
@@ -31,3 +32,7 @@ jobs:
         uses: raven-actions/actionlint@3a24062651993d40fed1019b58ac6fbdfbf276cc # v2.0.1
         with:
           fail-on-error: true
+      - name: Validate workflow schema (basic)
+        run: |
+          echo "Checking for forbidden blank env blocks...";
+          ! grep -R "env:\n\s*with:" -n .github/workflows || echo "Potential mis-indented env found";
