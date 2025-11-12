@@ -2,16 +2,24 @@
 pnpm exec lint-staged
 pnpm quality-check --staged --fix
 
-# If workflow files are staged and actionlint exists, run it for fast feedback
+# If workflow files are staged and actionlint is available, run it for fast feedback
 if git diff --name-only --cached | grep -E '^\.github/workflows/.*\.(yml|yaml)$' >/dev/null 2>&1; then
-	if command -v actionlint >/dev/null 2>&1; then
+	ACTIONLINT_BIN=""
+	if [ -x "scripts/bin/actionlint" ]; then
+		ACTIONLINT_BIN="scripts/bin/actionlint"
+	elif command -v actionlint >/dev/null 2>&1; then
+		ACTIONLINT_BIN="actionlint"
+	fi
+
+	if [ -n "$ACTIONLINT_BIN" ]; then
 		echo "Running actionlint on staged workflow files..."
 		STAGED_FILES=$(git diff --name-only --cached | grep -E '^\.github/workflows/.*\.(yml|yaml)$' || true)
 		if [ -n "$STAGED_FILES" ]; then
 			# shellcheck disable=SC2086
-			actionlint -no-color -oneline $STAGED_FILES || exit 1
+			$ACTIONLINT_BIN -no-color -oneline $STAGED_FILES || exit 1
 		fi
 	else
-		echo "actionlint not installed; skipping (install with: brew install actionlint)"
+		echo "actionlint is not installed. Skipping workflow lint."
+		echo "Install it: brew install actionlint"
 	fi
 fi
