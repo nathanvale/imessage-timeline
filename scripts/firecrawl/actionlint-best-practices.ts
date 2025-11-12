@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 /*
-  Firecrawl research script: summarizes best practices for using actionlint
-  - Requires FIRECRAWL_API_KEY in env to fetch; otherwise prints curated summary and exits
-  - Writes a lightweight, citation-centric doc to docs/actionlint-best-practices.md
+	Firecrawl research script: summarizes best practices for using actionlint
+	- Requires FIRECRAWL_API_KEY in env to fetch; otherwise prints curated summary and exits
+	- Writes a lightweight, citation-centric doc to docs/actionlint-best-practices.md
 
-  Note on copyrights: This script only stores brief summaries and links to the authoritative sources.
-  It intentionally avoids copying long passages from upstream docs.
+	Note on copyrights: This script only stores brief summaries and links to the authoritative sources.
+	It intentionally avoids copying long passages from upstream docs.
 */
 
 import { writeFileSync } from 'node:fs'
