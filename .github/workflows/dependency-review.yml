@@ -11,15 +11,16 @@ jobs:
   review:
     runs-on: ubuntu-latest
     continue-on-error: true
+    timeout-minutes: 10
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
         with:
           egress-policy: audit
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Dependency Review (non-blocking when unsupported)
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@4081bf99e2866ebe428fc0477b69eb4fcda7220a # v4.4.0
         with:
           fail-on-severity: moderate
           comment-summary-in-pr: on-failure
