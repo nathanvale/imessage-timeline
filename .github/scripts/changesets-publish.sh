@@ -5,8 +5,19 @@
 
 set -euo pipefail
 
+notice() {
+  local msg="$1"
+  echo "::notice::${msg}"
+  if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+    {
+      echo "## Changesets Publish"
+      echo "${msg}"
+    } >>"$GITHUB_STEP_SUMMARY"
+  fi
+}
+
 if [[ -z "${NPM_TOKEN:-}" ]]; then
-  echo "[changesets-publish] NPM_TOKEN not set; skipping publish step."
+  notice "NPM_TOKEN not set; skipping publish. Configure repository secret 'NPM_TOKEN' to enable publishing."
   exit 0
 fi
 
@@ -15,6 +26,12 @@ fi
 {
   echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
 } > "$HOME/.npmrc"
+
+echo "::group::Configure npm auth"
+echo "Wrote npm auth token to ~/.npmrc"
+echo "::endgroup::"
+
+notice "NPM_TOKEN detected; attempting publish via 'pnpm release'."
 
 # Run the project's publish script (configured to call `changeset publish`)
 pnpm release
