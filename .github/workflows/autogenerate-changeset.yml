@@ -45,6 +45,7 @@ jobs:
         run: |
           set -eu
           # string assignment from env is intentional
+          # shellcheck disable=SC2209
           TITLE="${PR_TITLE:-}"
           # Lowercase title using tr to avoid shell-specific expansions that trigger shellcheck
           LOWER="$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')"
