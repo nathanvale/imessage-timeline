@@ -23,7 +23,7 @@ jobs:
       - name: Detect existing changeset
         id: detect
         run: |
-          COUNT="$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ' || true)"
+          COUNT=$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ' || true)
           echo "found=$COUNT" >> "$GITHUB_OUTPUT"
       - name: Setup pnpm toolchain
         uses: ./.github/actions/setup-pnpm
