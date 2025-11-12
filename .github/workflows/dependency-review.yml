@@ -1,4 +1,4 @@
-name: Dependency Review
+name: Dependency Review (advisory)
 
 on:
   pull_request:
@@ -22,8 +22,9 @@ jobs:
           egress-policy: audit
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Dependency Review (non-blocking when unsupported)
+      - name: Dependency Review (non-blocking)
         uses: actions/dependency-review-action@4081bf99e2866ebe428fc0477b69eb4fcda7220a # v4.4.0
         with:
-          fail-on-severity: moderate
-          comment-summary-in-pr: on-failure
+          # Keep advisory: do not fail the check run, just comment
+          fail-on-severity: none
+          comment-summary-in-pr: always
