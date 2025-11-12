@@ -23,31 +23,30 @@ jobs:
       - name: Detect existing changeset
         id: detect
         run: |
-          COUNT=$(ls .changeset/*.md 2>/dev/null | wc -l | tr -d ' ' || true)
-          echo "found=$COUNT" >> $GITHUB_OUTPUT
+          COUNT=$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ' || true)
+          echo "found=$COUNT" >> "$GITHUB_OUTPUT"
       - name: Setup pnpm toolchain
         uses: ./.github/actions/setup-pnpm
       - name: Install deps (minimal)
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Generate changeset if missing
         if: steps.detect.outputs.found == '0'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
-          LOWER=$(echo "$TITLE" | tr 'A-Z' 'a-z')
+          TITLE="$PR_TITLE"
+          LOWER=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]')
           TYPE=patch
           if echo "$LOWER" | grep -q '^feat'; then TYPE=minor; fi
           if echo "$LOWER" | grep -q 'breaking'; then TYPE=major; fi
           SAFE_NAME=$(echo "$TITLE" | tr -cd '[:alnum:] -' | tr ' ' '-')
           FILE=".changeset/auto-${SAFE_NAME:-change}.md"
-          echo "---" > "$FILE"
-          echo "imessage-timeline: $TYPE" >> "$FILE"
-          echo "---" >> "$FILE"
-          echo >> "$FILE"
-          echo "$TITLE" >> "$FILE"
+          { echo "---"; echo "imessage-timeline: $TYPE"; echo "---"; echo; echo "$TITLE"; } > "$FILE"
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add "$FILE"
-          git commit -m "chore(changeset): auto-generate for PR #${{ github.event.pull_request.number }}" || echo 'No commit'
+          git commit -m "chore(changeset): auto-generate for PR #$PR_NUMBER" || echo 'No commit'
           git push || echo 'Push skipped'
       - name: Annotate PR
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
