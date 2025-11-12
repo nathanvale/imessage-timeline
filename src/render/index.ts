@@ -35,8 +35,22 @@ function formatTimeLocal(iso: string): string {
  * Returns Map<date, markdown> with deterministic output
  */
 export function renderMessages(messages: Message[]): Map<string, string> {
+  // Normalize all message dates to canonical UTC ISO (YYYY-MM-DDTHH:mm:ss.sssZ)
+  // This prevents environment-specific parsing differences for inputs lacking 'Z'.
+  const normalized: Message[] = messages.map((m) => {
+    const raw = m.date
+    // If the timestamp lacks any timezone designator (no 'Z' and no +/- offset),
+    // interpret it as UTC by appending 'Z' rather than relying on local timezone.
+    const hasZ = /Z$/.test(raw)
+    const hasOffset = /[+-]\d{2}:?\d{2}$/.test(raw)
+    const coerced = hasZ || hasOffset ? raw : `${raw.replace(/\s+$/, '')}Z`
+    // Now coerce to canonical ISO string in UTC
+    const iso = new Date(coerced).toISOString()
+    return { ...m, date: iso }
+  })
+
   // Sort messages deterministically by timestamp, then by GUID
-  const sorted = sortMessagesByTimestamp(messages)
+  const sorted = sortMessagesByTimestamp(normalized)
 
   // Group by date and time-of-day
   const grouped = groupMessagesByDateAndTimeOfDay(sorted)

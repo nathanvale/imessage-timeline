@@ -59,6 +59,7 @@ describe('RENDER--T04: Determinism Test Suite', () => {
       const output2 = renderMessages(messages)
 
       expect(output1).toEqual(output2)
+      // Snapshot represents canonical UTC-normalized output; update only when rendering rules change intentionally.
       expect(normalizeSnapshotMap(output1)).toMatchSnapshot()
     })
 

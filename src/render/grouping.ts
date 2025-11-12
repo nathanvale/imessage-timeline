@@ -128,11 +128,9 @@ export function groupMessagesByDateAndTimeOfDay(
  * Returns dates in chronological order
  */
 export function getDatesSorted(grouped: GroupedMessages): string[] {
-  return Object.keys(grouped).sort((a, b) => {
-    const dateA = new Date(a).getTime()
-    const dateB = new Date(b).getTime()
-    return dateA - dateB
-  })
+  // Keys are YYYY-MM-DD; lexicographic sort is equivalent to chronological
+  // Avoid Date parsing entirely to prevent any environment-specific quirks.
+  return Object.keys(grouped).sort()
 }
 
 /**

@@ -20,6 +20,9 @@ import { beforeEach, afterEach, vi } from 'vitest'
 // - Initialize shared test utilities
 
 // Ensure clean state between test suites
+// Force UTC timezone for consistent date parsing/formatting across environments
+process.env.TZ = 'UTC'
+
 beforeEach(() => {
   // Reset any global state if needed
   vi.resetAllMocks()
