@@ -24,11 +24,10 @@ jobs:
         id: detect
         shell: bash
         run: |
-          # shellcheck disable=SC2209
           set -eu
           # Count files safely; allow directory to be absent and strip whitespace
-          COUNT=$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l)
-          COUNT=${COUNT//[[:space:]]/}
+          COUNT="$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l)"
+          COUNT="${COUNT//[[:space:]]/}"
           echo "found=$COUNT" >> "$GITHUB_OUTPUT"
       - name: Setup pnpm toolchain
         uses: ./.github/actions/setup-pnpm
@@ -41,18 +40,16 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # shellcheck disable=SC2209
           set -eu
-          # shellcheck disable=SC2209 # string assignment from env is intentional
+          # string assignment from env is intentional
           TITLE="${PR_TITLE:-}"
-          # Lowercase title using bash parameter expansion
-          LOWER=${TITLE,,}
+          # Lowercase title using tr to avoid shell-specific expansions that trigger shellcheck
+          LOWER="$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')"
           TYPE=patch
           if printf '%s' "$LOWER" | grep -q '^feat'; then TYPE=minor; fi
           if printf '%s' "$LOWER" | grep -q 'breaking'; then TYPE=major; fi
           # Sanitize: keep alnum, space, hyphen; then convert spaces to hyphens
-          SAFE_NAME=${TITLE//[^[:alnum:]\ -]/}
-          SAFE_NAME=${SAFE_NAME// /-}
+          SAFE_NAME="$(printf '%s' "$TITLE" | sed -E 's/[^[:alnum:][:space:]-]//g' | tr ' ' '-')"
           FILE=".changeset/auto-${SAFE_NAME:-change}.md"
           {
             printf '---\n'
