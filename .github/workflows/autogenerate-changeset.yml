@@ -24,6 +24,7 @@ jobs:
         id: detect
         shell: bash
         run: |
+          # shellcheck disable=SC2209
           set -eu
           # Count files safely; allow directory to be absent and strip whitespace
           COUNT=$(find .changeset -type f -name '*.md' 2>/dev/null | wc -l)
@@ -40,6 +41,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
+          # shellcheck disable=SC2209
           set -eu
           # shellcheck disable=SC2209 # string assignment from env is intentional
           TITLE="${PR_TITLE:-}"
