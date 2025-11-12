@@ -31,8 +31,10 @@ jobs:
       - name: Run actionlint
         uses: raven-actions/actionlint@3a24062651993d40fed1019b58ac6fbdfbf276cc # v2.0.1
         with:
+          version: latest
+          flags: -no-color -oneline -ignore "SC2209:"
           fail-on-error: true
-          args: -no-color -oneline -ignore "SC2209:"
+          group-result: true
       - name: Validate workflow schema (basic)
         run: |
           echo "Checking for forbidden blank env blocks..."
