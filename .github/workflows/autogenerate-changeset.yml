@@ -43,13 +43,14 @@ jobs:
           set -eu
           # shellcheck disable=SC2209 # string assignment from env is intentional
           TITLE="${PR_TITLE:-}"
-          # shellcheck disable=SC2209
-          LOWER=$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')
+          # Lowercase title using bash parameter expansion
+          LOWER=${TITLE,,}
           TYPE=patch
           if printf '%s' "$LOWER" | grep -q '^feat'; then TYPE=minor; fi
           if printf '%s' "$LOWER" | grep -q 'breaking'; then TYPE=major; fi
-          # shellcheck disable=SC2209
-          SAFE_NAME=$(printf '%s' "$TITLE" | tr -cd '[:alnum:] -' | tr ' ' '-')
+          # Sanitize: keep alnum, space, hyphen; then convert spaces to hyphens
+          SAFE_NAME=${TITLE//[^[:alnum:]\ -]/}
+          SAFE_NAME=${SAFE_NAME// /-}
           FILE=".changeset/auto-${SAFE_NAME:-change}.md"
           {
             printf '---\n'
