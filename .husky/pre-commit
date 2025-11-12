@@ -1,3 +1,13 @@
 # Run fast, local formatting and linting on changed files
 pnpm exec lint-staged
 pnpm quality-check --staged --fix
+
+# If workflow files are staged, and actionlint is available, run quick lint.
+if git diff --name-only --cached | grep -qE '^\.github/workflows/'; then
+	if command -v actionlint >/dev/null 2>&1; then
+		echo "actionlint: detected workflow changes; running lint..."
+		pnpm run -s lint:workflows || exit 1
+	else
+		echo "actionlint not found. Hint: brew install actionlint (or run 'pnpm run lint:workflows' manually)."
+	fi
+fi
