@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "This helper script has been removed."
-echo "Install actionlint and use it directly: brew install actionlint"
-exit 1
