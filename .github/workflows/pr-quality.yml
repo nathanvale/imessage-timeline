@@ -141,3 +141,12 @@ jobs:
         run: pnpm quality-check:ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, quality]
+    timeout-minutes: 5
+    steps:
+      - name: Aggregate result
+        run: echo "All prerequisite PR quality jobs succeeded." && exit 0

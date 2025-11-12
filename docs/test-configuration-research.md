@@ -226,12 +226,6 @@ If tests must be linted for type safety:
 }
 ```
 
-### Phase 2: Fix Single Remaining Error (scripts/smoke-firecrawl-bun.ts)
-
-- Root cause: `process.env.FIRECRAWL_API_KEY` is `string | undefined`
-- Firecrawl API expects `string | null`
-- Fix: Provide explicit null if env var missing
-
 ---
 
 ## Conclusion

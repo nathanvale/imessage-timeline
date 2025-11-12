@@ -43,7 +43,8 @@ jobs:
       - name: Changesets - open PR or publish
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
-          publish: pnpm release
+          # Guard publish to avoid failing main when NPM_TOKEN isn't configured
+          publish: bash .github/scripts/changesets-publish.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
