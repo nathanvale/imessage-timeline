@@ -30,3 +30,14 @@ jobs:
             ci
             chore
             revert
+      - name: Enforce PR title length <= 100
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const title = context.payload.pull_request?.title || ''
+            const len = title.length
+            if (len > 100) {
+              const msg = `PR title is ${len} characters; limit is 100. Please shorten the title and move details to the PR body.`
+              core.setFailed(msg)
+            }
