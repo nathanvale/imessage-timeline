@@ -1,15 +1,16 @@
 name: Channel Release (manual)
 
 on:
-  # Manual only; prevents unintended prerelease management during initial setup
+  # Manual only for package operations (version/publish/snapshot).
+  # Use pre-mode.yml workflow to enter/exit pre-release mode.
   workflow_dispatch:
     inputs:
       channel:
-        description: 'Channel tag (next, beta, rc)'
+        description: 'Channel tag (next, beta, rc) - must be in pre-mode first'
         required: true
         default: 'next'
       intent:
-        description: 'Action: enter | version | publish | exit | snapshot'
+        description: 'Action: version | publish | snapshot'
         required: true
         default: 'version'
 
@@ -47,14 +48,14 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-      - name: Enter prerelease mode
-        if: ${{ inputs.intent == 'enter' }}
+      - name: Validate pre-mode state
+        if: ${{ inputs.intent == 'version' || inputs.intent == 'publish' }}
         run: |
-          pnpm pre:enter:${{ inputs.channel }}
-          pnpm version:pre
-          git add .
-          git commit -m "chore(prerelease): enter ${{ inputs.channel }} channel"
-          git push --follow-tags
+          if [ ! -f .changeset/pre.json ]; then
+            echo "::error::Not in pre-release mode. Run 'Changesets Pre-Mode Toggle' workflow first to enter ${{ inputs.channel }} mode."
+            exit 1
+          fi
+          echo "Pre-mode active, proceeding with ${{ inputs.intent }}"
       - name: Version (prerelease continuation)
         if: ${{ inputs.intent == 'version' }}
         run: |
@@ -69,14 +70,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pnpm publish:pre
-      - name: Exit prerelease mode
-        if: ${{ inputs.intent == 'exit' }}
-        run: |
-          pnpm pre:exit
-          pnpm version:pre
-          git add .
-          git commit -m "chore(prerelease): exit ${{ inputs.channel }} channel"
-          git push --follow-tags
       - name: Canary snapshot publish
         if: ${{ inputs.intent == 'snapshot' }}
         env:

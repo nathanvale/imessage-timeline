@@ -1,0 +1,158 @@
+name: Emergency Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deprecate (e.g., 1.2.3)'
+        required: true
+      reason:
+        description: 'Reason for deprecation (will be shown to users)'
+        required: true
+        default: 'This version has critical issues. Please upgrade.'
+      create_issue:
+        description: 'Create GitHub issue documenting rollback?'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  rollback:
+    name: Deprecate Version
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '22.20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Validate version format
+        run: |
+          if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-.*)?$ ]]; then
+            echo "::error::Invalid version format. Expected: X.Y.Z or X.Y.Z-prerelease"
+            exit 1
+          fi
+          echo "Version format valid: ${{ inputs.version }}"
+
+      - name: Check if version exists
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # Authenticate
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          chmod 0600 ~/.npmrc
+
+          # Check if version exists
+          if npm view imessage-timeline@${{ inputs.version }} version 2>/dev/null; then
+            echo "✅ Version ${{ inputs.version }} exists on npm"
+          else
+            echo "::error::Version ${{ inputs.version }} not found on npm"
+            exit 1
+          fi
+
+      - name: Deprecate version
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm deprecate imessage-timeline@${{ inputs.version }} "${{ inputs.reason }}"
+          echo "✅ Deprecated imessage-timeline@${{ inputs.version }}"
+
+      - name: Verify deprecation
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          DEPRECATED_MSG=$(npm view imessage-timeline@${{ inputs.version }} deprecated)
+          if [ -n "$DEPRECATED_MSG" ]; then
+            echo "✅ Deprecation confirmed"
+            echo "Message: $DEPRECATED_MSG"
+          else
+            echo "::warning::Deprecation may not have applied correctly"
+          fi
+
+      - name: Create rollback documentation issue
+        if: ${{ inputs.create_issue }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Emergency Rollback: v${{ inputs.version }}`,
+              labels: ['rollback', 'critical'],
+              body: `## Emergency Rollback Executed
+
+            **Version:** \`${{ inputs.version }}\`
+            **Deprecation Reason:** ${{ inputs.reason }}
+            **Executed By:** @${{ github.actor }}
+            **Date:** ${new Date().toISOString()}
+
+            ---
+
+            ## What Happened
+
+            Version \`${{ inputs.version }}\` of \`imessage-timeline\` was deprecated on npm due to critical issues.
+
+            ## User Impact
+
+            Users who run \`npm install imessage-timeline@${{ inputs.version }}\` will see a deprecation warning:
+            > ${{ inputs.reason }}
+
+            ## Next Steps
+
+            - [ ] Identify root cause of issue
+            - [ ] Create fix
+            - [ ] Publish new patch version
+            - [ ] Communicate fix to affected users
+            - [ ] Close this issue once resolved
+
+            ## Related
+
+            - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - NPM package: https://www.npmjs.com/package/imessage-timeline/v/${{ inputs.version }}
+            `
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+            core.summary
+              .addHeading('Emergency Rollback Complete')
+              .addRaw(`Version <code>${{ inputs.version }}</code> has been deprecated.`)
+              .addLink('View issue', issue.data.html_url)
+              .write();
+
+      - name: Summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## Emergency Rollback Complete
+
+          **Version:** \`${{ inputs.version }}\`
+          **Status:** ✅ Deprecated on npm
+          **Reason:** ${{ inputs.reason }}
+
+          ### What Users See
+
+          When installing this version:
+          \`\`\`
+          npm WARN deprecated imessage-timeline@${{ inputs.version }}: ${{ inputs.reason }}
+          \`\`\`
+
+          ### Recovery Steps
+
+          1. Fix the issue in a new PR
+          2. Create changeset for patch release
+          3. Publish fixed version
+          4. Communicate to users
+          EOF
