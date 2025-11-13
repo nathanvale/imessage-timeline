@@ -41,5 +41,9 @@ mkdir -p .changeset
 git config user.name 'github-actions[bot]'
 git config user.email 'github-actions[bot]@users.noreply.github.com'
 git add "$FILE"
+# Disable Husky hooks in CI to avoid commitlint friction for automation commits
+if [[ "${CI:-false}" == "true" ]]; then
+  export HUSKY=0
+fi
 git commit -m "chore(changeset): auto-generate for PR #$PR_NUMBER" || echo 'No commit'
 git push || echo 'Push skipped'

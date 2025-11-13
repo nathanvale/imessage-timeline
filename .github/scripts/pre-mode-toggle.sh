@@ -27,5 +27,9 @@ if git diff --quiet; then
 fi
 
 git add .
+# Disable Husky hooks in CI to avoid commitlint friction for automation commits
+if [[ "${CI:-false}" == "true" ]]; then
+  export HUSKY=0
+fi
 git commit -m "chore(pre): $ACTION $CHANNEL channel"
 git push --set-upstream origin "$BRANCH"
