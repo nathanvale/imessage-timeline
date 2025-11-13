@@ -60,6 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, typecheck]
     timeout-minutes: 15
+    outputs:
+      coverage_lines: ${{ steps.cov.outputs.coverage_lines }}
+      coverage_branches: ${{ steps.cov.outputs.coverage_branches }}
+      coverage_functions: ${{ steps.cov.outputs.coverage_functions }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -109,6 +113,23 @@ jobs:
             echo "No lcov.info found to summarize" >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - name: Compute coverage metrics for gate
+        id: cov
+        if: always()
+        shell: bash
+        run: |
+          if [ -f ./test-results/coverage/lcov.info ]; then
+            {
+              node -e "const fs=require('fs');const d=fs.readFileSync('test-results/coverage/lcov.info','utf8');let L={f:0,h:0},B={f:0,h:0},F={f:0,h:0};for(const r of d.split('end_of_record')){if(!/SF:/.test(r)) continue;const lf=r.match(/LF:(\d+)/);const lh=r.match(/LH:(\d+)/);const brf=r.match(/BRF:(\d+)/);const brh=r.match(/BRH:(\d+)/);const fnf=r.match(/FNF:(\d+)/);const fnh=r.match(/FNH:(\d+)/);if(lf) L.f+=+lf[1];if(lh) L.h+=+lh[1];if(brf) B.f+=+brf[1];if(brh) B.h+=+brh[1];if(fnf) F.f+=+fnf[1];if(fnh) F.h+=+fnh[1];}function pct(h,f){return f? (h/f*100).toFixed(2):'0.00'};console.log('coverage_lines=' + pct(L.h,L.f));console.log('coverage_branches=' + pct(B.h,B.f));console.log('coverage_functions=' + pct(F.h,F.f));"
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "coverage_lines=0.00"
+              echo "coverage_branches=0.00"
+              echo "coverage_functions=0.00"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Comment coverage summary on PR
         if: github.event_name == 'pull_request'
         uses: ./.github/actions/coverage-comment
@@ -119,7 +140,7 @@ jobs:
           min-functions: '80'
 
   quality:
-    name: Repo quality checks
+    name: Repo quality (delta since main)
     runs-on: ubuntu-latest
     needs: [test]
     timeout-minutes: 10
@@ -144,10 +165,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   gate:
-    name: gate
+    name: All checks passed
     runs-on: ubuntu-latest
     needs: [lint, typecheck, test, quality]
     timeout-minutes: 5
     steps:
       - name: Aggregate result
         run: echo "All prerequisite PR quality jobs succeeded." && exit 0
+      - name: PR summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## All checks summary"
+            echo
+            echo "| Check | Status |"
+            echo "|---|---|"
+            echo "| Lint | ${{ needs.lint.result }} |"
+            echo "| Typecheck | ${{ needs.typecheck.result }} |"
+            echo "| Tests + Coverage | ${{ needs.test.result }} |"
+            echo "| Repo quality (delta since main) | ${{ needs.quality.result }} |"
+            echo
+            echo "### Coverage"
+            echo
+            echo "- Lines: ${{ needs.test.outputs.coverage_lines }}%"
+            echo "- Branches: ${{ needs.test.outputs.coverage_branches }}%"
+            echo "- Functions: ${{ needs.test.outputs.coverage_functions }}%"
+          } >> "$GITHUB_STEP_SUMMARY"
