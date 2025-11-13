@@ -19,7 +19,6 @@ if [[ -z "${PR_TITLE:-}" ]] || [[ -z "${PR_NUMBER:-}" ]]; then
 fi
 
 TITLE="${PR_TITLE}"
-PR_NUMBER="${PR_NUMBER}"
 
 LOWER=$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')
 TYPE="patch"
