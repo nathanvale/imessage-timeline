@@ -25,11 +25,15 @@ if [[ -z "${NPM_TOKEN:-}" ]]; then
   exit 0
 fi
 
+# Trap to ensure cleanup on exit
+trap 'rm -f "$HOME/.npmrc"' EXIT
+
 # Authenticate npm for publish
 # Note: pnpm respects ~/.npmrc for auth to npm registry
 {
   echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
 } > "$HOME/.npmrc"
+chmod 0600 "$HOME/.npmrc"
 
 echo "::group::Configure npm auth"
 echo "Wrote npm auth token to ~/.npmrc"
