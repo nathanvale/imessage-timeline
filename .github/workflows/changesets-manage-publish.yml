@@ -45,6 +45,9 @@ jobs:
             echo "::notice::NPM_TOKEN detected; publish enabled."
           fi
 
+      - name: Disable git hooks for CI commits
+        run: git config --global core.hooksPath /dev/null
+
       # This action will:
       # - open/update the "Version Packages" PR when there are pending changesets
       # - OR if this commit is the merged version commit, run the publish command
