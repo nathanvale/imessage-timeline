@@ -24,7 +24,7 @@ jobs:
         id: detect
         shell: bash
         run: |
-          set -eu
+          set -euo pipefail
           # Count files safely; allow directory to be absent. Use NUL delimiters.
           COUNT=0
           while IFS= read -r -d '' _file; do
@@ -43,7 +43,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          set -eu
+          set -euo pipefail
           # string assignment from env is intentional
           TITLE="${PR_TITLE:-}"
           # Lowercase title using tr to avoid shell-specific expansions that trigger shellcheck

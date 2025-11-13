@@ -28,6 +28,7 @@ jobs:
         id: pre
         shell: bash
         run: |
+          set -euo pipefail
           if [ -f .changeset/pre.json ]; then
             echo "active=true" >> "$GITHUB_OUTPUT"
           else
@@ -45,7 +46,9 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Alpha snapshot version + publish
         if: steps.pre.outputs.active == 'true'
+        shell: bash
         run: |
+          set -euo pipefail
           pnpm changeset version --snapshot alpha
           pnpm changeset publish --tag alpha
         env:

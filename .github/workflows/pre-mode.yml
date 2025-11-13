@@ -44,6 +44,7 @@ jobs:
           CHANNEL: ${{ inputs.channel }}
           RUN_ID: ${{ github.run_id }}
         run: |
+          set -euo pipefail
           BRANCH="pre/${ACTION}-${CHANNEL}-${RUN_ID}"
           echo "BRANCH=$BRANCH" >> "$GITHUB_OUTPUT"
           git checkout -b "$BRANCH"
