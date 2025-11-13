@@ -31,6 +31,12 @@ fi
 	echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
 } > "$HOME/.npmrc"
 
+# Configure git identity and disable hooks for automation
+git config user.name 'github-actions[bot]'
+git config user.email 'github-actions[bot]@users.noreply.github.com'
+export HUSKY=0
+git config --global core.hooksPath /dev/null || true
+
 annotate notice "Publishing alpha snapshot via Changesets (version snapshot + npm publish)."
 
 pnpm changeset version --snapshot alpha

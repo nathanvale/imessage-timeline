@@ -3,6 +3,10 @@
 # Generate a changeset file using PR context when none exists.
 # Expects env PR_TITLE and PR_NUMBER. Writes/commits/pushes the new file.
 
+#!/usr/bin/env bash
+# Generate a changeset file using PR context when none exists.
+# Expects env PR_TITLE and PR_NUMBER. Writes/commits/pushes the new file.
+
 set -euo pipefail
 
 if [[ -z "${PR_TITLE:-}" ]] || [[ -z "${PR_NUMBER:-}" ]]; then
@@ -42,16 +46,13 @@ mkdir -p .changeset
 git config user.name 'github-actions[bot]'
 git config user.email 'github-actions[bot]@users.noreply.github.com'
 git add "$FILE"
+# Disable Husky hooks in CI to avoid commitlint friction for automation commits
+if [[ "${CI:-false}" == "true" ]]; then
+  export HUSKY=0
+  git config --global core.hooksPath /dev/null || true
+fi
 git commit -m "chore(changeset): auto-generate for PR #$PR_NUMBER" || echo 'No commit'
 git push || echo 'Push skipped'
-||||||| 285d217
-=======
-#!/usr/bin/env bash
-# Generate a changeset file using PR context when none exists.
-# Expects env PR_TITLE and PR_NUMBER. Writes/commits/pushes the new file.
-
-set -euo pipefail
-
 if [[ -z "${PR_TITLE:-}" ]] || [[ -z "${PR_NUMBER:-}" ]]; then
   missing=()
   [[ -z "${PR_TITLE:-}" ]] && missing+=("PR_TITLE")
