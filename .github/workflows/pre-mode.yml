@@ -43,23 +43,8 @@ jobs:
           ACTION: ${{ inputs.action }}
           CHANNEL: ${{ inputs.channel }}
           RUN_ID: ${{ github.run_id }}
-        run: |
-          set -euo pipefail
-          BRANCH="pre/${ACTION}-${CHANNEL}-${RUN_ID}"
-          echo "BRANCH=$BRANCH" >> "$GITHUB_OUTPUT"
-          git checkout -b "$BRANCH"
-          if [ "$ACTION" = "enter" ]; then
-            pnpm changeset pre enter "$CHANNEL"
-          else
-            pnpm changeset pre exit
-          fi
-          if git diff --quiet; then
-            echo "No pre-mode changes to commit"
-            exit 0
-          fi
-          git add .
-          git commit -m "chore(pre): $ACTION $CHANNEL channel"
-          git push --set-upstream origin "$BRANCH"
+        shell: bash
+        run: ./.github/scripts/pre-mode-toggle.sh
       - name: Open PR to toggle pre-mode
         if: steps.prep.outcome == 'success'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1

@@ -47,10 +47,7 @@ jobs:
       - name: Alpha snapshot version + publish
         if: steps.pre.outputs.active == 'true'
         shell: bash
-        run: |
-          set -euo pipefail
-          pnpm changeset version --snapshot alpha
-          pnpm changeset publish --tag alpha
+        run: ./.github/scripts/alpha-snapshot-publish.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

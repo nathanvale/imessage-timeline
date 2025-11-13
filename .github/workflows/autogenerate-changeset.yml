@@ -23,15 +23,7 @@ jobs:
       - name: Detect existing changeset
         id: detect
         shell: bash
-        run: |
-          set -euo pipefail
-          # Count files safely; allow directory to be absent. Use NUL delimiters.
-          COUNT=0
-          while IFS= read -r -d '' _file; do
-            COUNT=$((COUNT + 1))
-          done < <(find .changeset -type f -name '*.md' -print0 2>/dev/null)
-          COUNT="${COUNT//[[:space:]]/}"
-          echo "found=$COUNT" >> "$GITHUB_OUTPUT"
+        run: ./.github/scripts/changeset-detect-existing.sh .changeset
       - name: Setup pnpm toolchain
         uses: ./.github/actions/setup-pnpm
       - name: Install deps (minimal)
@@ -42,29 +34,7 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          set -euo pipefail
-          # string assignment from env is intentional
-          TITLE="${PR_TITLE:-}"
-          # Lowercase title using tr to avoid shell-specific expansions that trigger shellcheck
-          LOWER="$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')"
-          TYPE="patch"
-          if printf '%s' "$LOWER" | grep -q '^feat'; then TYPE="minor"; fi
-          if printf '%s' "$LOWER" | grep -q 'breaking'; then TYPE="major"; fi
-          # Sanitize: keep alnum, space, hyphen; then convert spaces to hyphens
-          SAFE_NAME="$(printf '%s' "$TITLE" | sed -E 's/[^[:alnum:][:space:]-]//g' | tr ' ' '-')"
-          FILE=".changeset/auto-${SAFE_NAME:-change}.md"
-          {
-            printf '---\n'
-            printf 'imessage-timeline: %s\n' "$TYPE"
-            printf '---\n\n'
-            printf '%s\n' "$TITLE"
-          } > "$FILE"
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add "$FILE"
-          git commit -m "chore(changeset): auto-generate for PR #$PR_NUMBER" || echo 'No commit'
-          git push || echo 'Push skipped'
+        run: ./.github/scripts/changeset-generate-if-missing.sh
       - name: Annotate PR
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
