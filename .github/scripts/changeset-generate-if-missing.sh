@@ -4,8 +4,22 @@
 
 set -euo pipefail
 
-TITLE="${PR_TITLE:-}"
-PR_NUMBER="${PR_NUMBER:-}"
+if [[ -z "${PR_TITLE:-}" ]] || [[ -z "${PR_NUMBER:-}" ]]; then
+  missing=()
+  [[ -z "${PR_TITLE:-}" ]] && missing+=("PR_TITLE")
+  [[ -z "${PR_NUMBER:-}" ]] && missing+=("PR_NUMBER")
+  echo "::warning::Missing required env: ${missing[*]}. Skipping changeset generation."
+  if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+    {
+      echo "## Auto-generate Changeset"
+      echo "Missing required env: ${missing[*]}. Skipping generation."
+    } >>"$GITHUB_STEP_SUMMARY"
+  fi
+  exit 0
+fi
+
+TITLE="${PR_TITLE}"
+PR_NUMBER="${PR_NUMBER}"
 
 LOWER=$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]')
 TYPE="patch"

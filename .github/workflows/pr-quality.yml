@@ -107,28 +107,13 @@ jobs:
       - name: Append coverage summary to job summary
         if: always()
         run: |
-          if [ -f ./test-results/coverage/lcov.info ]; then
-            node -e "const fs=require('fs');const data=fs.readFileSync('test-results/coverage/lcov.info','utf8');let total={lines:{found:0,hit:0},branches:{found:0,hit:0},functions:{found:0,hit:0}};for(const rec of data.split('end_of_record')){if(!/SF:/.test(rec)) continue;const lines=rec.match(/LF:(\d+)/);const lhit=rec.match(/LH:(\d+)/);const brfound=rec.match(/BRF:(\d+)/);const brhit=rec.match(/BRH:(\d+)/);const ffound=rec.match(/FNF:(\d+)/);const fhit=rec.match(/FNH:(\d+)/);if(lines) total.lines.found+=+lines[1];if(lhit) total.lines.hit+=+lhit[1];if(brfound) total.branches.found+=+brfound[1];if(brhit) total.branches.hit+=+brhit[1];if(ffound) total.functions.found+=+ffound[1];if(fhit) total.functions.hit+=+fhit[1];}function pct(hit,found){return found? (hit/found*100).toFixed(2):'0.00'};const summary=`## Coverage Summary\n\n| Metric | % | Covered / Total |\n|---|---|---|\n| Lines | ${pct(total.lines.hit,total.lines.found)} | ${total.lines.hit} / ${total.lines.found} |\n| Branches | ${pct(total.branches.hit,total.branches.found)} | ${total.branches.hit} / ${total.branches.found} |\n| Functions | ${pct(total.functions.hit,total.functions.found)} | ${total.functions.hit} / ${total.functions.found} |\n`;fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);";
-          else
-            echo "No lcov.info found to summarize" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          node ./.github/scripts/coverage-metrics.mjs summary >> "$GITHUB_STEP_SUMMARY" || echo "No coverage found to summarize" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Compute coverage metrics for gate
         id: cov
         if: always()
         shell: bash
-        run: |
-          if [ -f ./test-results/coverage/lcov.info ]; then
-            {
-              node -e "const fs=require('fs');const d=fs.readFileSync('test-results/coverage/lcov.info','utf8');let L={f:0,h:0},B={f:0,h:0},F={f:0,h:0};for(const r of d.split('end_of_record')){if(!/SF:/.test(r)) continue;const lf=r.match(/LF:(\d+)/);const lh=r.match(/LH:(\d+)/);const brf=r.match(/BRF:(\d+)/);const brh=r.match(/BRH:(\d+)/);const fnf=r.match(/FNF:(\d+)/);const fnh=r.match(/FNH:(\d+)/);if(lf) L.f+=+lf[1];if(lh) L.h+=+lh[1];if(brf) B.f+=+brf[1];if(brh) B.h+=+brh[1];if(fnf) F.f+=+fnf[1];if(fnh) F.h+=+fnh[1];}function pct(h,f){return f? (h/f*100).toFixed(2):'0.00'};console.log('coverage_lines=' + pct(L.h,L.f));console.log('coverage_branches=' + pct(B.h,B.f));console.log('coverage_functions=' + pct(F.h,F.f));"
-            } >> "$GITHUB_OUTPUT"
-          else
-            {
-              echo "coverage_lines=0.00"
-              echo "coverage_branches=0.00"
-              echo "coverage_functions=0.00"
-            } >> "$GITHUB_OUTPUT"
-          fi
+        run: node ./.github/scripts/coverage-metrics.mjs outputs >> "$GITHUB_OUTPUT"
 
       - name: Comment coverage summary on PR
         if: github.event_name == 'pull_request'
