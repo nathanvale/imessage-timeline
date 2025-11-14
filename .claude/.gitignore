@@ -1,0 +1,5 @@
+# Local settings (user-specific, should not be committed)
+settings.local.json
+
+# State directory (runtime state, should not be committed)
+state/
