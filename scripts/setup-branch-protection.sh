@@ -85,7 +85,7 @@ gh api -X PUT -H "Accept: application/vnd.github+json" \
 echo "Applying branch protection rules..."
 
 if [ "$REQUIRE_PR" = true ]; then
-  read -r -d '' BODY <<'JSON'
+  read -r -d '' BODY <<'JSON' || true
 {
   "required_status_checks": {
     "strict": true,
@@ -110,7 +110,7 @@ if [ "$REQUIRE_PR" = true ]; then
 }
 JSON
 else
-  read -r -d '' BODY <<'JSON'
+  read -r -d '' BODY <<'JSON' || true
 {
   "required_status_checks": {
     "strict": true,
