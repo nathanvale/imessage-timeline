@@ -8,7 +8,7 @@
   ],
   "commit": false,
   "fixed": [],
-  "ignore": [],
+  "ignore": ["!private"],
   "linked": [],
   "updateInternalDependencies": "patch"
 }

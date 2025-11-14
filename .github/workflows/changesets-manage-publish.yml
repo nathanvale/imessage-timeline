@@ -48,6 +48,14 @@ jobs:
       - name: Disable git hooks for CI commits
         run: git config --global core.hooksPath /dev/null
 
+      - name: Prepare release branch (local)
+        shell: bash
+        run: |
+          # Ensure we have main locally
+          git fetch --no-tags --prune --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+          # Create/align local release branch from main so downstream git ops don't fail if branch doesn't exist yet
+          git checkout -B changeset-release/main origin/main
+
       # This action will:
       # - open/update the "Version Packages" PR when there are pending changesets
       # - OR if this commit is the merged version commit, run the publish command
@@ -56,6 +64,7 @@ jobs:
         with:
           # Guard publish to avoid failing main when NPM_TOKEN isn't configured
           publish: bash .github/scripts/changesets-publish.sh
+          commit: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -26,10 +26,20 @@ if [[ -z "${NPM_TOKEN:-}" ]] || [[ -z "${GITHUB_TOKEN:-}" ]]; then
 	exit 0
 fi
 
+# Trap to ensure cleanup on exit
+trap 'rm -f "$HOME/.npmrc"' EXIT
+
 # Authenticate npm for publish
 {
 	echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
 } > "$HOME/.npmrc"
+chmod 0600 "$HOME/.npmrc"
+
+# Configure git identity and disable hooks for automation
+git config user.name 'github-actions[bot]'
+git config user.email 'github-actions[bot]@users.noreply.github.com'
+export HUSKY=0
+git config --global core.hooksPath /dev/null || true
 
 annotate notice "Publishing alpha snapshot via Changesets (version snapshot + npm publish)."
 
