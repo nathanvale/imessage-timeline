@@ -296,7 +296,7 @@ After Phase 1 implementation:
 3. Navigate to Releases page
 4. Confirm `sbom.cdx.json` appears in release assets
 5. Download and validate with:
-   `cyclonedx-cli validate --input-file sbom.cdx.json`
+   `cyclonedx validate --input-file sbom.cdx.json --fail-on-errors`
 
 ---
 
