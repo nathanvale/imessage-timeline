@@ -133,7 +133,7 @@ Release**.
 1. **Attach SBOM to GitHub Releases**
    ```yaml
    - name: Create GitHub Release
-     uses: softprops/action-gh-release@4e5b2f7f38156d81e9446a1167718c5e7c1a0b15 # v2.0.4
+     uses: softprops/action-gh-release@v2.4.2
      with:
        generate_release_notes: true
        files: |
@@ -163,7 +163,7 @@ Release**.
    - name: Validate SBOM
      run: |
        npm install -g @cyclonedx/cyclonedx-cli
-       cyclonedx-cli validate --input-file sbom.cdx.json
+       cyclonedx validate --input-file sbom.cdx.json --fail-on-errors
    ```
 
 ### Medium-Term Actions (P2)
@@ -176,13 +176,29 @@ Release**.
 5. **Implement SBOM Signing**
    - Use Cosign for keyless signing
    - Generate attestation using GitHub OIDC
-   - Example:
+   - Example (for container images):
+
    ```yaml
-   - name: Sign SBOM
-     uses: sigstore/cosign-installer@v3
-   - name: Create SBOM Attestation
-     run: cosign attest --type cyclonedx --predicate sbom.cdx.json
+   # Add at job level
+   permissions:
+     id-token: write # Required for OIDC token
+     attestations: write # Required for attestation creation
+
+   steps:
+     - name: Install Cosign
+       uses: sigstore/cosign-installer@v3
+
+     - name: Create SBOM Attestation
+       run: |
+         # For container images: replace with your image and digest
+         cosign attest --type cyclonedx \
+           --predicate sbom.cdx.json \
+           ${{ env.IMAGE_NAME }}@sha256:${{ env.IMAGE_DIGEST }}
    ```
+
+   **Note**: For npm packages (non-container), consider using npm provenance
+   (`--provenance` flag) or the GitHub Attestations API instead of Cosign, as
+   Cosign is primarily designed for container images.
 
 ### Long-Term Actions (P3)
 
