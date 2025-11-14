@@ -1,3 +1,5 @@
-     STDIN
+---
+'imessage-timeline': patch
+---
 
-1 --- 2 "imessage-timeline": patch 3 --- 4 5 Test changesets workflow end-to-end
+Test changesets workflow end-to-end
