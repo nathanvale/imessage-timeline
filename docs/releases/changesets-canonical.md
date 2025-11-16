@@ -108,8 +108,8 @@ Ensure these checks are required before merging:
 
 - `release`: `changeset publish` (used by publish workflows)
 - `release:snapshot:canary`:
-  `changeset version --snapshot canary && changeset publish --tag canary`
-  (example)
+  `changeset version --snapshot canary && changeset publish --tag canary` ⚠️
+  **Only works when NOT in pre-mode** (`.changeset/pre.json` must not exist)
 - `version:pre`: `changeset version` (not used directly; handled by action)
 
 ---
