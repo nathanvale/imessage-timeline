@@ -26,6 +26,12 @@ if [[ -z "${NPM_TOKEN:-}" ]] || [[ -z "${GITHUB_TOKEN:-}" ]]; then
 	exit 0
 fi
 
+# Check if pre-release mode is active
+if [[ -f .changeset/pre.json ]]; then
+	annotate notice "Pre-release mode is active. Skipping alpha snapshot (use pre-release versioning instead)."
+	exit 0
+fi
+
 # Trap to ensure cleanup on exit
 trap 'rm -f "$HOME/.npmrc"' EXIT
 
