@@ -473,19 +473,29 @@ pnpm changeset status
 
 ### Pre-release Workflow (Advanced)
 
-For beta/alpha releases:
+> **📘 Complete Guide:** For comprehensive pre-release documentation, see
+> **[Pre-Release Guide](./pre-release-guide.md)**
+
+Quick overview:
 
 ```bash
-# Enter pre-release mode
-pnpm changeset pre enter beta
+# Enter pre-release mode (creates PR for review)
+gh workflow run pre-mode.yml -f action=enter -f channel=next
 
 # Create changesets as normal
 pnpm version:gen
-# Versions will be: 1.0.0-beta.0, 1.0.0-beta.1, etc.
+# Versions will be: 0.0.1-next.0, 0.0.1-next.1, etc.
 
-# Exit pre-release mode
-pnpm changeset pre exit
+# Exit pre-release mode (creates PR for review)
+gh workflow run pre-mode.yml -f action=exit -f channel=next
 ```
+
+**See the [Pre-Release Guide](./pre-release-guide.md) for:**
+
+- How to toggle pre-release mode on/off
+- Publishing snapshots vs versioned pre-releases
+- Common workflows (canary, beta, RC)
+- Troubleshooting pre-release issues
 
 ---
 
@@ -1290,6 +1300,10 @@ git log --oneline --format="%s"
 
 ### Related Docs in This Project
 
+- **[Pre-Release Guide](./pre-release-guide.md)** - Canary, beta, and RC
+  releases
+- **[Release Channels](./release-channels.md)** - Channel strategy and
+  architecture
 - [Dual-Mode Distribution](./dual-mode-distribution-best-practices.md)
 - [README.md](../README.md) - Library usage examples
 - [CHANGELOG.md](../CHANGELOG.md) - Generated release history
