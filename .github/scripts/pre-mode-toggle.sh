@@ -21,12 +21,11 @@ else
   pnpm changeset pre exit
 fi
 
-if git diff --quiet; then
+git add .
+if git diff --cached --quiet; then
   echo "No pre-mode changes to commit"
   exit 0
 fi
-
-git add .
 # Disable Husky hooks in CI to avoid commitlint friction for automation commits
 if [[ "${CI:-false}" == "true" ]]; then
   export HUSKY=0
