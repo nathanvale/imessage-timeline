@@ -60,7 +60,16 @@ GitHub workflow: `.github/workflows/channel-release.yml` provides
 
 ### Canary Snapshots
 
-Use `intent=snapshot` to invoke `release:snapshot:canary` script:
+> ⚠️ **IMPORTANT:** Snapshot releases do NOT work when in pre-release mode.
+>
+> Changesets explicitly forbids `changeset version --snapshot` when
+> `.changeset/pre.json` exists. To use snapshots, you must first exit pre-mode.
+>
+> **Alternative:** When in pre-mode, use versioned pre-releases instead
+> (`changeset version` + `changeset publish`).
+
+Use `intent=snapshot` to invoke `release:snapshot:canary` script (only when NOT
+in pre-mode):
 
 ```
 changeset version --snapshot canary
@@ -70,13 +79,17 @@ changeset publish --tag canary
 Generates versions like `1.2.0-canary-20250101123045` (Changesets auto
 timestamp). Consumers pin explicitly or use range if appropriate.
 
+**Limitation:** This workflow only works when `.changeset/pre.json` does NOT
+exist. For pre-release workflows, use versioned pre-releases instead.
+
 ## Scripts Added (package.json)
 
 - `pre:enter:next|beta|rc` – enter prerelease mode with tag.
 - `pre:exit` – prepare exit.
 - `version:pre` – `changeset version` while in prerelease.
 - `publish:pre` – `changeset publish` for prerelease tag.
-- `release:snapshot:canary` – snapshot publishing.
+- `release:snapshot:canary` – snapshot publishing (⚠️ only works when NOT in
+  pre-mode).
 
 ## Dist-Tag Behavior
 
