@@ -25,13 +25,13 @@ for testing, early access, and staged rollouts.
 
 ### I Want To...
 
-| Goal                                 | Command                                                                 | What It Does                                                        |
-| ------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| **Publish a quick canary build NOW** | `pnpm release:snapshot:canary`                                          | Instant publish as `0.0.1-canary-20251116001234` with `@canary` tag |
-| **Publish a proper canary release**  | `pnpm changeset` → `pnpm changeset version` → `pnpm publish --tag next` | Versioned release as `0.0.1-next.0` with `@next` tag                |
-| **Enter beta mode**                  | `gh workflow run pre-mode.yml -f action=enter -f channel=beta`          | Switch to `beta` channel for `0.0.1-beta.0` releases                |
-| **Exit pre-release mode**            | `gh workflow run pre-mode.yml -f action=exit -f channel=next`           | Return to normal stable releases                                    |
-| **Check current mode**               | `cat .changeset/pre.json`                                               | Shows current pre-release configuration                             |
+| Goal                                | Command                                                          | Prerequisites                     | What It Does                                                        |
+| ----------------------------------- | ---------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------- |
+| **Publish a quick snapshot build**  | `pnpm release:snapshot:canary`                                   | ⚠️ **Must NOT be in pre-mode**    | Instant publish as `0.0.1-canary-20251116001234` with `@canary` tag |
+| **Publish a proper canary release** | `pnpm changeset` → `pnpm changeset version` → `pnpm publish:pre` | ✅ **Must be in pre-mode (next)** | Versioned release as `0.0.1-next.0` with `@next` tag                |
+| **Enter beta mode**                 | `gh workflow run pre-mode.yml -f action=enter -f channel=beta`   | -                                 | Switch to `beta` channel for `0.0.1-beta.0` releases                |
+| **Exit pre-release mode**           | `gh workflow run pre-mode.yml -f action=exit -f channel=next`    | -                                 | Return to normal stable releases                                    |
+| **Check current mode**              | `cat .changeset/pre.json`                                        | -                                 | Shows current pre-release configuration (file exists = pre-mode ON) |
 
 ---
 
@@ -171,7 +171,26 @@ cat .changeset/pre.json | jq '.'
 
 ### Option 1: Snapshot Release (Quick & Dirty)
 
-**Use when:** You need to test something RIGHT NOW without version tracking.
+> ⚠️ **IMPORTANT:** Snapshot releases do NOT work when in pre-release mode.
+>
+> If `.changeset/pre.json` exists (pre-mode is active), you will get this error:
+>
+> ```
+> 🦋 error Snapshot release is not allowed in pre mode
+> ```
+>
+> **To use snapshots:** Exit pre-release mode first with:
+>
+> ```bash
+> gh workflow run pre-mode.yml -f action=exit -f channel=next
+> ```
+>
+> **Alternative:** Use versioned pre-releases (Option 2) instead.
+
+**Use when:**
+
+- You need to test something RIGHT NOW without version tracking
+- You are **NOT in pre-release mode** (no `.changeset/pre.json` file)
 
 **Command:**
 
@@ -186,6 +205,7 @@ pnpm release:snapshot:canary
 - ✅ Publishes to npm with `@canary` tag
 - ❌ **No git commit** - not tracked in version history
 - ❌ **No CHANGELOG entry** - ephemeral release
+- ⚠️ **Only works when NOT in pre-mode** - Changesets limitation
 
 **Version format:**
 
@@ -315,9 +335,10 @@ npm install imessage-timeline@alpha
 
 ## Common Workflows
 
-### Workflow 1: Quick Canary for Testing
+### Workflow 1: Quick Pre-Release for Testing (In Pre-Mode)
 
-**Scenario:** You fixed a bug and want to test it immediately.
+**Scenario:** You fixed a bug and want to test it immediately (while in
+pre-mode).
 
 ```bash
 # 1. Commit your fix to main
@@ -325,18 +346,41 @@ git add .
 git commit -m "fix: resolve critical bug"
 git push origin main
 
-# 2. Publish snapshot
+# 2. Create changeset for the fix
+pnpm changeset
+# Select: imessage-timeline
+# Bump: patch
+# Summary: "Fix critical bug"
+
+# 3. Version the pre-release
+pnpm changeset version
+# Creates: 0.0.1-next.0 (or next increment)
+
+# 4. Commit the version
+git commit -am "chore: version 0.0.1-next.0"
+git push origin main
+
+# 5. Publish to npm
+pnpm publish:pre
+
+# 6. Test it
+npm install imessage-timeline@next
+# Run your tests...
+```
+
+**Alternative: Quick Snapshot (NOT in pre-mode)**
+
+If you're NOT in pre-release mode and need instant publish:
+
+```bash
+# 1. Commit your fix
+git commit -am "fix: resolve critical bug"
+
+# 2. Publish snapshot (only works if NOT in pre-mode)
 pnpm release:snapshot:canary
 
 # 3. Test it
 npm install imessage-timeline@canary
-# Run your tests...
-
-# 4. If good, create proper release later
-pnpm changeset
-pnpm changeset version
-git commit -am "chore: version 0.0.1-next.0"
-pnpm publish --tag next
 ```
 
 ---
@@ -498,19 +542,40 @@ pnpm publish  # Defaults to @latest
 
 ### Problem: Snapshot doesn't work
 
-**Error:** `changeset version --snapshot` fails
+**Error:** `changeset version --snapshot` fails with:
+
+```
+🦋 error Snapshot release is not allowed in pre mode
+🦋 To resolve this exit the pre mode by running `changeset pre exit`
+```
+
+**Cause:** You're in pre-release mode. Changesets does NOT support snapshots
+when `.changeset/pre.json` exists.
 
 **Solution:**
 
+**Option 1: Exit pre-mode to use snapshots**
+
 ```bash
-# Ensure you're in pre-mode first
-cat .changeset/pre.json
+# Exit pre-release mode
+gh workflow run pre-mode.yml -f action=exit -f channel=next
+# Wait for PR to be created and merged
 
-# If not in pre-mode, snapshots still work but use different format
-# They create: 0.0.1-canary-20251116... (timestamp)
-
-# In pre-mode, snapshots create: 0.0.1-next-canary-20251116...
+# Then snapshots will work
+pnpm release:snapshot:canary
 ```
+
+**Option 2: Use versioned pre-releases instead (recommended)**
+
+```bash
+# Stay in pre-mode and use proper versioned pre-releases
+pnpm changeset           # Create changeset
+pnpm changeset version   # Creates 0.0.1-next.0
+pnpm publish:pre         # Publish to @next tag
+```
+
+**Note:** Snapshots only work when NOT in pre-release mode. This is a Changesets
+limitation, not a configuration issue.
 
 ---
 

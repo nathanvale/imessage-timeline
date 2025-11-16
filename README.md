@@ -1322,13 +1322,21 @@ We support prerelease channels for fast feedback and safe promotion:
 **Quick commands:**
 
 ```bash
-# Publish quick canary build
+# Publish quick snapshot (only when NOT in pre-mode)
 pnpm release:snapshot:canary
+
+# Publish versioned pre-release (when in pre-mode)
+pnpm changeset              # Create changeset
+pnpm changeset version      # Version as 0.0.1-next.0
+pnpm publish:pre            # Publish to @next tag
 
 # Enter/exit pre-release mode
 gh workflow run pre-mode.yml -f action=enter -f channel=next
 gh workflow run pre-mode.yml -f action=exit -f channel=next
 ```
+
+> ⚠️ **Note:** Snapshot releases (`pnpm release:snapshot:canary`) only work when
+> NOT in pre-release mode. When in pre-mode, use versioned pre-releases instead.
 
 📚 **See the detailed guides:**
 
