@@ -25,6 +25,12 @@ if [[ -z "${NPM_TOKEN:-}" ]]; then
   exit 0
 fi
 
+# Check if pre-release mode is active
+if [[ -f .changeset/pre.json ]]; then
+  annotate notice "Pre-release mode is active. Skipping automated publish from main (use pre-release publishing workflow instead)."
+  exit 0
+fi
+
 # Trap to ensure cleanup on exit
 trap 'rm -f "$HOME/.npmrc"' EXIT
 
