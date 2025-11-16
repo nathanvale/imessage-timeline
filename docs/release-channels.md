@@ -1,5 +1,8 @@
 # Release Channels & Prerelease Strategy
 
+> **⚡ Quick Start:** For practical, step-by-step instructions on publishing
+> pre-releases, see the **[Pre-Release Guide](./pre-release-guide.md)**
+
 This document defines the multi-channel release process for `imessage-timeline`,
 enabling safe iteration and promotion flows while preserving stable `latest`
 integrity and supply chain guarantees.
@@ -156,8 +159,11 @@ pnpm add imessage-timeline@1.2.0-canary-20250101123045
 
 ## References
 
-- Changesets prerelease docs (`pre enter`, `pre exit`).
-- npm dist-tags reference.
+- **[Pre-Release Guide](./pre-release-guide.md)** - Step-by-step practical guide
+- **[Automated Release Workflow](./automated-release-workflow.md)** - Main
+  release documentation
+- Changesets prerelease docs (`pre enter`, `pre exit`)
+- npm dist-tags reference
 
 ---
 

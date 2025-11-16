@@ -1303,19 +1303,39 @@ This project uses **automated releases** with Changesets:
 - **Publishing** happens automatically when version PR is merged
 
 📚 **Full documentation:**
-[Automated Release Workflow](./docs/automated-release-workflow.md)
+
+- **[Automated Release Workflow](./docs/automated-release-workflow.md)** - Main
+  release process
+- **[Pre-Release Guide](./docs/pre-release-guide.md)** - Canary, beta, and RC
+  releases
 
 ### Release Channels
 
 We support prerelease channels for fast feedback and safe promotion:
 
-- `next` for early adopters
+- `next` for early adopters (canary builds)
 - `beta` for feature-complete testing
 - `rc` for release candidates
 - `canary` snapshots for experimental builds
+- `alpha` for automated nightly snapshots
 
-See the channel usage, promotion flow, and workflow details:
-[Release Channels & Prerelease Strategy](./docs/release-channels.md)
+**Quick commands:**
+
+```bash
+# Publish quick canary build
+pnpm release:snapshot:canary
+
+# Enter/exit pre-release mode
+gh workflow run pre-mode.yml -f action=enter -f channel=next
+gh workflow run pre-mode.yml -f action=exit -f channel=next
+```
+
+📚 **See the detailed guides:**
+
+- **[Pre-Release Guide](./docs/pre-release-guide.md)** - Step-by-step publishing
+  instructions
+- **[Release Channels Strategy](./docs/release-channels.md)** - Architecture and
+  promotion flows
 
 ### Package Hygiene
 
