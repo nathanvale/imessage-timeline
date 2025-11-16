@@ -65,12 +65,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist/**",
-    "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
-  ],
+  "files": ["dist/**", "README.md", "LICENSE", "CHANGELOG.md"],
   "funding": [
     {
       "type": "github",
@@ -97,13 +92,8 @@
   ],
   "license": "MIT",
   "lint-staged": {
-    "*.{json,md,yml,yaml}": [
-      "prettier -w"
-    ],
-    "*.{ts,tsx,js,jsx,mts,cts}": [
-      "eslint --fix",
-      "prettier -w"
-    ]
+    "*.{json,md,yml,yaml}": ["prettier -w"],
+    "*.{ts,tsx,js,jsx,mts,cts}": ["eslint --fix", "prettier -w"]
   },
   "main": "./dist/index.js",
   "name": "imessage-timeline",
@@ -163,5 +153,5 @@
   "sideEffects": false,
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.0.2"
+  "version": "0.0.1"
 }
