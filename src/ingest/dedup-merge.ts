@@ -48,9 +48,14 @@ export type MergeResult = {
  * 4. Verify no data loss (AC04)
  * 5. Ensure determinism (AC05)
  */
-export function dedupAndMerge(csvMessages: Message[], dbMessages: Message[]): MergeResult {
+export function dedupAndMerge(
+  csvMessages: Message[],
+  dbMessages: Message[],
+): MergeResult {
   // AC05: Sort inputs for determinism
-  const sortedCsv = [...csvMessages].sort((a, b) => a.guid.localeCompare(b.guid))
+  const sortedCsv = [...csvMessages].sort((a, b) =>
+    a.guid.localeCompare(b.guid),
+  )
   const sortedDb = [...dbMessages].sort((a, b) => a.guid.localeCompare(b.guid))
 
   const stats: MergeStats = {
@@ -66,10 +71,29 @@ export function dedupAndMerge(csvMessages: Message[], dbMessages: Message[]): Me
   const outputMessages: Message[] = []
   const matchedDbGuids = new Set<string>()
 
+  // Build O(1) lookup indices for DB messages
+  const dbByGuid = new Map<string, Message>()
+  const dbByNormalizedContent = new Map<string, Message[]>()
+
+  for (const dbMsg of sortedDb) {
+    dbByGuid.set(dbMsg.guid, dbMsg)
+
+    // Index by normalized text for content equivalence (text messages only)
+    if (dbMsg.messageKind === 'text' && dbMsg.text) {
+      const normalizedKey = `${dbMsg.handle || ''}:${normalizeTextForIndex(dbMsg.text)}`
+      const existing = dbByNormalizedContent.get(normalizedKey)
+      if (existing) {
+        existing.push(dbMsg)
+      } else {
+        dbByNormalizedContent.set(normalizedKey, [dbMsg])
+      }
+    }
+  }
+
   // Process each CSV message
   for (const csvMsg of sortedCsv) {
-    // AC01: Try exact GUID match first
-    const exactMatch = findExactMatch(csvMsg, sortedDb)
+    // AC01: Try exact GUID match first - O(1) lookup
+    const exactMatch = dbByGuid.get(csvMsg.guid) || null
 
     if (exactMatch) {
       // AC02: Merge with DB authoritiveness
@@ -78,9 +102,21 @@ export function dedupAndMerge(csvMessages: Message[], dbMessages: Message[]): Me
       matchedDbGuids.add(exactMatch.guid)
       stats.exactMatches++
     } else {
-      // AC03: Try content equivalence on unmatched DB messages
-      const unmatchedDbMessages = sortedDb.filter(dbMsg => !matchedDbGuids.has(dbMsg.guid))
-      const contentMatch = detectContentEquivalence(csvMsg, unmatchedDbMessages)
+      // AC03: Try content equivalence using indexed lookup - O(1) average case for text
+      let contentMatch = detectContentEquivalenceIndexed(
+        csvMsg,
+        dbByNormalizedContent,
+        matchedDbGuids,
+      )
+
+      // Fallback to linear scan for non-text messages (media, tapback, notification)
+      // The indexed lookup only handles text messages; media uses media.id comparison
+      if (!contentMatch && csvMsg.messageKind !== 'text') {
+        const unmatchedDbMessages = sortedDb.filter(
+          (dbMsg) => !matchedDbGuids.has(dbMsg.guid),
+        )
+        contentMatch = detectContentEquivalence(csvMsg, unmatchedDbMessages)
+      }
 
       if (contentMatch) {
         // AC02: Merge with DB authoritiveness
@@ -114,8 +150,11 @@ export function dedupAndMerge(csvMessages: Message[], dbMessages: Message[]): Me
 /**
  * AC01: Find exact GUID match in DB messages
  */
-export function findExactMatch(message: Message, dbMessages: Message[]): Message | null {
-  return dbMessages.find(dbMsg => dbMsg.guid === message.guid) || null
+export function findExactMatch(
+  message: Message,
+  dbMessages: Message[],
+): Message | null {
+  return dbMessages.find((dbMsg) => dbMsg.guid === message.guid) || null
 }
 
 /**
@@ -131,7 +170,7 @@ export function findExactMatch(message: Message, dbMessages: Message[]): Message
 export function detectContentEquivalence(
   csvMsg: Message,
   candidates: Message[],
-  threshold = 0.9
+  threshold = 0.9,
 ): ContentMatch | null {
   for (const candidate of candidates) {
     const reasons: string[] = []
@@ -161,7 +200,10 @@ export function detectContentEquivalence(
         // Not an exact match, skip to avoid false positives
         continue
       }
-    } else if (csvMsg.messageKind === 'media' && candidate.messageKind === 'media') {
+    } else if (
+      csvMsg.messageKind === 'media' &&
+      candidate.messageKind === 'media'
+    ) {
       // For media messages, compare media metadata
       const csvMediaId = csvMsg.media?.id
       const candidateMediaId = candidate.media?.id
@@ -206,6 +248,54 @@ function normalizeText(text: string): string {
 }
 
 /**
+ * Normalize text for Map index key (same as normalizeText)
+ * Used when building the content equivalence index
+ */
+function normalizeTextForIndex(text: string): string {
+  return normalizeText(text)
+}
+
+/**
+ * AC03: O(1) content equivalence detection using pre-built index
+ *
+ * @param csvMsg - CSV message to find match for
+ * @param contentIndex - Map of normalized content key to DB messages
+ * @param matchedGuids - Set of already-matched GUIDs to skip
+ * @returns ContentMatch if found, null otherwise
+ */
+function detectContentEquivalenceIndexed(
+  csvMsg: Message,
+  contentIndex: Map<string, Message[]>,
+  matchedGuids: Set<string>,
+): ContentMatch | null {
+  // Only text messages are indexed
+  if (csvMsg.messageKind !== 'text' || !csvMsg.text) {
+    return null
+  }
+
+  // Build the lookup key
+  const normalizedKey = `${csvMsg.handle || ''}:${normalizeTextForIndex(csvMsg.text)}`
+  const candidates = contentIndex.get(normalizedKey)
+
+  if (!candidates || candidates.length === 0) {
+    return null
+  }
+
+  // Find first unmatched candidate
+  for (const candidate of candidates) {
+    if (!matchedGuids.has(candidate.guid)) {
+      return {
+        message: candidate,
+        confidence: 1.0,
+        reasons: ['exact text match after normalization (indexed)'],
+      }
+    }
+  }
+
+  return null
+}
+
+/**
  * AC02: Merge messages with DB authoritiveness
  *
  * DB is authoritative for:
@@ -215,14 +305,18 @@ function normalizeText(text: string): string {
  *
  * CSV fields are preserved when DB doesn't have them
  */
-export function applyDbAuthoritiveness(csvMsg: Message, dbMsg: Message): Message {
+export function applyDbAuthoritiveness(
+  csvMsg: Message,
+  dbMsg: Message,
+): Message {
   // Start with CSV message
   const merged: Message = { ...csvMsg }
 
   // DB authoritative: timestamps
   merged.date = dbMsg.date
   if (dbMsg.dateRead !== undefined) merged.dateRead = dbMsg.dateRead
-  if (dbMsg.dateDelivered !== undefined) merged.dateDelivered = dbMsg.dateDelivered
+  if (dbMsg.dateDelivered !== undefined)
+    merged.dateDelivered = dbMsg.dateDelivered
   if (dbMsg.dateEdited !== undefined) merged.dateEdited = dbMsg.dateEdited
 
   // DB authoritative: handle
@@ -248,7 +342,11 @@ export function applyDbAuthoritiveness(csvMsg: Message, dbMsg: Message): Message
 /**
  * AC04: Verify count invariants to prevent data loss
  */
-export function verifyNoDataLoss(csvCount: number, dbCount: number, outputCount: number): boolean {
+export function verifyNoDataLoss(
+  csvCount: number,
+  dbCount: number,
+  outputCount: number,
+): boolean {
   // TODO: Implement count verification
   // Invariant: outputCount >= max(csvCount, dbCount) - dedup count
   return outputCount >= Math.max(csvCount, dbCount)
