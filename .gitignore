@@ -38,6 +38,7 @@ report.*.json
 
 # Test artifacts
 test-results/
+.vitest/
 
 #Obsidian vault
 .vault/
