@@ -1,8 +1,7 @@
 # iMessage Pipeline Troubleshooting Guide
 
-**Version**: 1.0
-**Last Updated**: 2025-10-19
-**Project**: iMessage Timeline Refactor
+**Version**: 1.0 **Last Updated**: 2025-10-19 **Project**: iMessage Timeline
+Refactor
 
 ---
 
@@ -44,7 +43,8 @@ imessage-timeline ingest-csv \
   --force-utc
 ```
 
-**Prevention**: Always use UTC dates. The pipeline enforces ISO 8601 with Z suffix.
+**Prevention**: Always use UTC dates. The pipeline enforces ISO 8601 with Z
+suffix.
 
 ---
 
@@ -57,10 +57,12 @@ Date: 1970-01-01T00:00:00.000Z (should be 2024)
 ```
 
 **Cause**:
+
 - **1970**: Treating Apple epoch as Unix epoch
 - **2159**: Apple epoch seconds interpreted as milliseconds
 
 **Apple Epoch Details**:
+
 - Apple epoch: Seconds since `2001-01-01 00:00:00 UTC`
 - Valid range: `0` to `~5,000,000,000` (year 2159)
 - Example: `756,864,000` = `2024-12-31 00:00:00 UTC`
@@ -95,6 +97,7 @@ jq '.messages | map(.date) | unique | sort | .[0], .[-1]' normalized.json
 **Symptom**: Messages near DST transitions appear duplicated or missing.
 
 **DST Transition Times** (varies by region):
+
 - **US**: March 2am → 3am (spring), November 2am → 1am (fall)
 - **Australia**: October 2am → 3am (spring), April 3am → 2am (fall)
 
@@ -249,6 +252,7 @@ imessage-timeline normalize-link \
 ```
 
 **Cause**:
+
 - Corrupted HEIC files
 - Unsupported HEIC variant (e.g., multi-image sequences)
 - Missing libheif codec
@@ -347,11 +351,13 @@ imessage-timeline enrich-ai \
 **Solution 2: Upgrade API Tier**
 
 Free tier limits:
+
 - **15 RPM** (requests per minute)
 - **1500 RPD** (requests per day)
 - **1 million TPM** (tokens per minute)
 
 Upgrade to paid tier:
+
 - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
 - Enable billing
 - Increase to **60 RPM** or **360 RPM**
@@ -369,6 +375,7 @@ imessage-timeline enrich-ai \
 ```
 
 The pipeline will:
+
 1. Hit 429 error
 2. Wait for `Retry-After` header duration (or exponential backoff)
 3. Write checkpoint
@@ -435,6 +442,7 @@ const delay = baseDelay + jitter
 **Cause**: Circuit breaker prevents hammering failing APIs.
 
 **Default thresholds**:
+
 - **5 consecutive failures** → circuit opens
 - **60 seconds** → circuit resets (half-open state)
 
@@ -525,9 +533,11 @@ imessage-timeline enrich-ai \
    Delete checkpoint and restart, or restore original config.
 ```
 
-**Cause**: Configuration changed between runs (e.g., different API key, rate limit settings).
+**Cause**: Configuration changed between runs (e.g., different API key, rate
+limit settings).
 
 **Config hash includes**:
+
 - `geminiApiKey`
 - `firecrawlApiKey`
 - `rateLimitDelay`
@@ -568,6 +578,7 @@ imessage-timeline enrich-ai \
 ```
 
 ⚠️ **Warning**: Force resuming with different config may cause:
+
 - Duplicate enrichments with different models
 - Missing enrichments if providers disabled
 - Inconsistent rate limiting
@@ -697,8 +708,10 @@ imessage-timeline enrich-ai \
 ```
 
 **Tradeoffs**:
+
 - **Smaller interval** (10-50): More frequent backups, slower performance
-- **Larger interval** (500-1000): Faster performance, lose more progress on failure
+- **Larger interval** (500-1000): Faster performance, lose more progress on
+  failure
 - **Recommended**: 100 items (default) balances speed and safety
 
 ---
@@ -755,6 +768,7 @@ imessage-timeline ingest-csv \
 **Cause**: Malformed GUID in source data.
 
 **Valid GUID formats**:
+
 - CSV: `csv:<rowNumber>:<partIndex>` (e.g., `csv:123:0`)
 - DB: `<UUID>` (e.g., `550e8400-e29b-41d4-a716-446655440000`)
 - Part: `p:<index>/<parentGuid>` (e.g., `p:1/abc-123`)
@@ -783,7 +797,8 @@ imessage-timeline ingest-csv \
 
 **Solution 1: Normal Behavior**
 
-This is **expected** behavior (idempotency). Re-running won't duplicate enrichments.
+This is **expected** behavior (idempotency). Re-running won't duplicate
+enrichments.
 
 **Solution 2: Force Re-enrichment**
 
@@ -805,7 +820,7 @@ for (const msg of messages) {
   if (msg.messageKind === 'media') {
     msg.media.enrichment = clearEnrichmentByKind(
       msg.media.enrichment,
-      'image_analysis'
+      'image_analysis',
     )
   }
 }
@@ -822,14 +837,15 @@ for (const msg of messages) {
    Use camelCase: 'messageDate'
 ```
 
-**Cause**: CSV export uses snake_case (e.g., `message_date`), schema requires camelCase.
+**Cause**: CSV export uses snake_case (e.g., `message_date`), schema requires
+camelCase.
 
 **Solution**: The ingest stage auto-converts:
 
 ```typescript
 // ingest-csv.ts mapping
 const mapping = {
-  'Message Date': 'date',           // CSV → camelCase
+  'Message Date': 'date', // CSV → camelCase
   'Delivered Date': 'dateDelivered',
   'Read Date': 'dateRead',
   'Is From Me': 'isFromMe',
@@ -855,6 +871,7 @@ jq 'keys' ingested.json | grep "_"
 **Symptom**: Processing 1000 messages takes >2 hours.
 
 **Expected performance**:
+
 - **Ingest CSV**: ~500 messages/second
 - **Normalize-Link**: ~1000 messages/second
 - **Enrich-AI**: ~2 messages/second (limited by API rate)
@@ -1008,6 +1025,7 @@ jq '.messages | length' ingested.json
 If you encounter an error not covered here:
 
 1. **Enable verbose logging**:
+
    ```bash
    imessage-timeline enrich-ai \
      --input normalized.json \
@@ -1017,6 +1035,7 @@ If you encounter an error not covered here:
    ```
 
 2. **Check logs**:
+
    ```bash
    tail -f debug.log
    ```
@@ -1032,11 +1051,12 @@ If you encounter an error not covered here:
 ## Related Documentation
 
 - **[Usage Guide](./imessage-pipeline-usage.md)** - How to run the pipeline
-- **[Technical Specification](./imessage-pipeline-tech-spec.md)** - Architecture details
-- **[Implementation Summary](./imessage-pipeline-implementation-summary.md)** - File structure
+- **[Technical Specification](./imessage-pipeline-tech-spec.md)** - Architecture
+  details
+- **[Implementation Summary](./imessage-pipeline-implementation-summary.md)** -
+  File structure
 
 ---
 
-**Document Version**: 1.0
-**Author**: Generated from iMessage Pipeline implementation
-**Last Updated**: 2025-10-19
+**Document Version**: 1.0 **Author**: Generated from iMessage Pipeline
+implementation **Last Updated**: 2025-10-19

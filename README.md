@@ -25,6 +25,20 @@ time-of-day.
 Perfect for creating browsable conversation archives, enriched research notes,
 or personal history exports.
 
+## 📚 Documentation
+
+**Full documentation available at:**
+[https://nathanvale.github.io/imessage-timeline/](https://nathanvale.github.io/imessage-timeline/)
+
+The documentation site includes:
+
+- Getting Started Guide
+- CLI Usage
+- Pipeline Technical Specifications
+- Best Practices
+- Release Management
+- Troubleshooting
+
 ### Automated Quality & Security
 
 This repository is continuously checked by:

@@ -1,354 +1,429 @@
 {
-  "manifest_hash": "d0i5h4e2f1c0a3b7d9e8f1a3b5c7d0e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c",
   "last_updated": "2025-10-25T02:30:00.000Z",
+  "manifest_hash": "d0i5h4e2f1c0a3b7d9e8f1a3b5c7d0e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c",
   "metadata": {
-    "spec_source": "documentation/imessage-pipeline-enhancements-spec.md",
-    "total_tasks": 48,
     "completed_tasks": 37,
     "epics": 7,
+    "spec_source": "documentation/imessage-pipeline-enhancements-spec.md",
+    "total_tasks": 48,
     "usage": {
-      "status_values": [
-        "pending",
-        "in_progress",
-        "completed"
-      ],
-      "update_workflow": "Move ACs from acs_remaining to acs_completed as work progresses. Update status and timestamps accordingly.",
+      "dependencies": "Check 'depends_on' field before starting a task",
+      "status_values": ["pending", "in_progress", "completed"],
       "tdd_requirement": "All HIGH risk tasks require strict TDD with Red-Green-Refactor cycle",
-      "dependencies": "Check 'depends_on' field before starting a task"
+      "update_workflow": "Move ACs from acs_remaining to acs_completed as work progresses. Update status and timestamps accordingly."
     }
   },
   "tasks": {
-    "SCHEMA--T01": {
-      "status": "completed",
-      "started_at": "2025-10-17T01:44:51.000Z",
-      "completed_at": "2025-10-17T01:51:12.000Z",
-      "epic": "E1-Schema",
-      "title": "Create unified Message schema with Zod validation",
-      "description": "Implement TypeScript interfaces and Zod validators for the unified Message model with discriminated union on messageKind",
-      "risk_level": "MEDIUM",
-      "estimated_days": 3,
-      "depends_on": [],
+    "CI--T01": {
+      "acceptance_criteria": {
+        "CI-T01-AC01": "Configure threads pool with maxForks ≤ 8 for parallel execution",
+        "CI-T01-AC02": "Set allowOnly: false to prevent .only in CI per spec §9",
+        "CI-T01-AC03": "Configure jsdom environment for renderer-related tests",
+        "CI-T01-AC04": "Setup global test setup file at tests/vitest/vitest-setup.ts",
+        "CI-T01-AC05": "Configure Vite aliases (#lib, #components) in vitest.config.ts"
+      },
       "acs_completed": [
-        "SCHEMA-T01-AC01",
-        "SCHEMA-T01-AC02",
-        "SCHEMA-T01-AC03",
-        "SCHEMA-T01-AC04",
-        "SCHEMA-T01-AC05",
-        "SCHEMA-T01-AC06"
+        "CI-T01-AC01",
+        "CI-T01-AC02",
+        "CI-T01-AC03",
+        "CI-T01-AC04",
+        "CI-T01-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "SCHEMA-T01-AC01": "Message interface with messageKind discriminated union ('text'|'media'|'tapback'|'notification')",
-        "SCHEMA-T01-AC02": "Zod schema with superRefine for cross-field invariants",
-        "SCHEMA-T01-AC03": "Media payload validation (exists and complete when messageKind='media')",
-        "SCHEMA-T01-AC04": "Tapback payload validation (exists when messageKind='tapback')",
-        "SCHEMA-T01-AC05": "ISO 8601 date validation with Z suffix enforced",
-        "SCHEMA-T01-AC06": "Absolute path validation for media.path when file exists"
-      },
-      "notes": "Completed unified Message schema with Zod validation. All 6 ACs implemented and verified. Created src/schema/message.ts with full TypeScript interfaces, Zod schemas, superRefine validation for cross-field invariants, and comprehensive acceptance criteria verification. Added zod dependency."
-    },
-    "SCHEMA--T02": {
-      "status": "completed",
-      "started_at": "2025-10-17T01:56:59.000Z",
-      "completed_at": "2025-10-17T02:05:26.000Z",
-      "epic": "E1-Schema",
-      "title": "Build validator CLI script",
-      "description": "Create scripts/validate-json.mts CLI to validate message artifacts against schema",
-      "risk_level": "LOW",
+      "completed_at": "2025-10-19T21:14:30.000Z",
+      "depends_on": ["SCHEMA--T01"],
+      "description": "Setup Vitest with threads pool, CI detection, jsdom, global setup, aliases",
+      "epic": "E5-CI-Testing-Tooling",
       "estimated_days": 1,
-      "depends_on": [
-        "SCHEMA--T01"
-      ],
-      "acs_completed": [
-        "SCHEMA-T02-AC01",
-        "SCHEMA-T02-AC02",
-        "SCHEMA-T02-AC03",
-        "SCHEMA-T02-AC04"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "SCHEMA-T02-AC01": "CLI accepts JSON file path as argument",
-        "SCHEMA-T02-AC02": "Validates against Message schema with detailed error messages including field paths",
-        "SCHEMA-T02-AC03": "Exit code 0 on success, 1 on validation failure",
-        "SCHEMA-T02-AC04": "Outputs summary stats (total messages, breakdown by messageKind)"
-      },
-      "notes": "Completed validator CLI script. Created .scripts/validate-json.mjs with full validation, error reporting, and statistics. Supports both ExportEnvelope and array formats. Added pnpm validate:json script. Includes comprehensive test files."
-    },
-    "SCHEMA--T03": {
-      "status": "completed",
-      "started_at": "2025-10-17T02:06:29.000Z",
-      "completed_at": "2025-10-17T02:12:40.000Z",
-      "epic": "E1-Schema",
-      "title": "Create fixtures and schema tests",
-      "description": "Build test fixtures for all messageKind types and unit tests covering schema validation",
+      "notes": "Completed Vitest configuration. (AC01) Configured threads pool with maxThreads: 8, minThreads: 1 at vitest.config.ts:23-24. (AC02) Set allowOnly: false at vitest.config.ts:25 to prevent .only in CI. (AC03) Configured jsdom environment at vitest.config.ts:15. (AC04) Created global test setup file at tests/vitest/vitest-setup.ts with beforeEach/afterEach hooks. (AC05) Added Vite aliases (#schema, #ingest, #normalize, #enrich, #render) at vitest.config.ts:5-13. Verified with test run: 614 tests passing. Configuration already existed but missing setup file and aliases - completed those missing pieces.",
       "risk_level": "LOW",
-      "estimated_days": 2,
-      "depends_on": [
-        "SCHEMA--T01"
-      ],
+      "started_at": "2025-10-19T21:13:00.000Z",
+      "status": "completed",
+      "title": "Configure Vitest with proper settings"
+    },
+    "CI--T02": {
+      "acceptance_criteria": {
+        "CI-T02-AC01": "Install and configure @vitest/coverage-v8",
+        "CI-T02-AC02": "Set branch coverage threshold ≥70% per spec §9",
+        "CI-T02-AC03": "CI outputs JUnit XML to ./test-results/junit.xml",
+        "CI-T02-AC04": "Coverage reports to ./test-results/coverage/ with formats: junit, html, text-summary",
+        "CI-T02-AC05": "Detect CI environment via TF_BUILD variable"
+      },
       "acs_completed": [
-        "SCHEMA-T03-AC01",
-        "SCHEMA-T03-AC02",
-        "SCHEMA-T03-AC03",
-        "SCHEMA-T03-AC04"
+        "CI-T02-AC01",
+        "CI-T02-AC02",
+        "CI-T02-AC03",
+        "CI-T02-AC04",
+        "CI-T02-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "SCHEMA-T03-AC01": "Happy path fixtures for all messageKind types (text, media, tapback, notification)",
-        "SCHEMA-T03-AC02": "Invariant violation fixtures (media without payload, tapback without payload, etc.)",
-        "SCHEMA-T03-AC03": "Date format violation fixtures (missing Z, invalid ISO 8601)",
-        "SCHEMA-T03-AC04": "Unit tests cover all Zod schema branches with >80% coverage"
-      },
-      "notes": "Completed fixtures and schema tests. Created 41 fixtures (12 valid, 14 invalid messages, 15 invalid dates) and 70 comprehensive unit tests. Coverage: 84% branches (exceeds 80% target). All tests passing. Added Vitest configuration, tsconfig.json, and test scripts to package.json."
-    },
-    "NORMALIZE--T01": {
+      "completed_at": "2025-10-19T21:17:00.000Z",
+      "depends_on": ["CI--T01"],
+      "description": "Install coverage-v8, configure thresholds ≥70%, CI output formats (JUnit, HTML, text-summary)",
+      "epic": "E5-CI-Testing-Tooling",
+      "estimated_days": 2,
+      "notes": "Completed coverage configuration. All configuration was already in place from CI--T01. (AC01) @vitest/coverage-v8@3.2.4 installed in package.json:83, configured as provider at vitest.config.ts:27. (AC02) Branch coverage threshold set to 70% at vitest.config.ts:31, along with lines/functions/statements all at 70%. (AC03) JUnit XML reporter configured at vitest.config.ts:20-21, outputs to ./test-results/junit.xml when TF_BUILD is set. Verified working: junit.xml generated successfully. (AC04) Coverage reporters configured at vitest.config.ts:26-32 with formats text-summary, html, and lcov (standard replacement for junit in coverage). Reports output to ./test-results/coverage/ in CI mode, ./coverage/ in local mode. (AC05) CI detection via TF_BUILD variable implemented throughout config at lines 20, 21, 28, 29. Tested with export TF_BUILD=true - all CI paths activated correctly. Configuration complete and verified working.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-19T21:15:00.000Z",
       "status": "completed",
-      "started_at": "2025-10-17T03:41:37.000Z",
-      "completed_at": "2025-10-17T03:49:55.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Implement CSV to schema mapping",
-      "description": "Build ingest-csv component to parse iMazing CSV and convert to Message schema",
+      "title": "Setup coverage with thresholds and CI reporters"
+    },
+    "CI--T03": {
+      "acceptance_criteria": {
+        "CI-T03-AC01": "pnpm test runs vitest with proper config",
+        "CI-T03-AC02": "pnpm test:coverage generates coverage reports with thresholds",
+        "CI-T03-AC03": "pnpm test:ci runs with CI-specific settings (reporters, etc.)",
+        "CI-T03-AC04": "pnpm lint runs ESLint on all TypeScript files",
+        "CI-T03-AC05": "pnpm build compiles TypeScript with proper config"
+      },
+      "acs_completed": [
+        "CI-T03-AC01",
+        "CI-T03-AC02",
+        "CI-T03-AC03",
+        "CI-T03-AC04",
+        "CI-T03-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T21:35:00.000Z",
+      "depends_on": ["CI--T01"],
+      "description": "Create pnpm scripts for test, test:coverage, test:ci, lint, build",
+      "epic": "E5-CI-Testing-Tooling",
+      "estimated_days": 1,
+      "notes": "Completed package.json test scripts. (AC01) `pnpm test` runs vitest at package.json:40 - verified 731 tests passing. (AC02) Added `pnpm test:coverage` at package.json:45 - verified coverage reports with 70% thresholds (branch: 81.41%). (AC03) Added `pnpm test:ci` at package.json:43 with TF_BUILD=true - verified JUnit XML generation at test-results/junit.xml. (AC04) `pnpm lint` runs ESLint at package.json:34 - verified successful execution. (AC05) `pnpm build` compiles TypeScript at package.json:30 - verified successful compilation. Also added `test:coverage` alias at package.json:45 for naming consistency. All 5 ACs verified working.",
       "risk_level": "LOW",
+      "started_at": "2025-10-19T21:30:00.000Z",
+      "status": "completed",
+      "title": "Add package.json test scripts"
+    },
+    "CI--T04": {
+      "acceptance_criteria": {
+        "CI-T04-AC01": "renderWithProviders helper for React components (if needed per spec §5.4)",
+        "CI-T04-AC02": "Mock provider setup utilities for AI services (Gemini, Firecrawl)",
+        "CI-T04-AC03": "Fixture loading helpers for JSON message datasets",
+        "CI-T04-AC04": "Assertion utilities for schema validation (wrappers around Zod)"
+      },
+      "acs_completed": [
+        "CI-T04-AC01",
+        "CI-T04-AC02",
+        "CI-T04-AC03",
+        "CI-T04-AC04"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T21:50:00.000Z",
+      "depends_on": ["CI--T01"],
+      "description": "Build test helpers: renderWithProviders (if React), mock providers, fixture loaders, schema assertions",
+      "epic": "E5-CI-Testing-Tooling",
       "estimated_days": 2,
-      "depends_on": [
-        "SCHEMA--T01"
-      ],
-      "acs_completed": [
-        "NORMALIZE-T01-AC01",
-        "NORMALIZE-T01-AC02",
-        "NORMALIZE-T01-AC03",
-        "NORMALIZE-T01-AC04",
-        "NORMALIZE-T01-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "NORMALIZE-T01-AC01": "Parse iMazing CSV rows with correct field mapping per CSV header",
-        "NORMALIZE-T01-AC02": "Split rows into text/media/tapback/notification by analyzing content",
-        "NORMALIZE-T01-AC03": "Convert CSV dates to ISO 8601 UTC with Z suffix",
-        "NORMALIZE-T01-AC04": "Resolve iMazing attachment paths to absolute paths when files exist",
-        "NORMALIZE-T01-AC05": "Preserve row metadata (source, line number) for provenance"
-      },
-      "notes": "Completed CSV ingestion with TDD. Created src/ingest/ingest-csv.ts with 24 comprehensive tests (all passing). Implements CSV parsing, row splitting (text/media/tapback/notification), date conversion to ISO 8601 UTC with Z suffix, attachment path resolution, and metadata preservation. Full schema validation verified."
-    },
-    "NORMALIZE--T02": {
-      "status": "completed",
-      "started_at": "2025-10-17T03:53:15.000Z",
-      "completed_at": "2025-10-17T04:00:25.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Implement DB row splitting with part GUIDs",
-      "description": "Build logic to split Messages.app DB rows with attachments into 1 text + N media messages with stable part GUIDs",
-      "risk_level": "MEDIUM",
-      "estimated_days": 3,
-      "depends_on": [
-        "SCHEMA--T01"
-      ],
-      "acs_completed": [
-        "NORMALIZE-T02-AC01",
-        "NORMALIZE-T02-AC02",
-        "NORMALIZE-T02-AC03",
-        "NORMALIZE-T02-AC04",
-        "NORMALIZE-T02-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "NORMALIZE-T02-AC01": "Split DB messages with n attachments into 1 text message + n media messages",
-        "NORMALIZE-T02-AC02": "Generate stable part GUIDs using format p:<index>/<original_guid>",
-        "NORMALIZE-T02-AC03": "Preserve parent GUID reference in each part's metadata",
-        "NORMALIZE-T02-AC04": "Convert Apple epoch timestamps to ISO 8601 UTC with Z",
-        "NORMALIZE-T02-AC05": "Maintain chronological ordering within split parts using index"
-      },
-      "notes": "Completed DB row splitting with TDD. Created src/ingest/ingest-db.ts with 23 comprehensive tests (all passing). Implements row splitting (1 text + N media), stable part GUID generation (p:<index>/<guid>), parent GUID preservation, Apple epoch conversion (0.99 billion second range), and chronological ordering. Fixed Apple epoch heuristic to handle realistic seconds values (up to ~5 billion for year 2159)."
-    },
-    "NORMALIZE--T03": {
-      "status": "completed",
-      "started_at": "2025-10-17T04:15:00.000Z",
-      "completed_at": "2025-10-17T04:30:00.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Implement reply and tapback linking",
-      "description": "Build linking logic using DB associations first, then heuristics for unlinked messages",
-      "risk_level": "HIGH",
-      "estimated_days": 5,
-      "depends_on": [
-        "NORMALIZE--T01",
-        "NORMALIZE--T02"
-      ],
-      "acs_completed": [
-        "NORMALIZE-T03-AC01",
-        "NORMALIZE-T03-AC02",
-        "NORMALIZE-T03-AC03",
-        "NORMALIZE-T03-AC04",
-        "NORMALIZE-T03-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "NORMALIZE-T03-AC01": "Link replies using DB association_guid as primary method",
-        "NORMALIZE-T03-AC02": "Apply heuristics for unlinked replies (timestamp proximity <30s, content patterns)",
-        "NORMALIZE-T03-AC03": "Link tapbacks to parent message GUIDs (including part GUIDs)",
-        "NORMALIZE-T03-AC04": "Handle ambiguous links with structured logging and tie counters",
-        "NORMALIZE-T03-AC05": "Maintain parity with CSV linking rules from original analyzer"
-      },
-      "notes": "Completed reply and tapback linking with TDD. Created src/ingest/link-replies-and-tapbacks.ts with 23 comprehensive tests (all passing). Implements: (AC01) DB association linking as primary method, (AC02) heuristic linking with <30s timestamp proximity and content pattern scoring, (AC03) tapback linking with media preference, (AC04) ambiguous link detection with confidence scoring, (AC05) CSV analyzer parity for scoring rules. Edge cases handled: empty replies, tie-breaking by nearest prior, same-sender preference, media-implied replies, part GUID resolution (p:N/guid)."
-    },
-    "NORMALIZE--T04": {
-      "status": "completed",
-      "started_at": "2025-10-17T04:45:00.000Z",
-      "completed_at": "2025-10-17T05:00:00.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Implement deduplication across sources",
-      "description": "Merge CSV and DB sources with deduplication by GUID equivalence and content similarity",
-      "risk_level": "HIGH",
-      "estimated_days": 4,
-      "depends_on": [
-        "NORMALIZE--T01",
-        "NORMALIZE--T02"
-      ],
-      "acs_completed": [
-        "NORMALIZE-T04-AC01",
-        "NORMALIZE-T04-AC02",
-        "NORMALIZE-T04-AC03",
-        "NORMALIZE-T04-AC04",
-        "NORMALIZE-T04-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "NORMALIZE-T04-AC01": "Merge CSV and DB by exact GUID match as primary strategy",
-        "NORMALIZE-T04-AC02": "Prefer DB values for authoritative fields (timestamps, associations, handle)",
-        "NORMALIZE-T04-AC03": "Detect content equivalence for messages without matching GUIDs (normalize text + compare)",
-        "NORMALIZE-T04-AC04": "Verify no data loss during merge with count invariants (input count >= output count)",
-        "NORMALIZE-T04-AC05": "Ensure stable GUID assignment across multiple runs (deterministic merge)"
-      },
-      "notes": "Completed deduplication with TDD and Wallaby JS. Created src/ingest/dedup-merge.ts with 30 comprehensive tests (100% passing). Implements: (AC01) Exact GUID matching with GUID index, (AC02) DB authoritiveness for timestamps/associations/handle with CSV field preservation, (AC03) Content equivalence detection with text normalization and confidence scoring, (AC04) Count invariants verification preventing data loss, (AC05) Deterministic GUID assignment with sorted processing. Branch coverage: 83.33% (exceeds 80% requirement). Edge cases: empty inputs, CSV/DB-only, null text, large datasets (100+ messages). Production-ready implementation."
-    },
-    "NORMALIZE--T05": {
-      "status": "completed",
-      "started_at": "2025-10-17T04:10:00.000Z",
-      "completed_at": "2025-10-17T14:30:00.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Implement absolute path enforcement",
-      "description": "Enforce absolute paths for all media files, retain filename with provenance for missing files",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "NORMALIZE--T01",
-        "NORMALIZE--T02"
-      ],
-      "acs_completed": [
-        "NORMALIZE-T05-AC01",
-        "NORMALIZE-T05-AC02",
-        "NORMALIZE-T05-AC03",
-        "NORMALIZE-T05-AC04"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "NORMALIZE-T05-AC01": "All media.path fields are absolute paths when files exist on disk",
-        "NORMALIZE-T05-AC02": "Missing files retain original filename with provenance metadata (source, last_seen)",
-        "NORMALIZE-T05-AC03": "Path validation errors reported with counters (found vs missing)",
-        "NORMALIZE-T05-AC04": "Support multiple attachment root directories from config"
-      },
-      "notes": "Completed path validation with TDD. Created src/normalize/path-validator.ts with comprehensive tests. Implements absolute path enforcement, missing file handling with provenance metadata, validation error reporting with counters, and multi-root support."
-    },
-    "NORMALIZE--T06": {
-      "status": "completed",
-      "started_at": "2025-10-17T14:00:00.000Z",
-      "completed_at": "2025-10-17T15:20:00.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Build date validator and converters",
-      "description": "Create robust date handling for CSV UTC and DB Apple epoch with end-to-end validation",
-      "risk_level": "HIGH",
-      "estimated_days": 3,
-      "depends_on": [
-        "NORMALIZE--T01",
-        "NORMALIZE--T02"
-      ],
-      "acs_completed": [
-        "NORMALIZE-T06-AC01",
-        "NORMALIZE-T06-AC02",
-        "NORMALIZE-T06-AC03",
-        "NORMALIZE-T06-AC04"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "NORMALIZE-T06-AC01": "All timestamps in output are ISO 8601 with Z suffix (UTC)",
-        "NORMALIZE-T06-AC02": "Apple epoch (Mac absolute time = seconds since 2001-01-01) converts correctly to UTC",
-        "NORMALIZE-T06-AC03": "CSV UTC timestamps preserve timezone information (no drift)",
-        "NORMALIZE-T06-AC04": "End-to-end date round-trip validation passes (parse → convert → validate)"
-      },
-      "notes": "Completed date validator and converters with TDD. Created src/normalize/date-converters.ts with 339 comprehensive tests (all passing). Implements: (AC01) ISO 8601 UTC output with Z suffix, (AC02) Apple epoch conversion (seconds since 2001-01-01), (AC03) CSV UTC preservation, (AC04) end-to-end round-trip validation. Coverage: >95% branches. Handles DST boundaries and leap seconds correctly."
-    },
-    "NORMALIZE--T07": {
-      "status": "completed",
-      "started_at": "2025-10-17T15:10:00.000Z",
-      "completed_at": "2025-10-17T15:45:00.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Add Zod validation layer",
-      "description": "Apply Zod validation to all normalized messages with comprehensive error reporting",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "NORMALIZE--T01",
-        "NORMALIZE--T02",
-        "NORMALIZE--T03",
-        "NORMALIZE--T04",
-        "NORMALIZE--T05",
-        "NORMALIZE--T06"
-      ],
-      "acs_completed": [
-        "NORMALIZE-T07-AC01",
-        "NORMALIZE-T07-AC02",
-        "NORMALIZE-T07-AC03",
-        "NORMALIZE-T07-AC04"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "NORMALIZE-T07-AC01": "Run Zod schema validation on all normalized messages before output",
-        "NORMALIZE-T07-AC02": "Error reporting includes field path and validation failure reason (use Zod's error formatting)",
-        "NORMALIZE-T07-AC03": "Batch validation with error collection (don't fail-fast, report all errors)",
-        "NORMALIZE-T07-AC04": "camelCase field enforcement via Zod schema (reject snake_case)"
-      },
-      "notes": "Completed Zod validation layer with comprehensive error reporting. Created src/normalize/validate-normalized.ts with 397 comprehensive tests (all passing). Implements: (AC01) Zod schema validation on all normalized messages, (AC02) detailed error reporting with field paths and reasons, (AC03) batch validation with error collection (no fail-fast), (AC04) camelCase enforcement. Final validation gate before output. Coverage >95%."
-    },
-    "NORMALIZE--T08": {
-      "status": "completed",
-      "started_at": "2025-10-17T15:30:00.000Z",
-      "completed_at": "2025-10-17T15:50:00.000Z",
-      "epic": "E2-Normalize-Link",
-      "title": "Create normalize-link test suite",
-      "description": "Comprehensive tests for split, linking, dedup, dates, and paths with >70% coverage",
+      "notes": "Completed test helper utilities. (AC01) Skipped renderWithProviders - no React components in project. (AC02) Created comprehensive mock provider utilities in tests/helpers/mock-providers.ts with factories for Gemini Vision/Audio/PDF, Firecrawl, YouTube, Spotify, Twitter, Instagram. Includes composite helpers (createMockProviderSuite, setupMockFailures, resetAllMocks). (AC03) Created fixture loading helpers in tests/helpers/fixture-loaders.ts with loadFixture, loadMessageFixture, file existence checks, and factory functions (createMessageFixture, createMessagesFixture, createMediaMessageFixture, createTapbackFixture). (AC04) Created schema assertion utilities in tests/helpers/schema-assertions.ts with validation functions (validateMessage, validateMessages), assertion helpers (assertValidMessage, assertTextMessage, assertMediaMessage, assertTapbackMessage), field validators (assertValidISO8601, assertValidGuid, assertAbsolutePath), and statistics helpers (getValidationStats, assertValidationRate). Added bonus test-data-builders.ts with fluent MessageBuilder API and batch builders (conversationThread, alternatingMessages, mediaMessages, tapbackMessages, dailyMessagePattern). Created comprehensive README.md with examples and best practices. All 764 tests passing including 33 new helper tests.",
       "risk_level": "LOW",
-      "estimated_days": 3,
-      "depends_on": [
-        "NORMALIZE--T07"
-      ],
+      "started_at": "2025-10-19T21:40:00.000Z",
+      "status": "completed",
+      "title": "Create test helper utilities"
+    },
+    "CLI--T01": {
+      "acceptance_criteria": {
+        "CLI-T01-AC01": "Install commander.js and @types/commander",
+        "CLI-T01-AC02": "Create main program with version, description, and global options",
+        "CLI-T01-AC03": "Global options: --verbose, --quiet, --config <path>",
+        "CLI-T01-AC04": "Proper exit codes: 0 (success), 1 (validation error), 2 (runtime error)",
+        "CLI-T01-AC05": "Top-level error handler with user-friendly messages"
+      },
       "acs_completed": [
-        "NORMALIZE-T08-AC01",
-        "NORMALIZE-T08-AC02",
-        "NORMALIZE-T08-AC03",
-        "NORMALIZE-T08-AC04",
-        "NORMALIZE-T08-AC05"
+        "CLI-T01-AC01",
+        "CLI-T01-AC02",
+        "CLI-T01-AC03",
+        "CLI-T01-AC04",
+        "CLI-T01-AC05"
       ],
       "acs_remaining": [],
+      "completed_at": "2025-10-19T23:15:00.000Z",
+      "depends_on": [],
+      "description": "Implement main CLI entry point with commander.js framework for all subcommands",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed CLI foundation with commander.js. (AC01) Installed commander@13.1.0 via pnpm. (AC02) Created main program at src/cli.ts:24-29 with version from package.json, full description, and name. (AC03) Added global options at src/cli.ts:35-38: --verbose, --quiet, --config <path> with defaults. (AC04) Implemented proper exit codes: 0 for success (src/cli.ts:56-60), 1 for validation errors (src/cli.ts:64-69, 72-76, 217), 2 for runtime errors (src/cli.ts:188-194, 196-199). (AC05) Created top-level error handler with emoji formatting (src/cli.ts:44-52) and custom exitOverride (src/cli.ts:55-81) for user-friendly messages. Tested: version (0.0.0), help (shows all 10 commands), unknown command error, placeholder command output. All tests passing. Build successful. Foundation ready for CLI--T02.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-19T22:50:00.000Z",
+      "status": "completed",
+      "title": "Setup Commander.js Structure"
+    },
+    "CLI--T02": {
       "acceptance_criteria": {
-        "NORMALIZE-T08-AC01": "Unit tests for DB split logic with various attachment counts (0, 1, 5, 10)",
-        "NORMALIZE-T08-AC02": "Integration tests for linking parity between CSV and DB sources",
-        "NORMALIZE-T08-AC03": "Dedup tests with overlapping CSV/DB datasets (exact match, content match, no match)",
-        "NORMALIZE-T08-AC04": "Date conversion tests for edge cases (DST boundaries, leap seconds, epoch boundaries)",
-        "NORMALIZE-T08-AC05": "Path resolution tests with missing files and multiple roots"
+        "CLI-T02-AC01": "ingest-csv command with all options from usage guide",
+        "CLI-T02-AC02": "ingest-db command with database path and contact filtering",
+        "CLI-T02-AC03": "Attachment root validation (check directories exist)",
+        "CLI-T02-AC04": "Input file validation with clear error messages",
+        "CLI-T02-AC05": "Progress output: ✓ Parsed 2,847 messages from CSV"
       },
-      "notes": "Completed comprehensive normalize-link test suite. All E2 epic tasks complete with comprehensive unit, integration, and edge-case tests across all normalize components. Branch coverage >85% across all normalize modules. Ready to proceed with E3 (Enrich-AI) epic."
+      "acs_completed": [
+        "CLI-T02-AC01",
+        "CLI-T02-AC02",
+        "CLI-T02-AC03",
+        "CLI-T02-AC04",
+        "CLI-T02-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T23:15:00.000Z",
+      "depends_on": ["CLI--T01"],
+      "description": "Create ingest-csv and ingest-db subcommands with validation",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 2,
+      "notes": "Completed ingest commands with comprehensive validation and testing. (AC01) Created ingest-csv command at cli.ts:91-181 with options: --input (required), --output (default: ./messages.csv.ingested.json), --attachments (multiple dirs). Integrates ingestCSV() from src/ingest/ingest-csv.ts with full validation and envelope wrapping. (AC02) Created ingest-db command at cli.ts:183-298 with options: --input (required), --output (default: ./messages.db.ingested.json), --attachments (multiple dirs), --contact (handle filtering). Integrates splitDBMessage() from src/ingest/ingest-db.ts. Contact filtering tested: 2 messages → 1 message for specific handle. (AC03) Attachment root validation at cli.ts:113-125 (CSV) and cli.ts:205-218 (DB). Checks directory existence with fs.existsSync() and isDirectory(). Clear error messages: '❌ Attachment directory not found' and '❌ Not a directory'. Default fallback: ~/Library/Messages/Attachments with verbose logging. (AC04) Input file validation at cli.ts:102-110 (CSV) and cli.ts:195-203 (DB). Validates file existence with clear error messages including bullet points for troubleshooting. Exit code 1 for validation errors. (AC05) Progress output implemented with toLocaleString() formatting. CSV: '✓ Parsed 4 messages from CSV'. DB: '✓ Parsed 3 messages from DB export'. Summary breakdown by message kind (Text/Media/Notifications). Fixed ES module imports: added .js extensions to ingest-csv.ts and ingest-db.ts for schema imports. Tested end-to-end: CSV ingestion (4 messages), DB ingestion (3 messages = 2 text + 1 media), contact filtering (2→1 messages), verbose mode, help display, validation errors. All 5 ACs verified working with production test data.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-19T23:00:00.000Z",
+      "status": "completed",
+      "title": "Implement Ingest Commands"
+    },
+    "CLI--T03": {
+      "acceptance_criteria": {
+        "CLI-T03-AC01": "normalize-link with merge mode support",
+        "CLI-T03-AC02": "enrich-ai with checkpoint/resume options",
+        "CLI-T03-AC03": "Rate limiting options: --rate-limit <ms>, --max-retries <n>",
+        "CLI-T03-AC04": "Enrichment toggles: --enable-vision, --enable-audio, --enable-links",
+        "CLI-T03-AC05": "Resume flag: --resume loads last checkpoint automatically"
+      },
+      "acs_completed": [
+        "CLI-T03-AC01",
+        "CLI-T03-AC02",
+        "CLI-T03-AC03",
+        "CLI-T03-AC04",
+        "CLI-T03-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-25T02:30:00.000Z",
+      "depends_on": ["CLI--T01"],
+      "description": "Create normalize-link and enrich-ai subcommands with checkpoint/resume support",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 3,
+      "notes": "Completed both normalize-link and enrich-ai commands with full feature support. (AC01) normalize-link supports exact/content/all merge modes. (AC02) enrich-ai integrates checkpoint system with loadCheckpoint/saveCheckpoint/createCheckpoint. (AC03) Rate limiting via --rate-limit (ms) and --max-retries (n) options. (AC04) Enrichment toggles for vision, audio, links. (AC05) --resume flag with config hash verification ensures safe checkpoint resumption. Both commands use proper error handling, input validation, progress reporting, and summary statistics.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-25T00:00:00.000Z",
+      "status": "completed",
+      "title": "Implement Normalize and Enrich Commands"
+    },
+    "CLI--T04": {
+      "acceptance_criteria": {
+        "CLI-T04-AC01": "render-markdown with date filtering options",
+        "CLI-T04-AC02": "Grouping toggles: --group-by-time, --nested-replies",
+        "CLI-T04-AC03": "Max nesting depth: --max-nesting-depth <n> (default 10)",
+        "CLI-T04-AC04": "Output directory creation if doesn't exist",
+        "CLI-T04-AC05": "Summary output: ✓ Wrote 92 markdown files to ./timeline/"
+      },
+      "acs_completed": [
+        "CLI-T04-AC01",
+        "CLI-T04-AC02",
+        "CLI-T04-AC03",
+        "CLI-T04-AC04",
+        "CLI-T04-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-25T14:30:00.000Z",
+      "depends_on": ["CLI--T01"],
+      "description": "Create render-markdown subcommand with grouping options",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed render-markdown command with all 5 ACs. (AC01) Date filtering with --start-date, --end-date options, validates YYYY-MM-DD format. (AC02) Grouping toggles: --group-by-time (default true) groups by Morning/Afternoon/Evening, --nested-replies (default true) renders replies as blockquotes. (AC03) --max-nesting-depth option with validation (default 10, must be positive). (AC04) Output directory auto-creation with recursive mkdir if doesn't exist. (AC05) Summary output shows: ✓ Wrote N markdown file(s), message counts by kind (Text/Media/Tapbacks). Tested end-to-end: basic render (2 files from 4 messages), date filtering (1 file from start-date), validation (invalid dates, bad max-nesting-depth). All tests passing.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-25T14:20:00.000Z",
+      "status": "completed",
+      "title": "Implement Render Command"
+    },
+    "CLI--T05": {
+      "acceptance_criteria": {
+        "CLI-T05-AC01": "validate command to check JSON against schema",
+        "CLI-T05-AC02": "stats command to show message counts by type",
+        "CLI-T05-AC03": "clean command to remove checkpoints and temp files",
+        "CLI-T05-AC04": "doctor command to diagnose common issues",
+        "CLI-T05-AC05": "Each helper has --help with examples"
+      },
+      "acs_completed": [
+        "CLI-T05-AC01",
+        "CLI-T05-AC02",
+        "CLI-T05-AC03",
+        "CLI-T05-AC04",
+        "CLI-T05-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-25T02:45:00.000Z",
+      "depends_on": ["CLI--T01"],
+      "description": "Implement validate, stats, clean, and doctor utility commands",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed all 5 helper commands with full functionality. (AC01) validate: JSON schema validation with detailed error reporting and field path display. (AC02) stats: Message statistics by kind, enrichment counts, date range analysis, participant listing with -v flag. (AC03) clean: Removes enrich-checkpoint-* files with preview, --force to confirm, --all for backup files. (AC04) doctor: Comprehensive system diagnostics checking Node.js version, config presence, API keys (GEMINI_API_KEY required, FIRECRAWL_API_KEY optional), Messages attachments, write permissions. (AC05) All commands include --help with full option documentation. Tested end-to-end: validate with test data (reports missing fields correctly), stats with 4-message sample (shows breakdown by type, date range, enrichment count), clean with checkpoint files (lists then removes), doctor with environment checks (6/7 passes with actionable recommendations). All tests passing. 37/48 tasks complete (77%).",
+      "risk_level": "LOW",
+      "started_at": "2025-10-25T02:30:00.000Z",
+      "status": "completed",
+      "title": "Add Helper Commands"
+    },
+    "CONFIG--T01": {
+      "acceptance_criteria": {
+        "CONFIG-T01-AC01": "Config schema with Zod validation",
+        "CONFIG-T01-AC02": "Support JSON and YAML formats",
+        "CONFIG-T01-AC03": "Environment variable interpolation: ${ENV_VAR}",
+        "CONFIG-T01-AC04": "Config file discovery: ./imessage-config.{json,yaml,yml}",
+        "CONFIG-T01-AC05": "Validation errors show field path and expected type"
+      },
+      "acs_completed": [
+        "CONFIG-T01-AC01",
+        "CONFIG-T01-AC02",
+        "CONFIG-T01-AC03",
+        "CONFIG-T01-AC04",
+        "CONFIG-T01-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T23:35:00.000Z",
+      "depends_on": [],
+      "description": "Create Zod schema for YAML/JSON configuration with validation",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed config schema with comprehensive Zod validation. (AC01) Created ConfigSchema at src/config/schema.ts with nested schemas for gemini, firecrawl, enrichment, and render sections. All fields have proper types, constraints, and defaults. (AC02) Documented JSON/YAML format support with detectConfigFormat() helper function. Format auto-detection based on file extension. (AC03) Documented environment variable interpolation pattern ${ENV_VAR} for use in config files (implementation in CONFIG--T02). (AC04) Defined CONFIG_FILE_PATTERNS array with discovery order: ./imessage-config.{yaml,yml,json}. (AC05) Created validateConfig() and validateConfigSafe() functions with detailed Zod error formatting showing field paths (e.g., 'gemini.apiKey') and validation messages. Test suite: 22 comprehensive tests (100% passing). Coverage: numeric constraints (rateLimitDelay ≥0, maxRetries 0-10, checkpointInterval 1-10000, maxNestingDepth 1-100), required fields (gemini.apiKey, attachmentRoots), defaults application, error formatting. Ready for CONFIG--T02.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-19T23:20:00.000Z",
+      "status": "completed",
+      "title": "Define Config Schema"
+    },
+    "CONFIG--T02": {
+      "acceptance_criteria": {
+        "CONFIG-T02-AC01": "Load config from file with YAML/JSON auto-detection",
+        "CONFIG-T02-AC02": "Merge with CLI options (CLI > config > defaults)",
+        "CONFIG-T02-AC03": "Environment variable substitution with ${VAR} syntax",
+        "CONFIG-T02-AC04": "Config validation with helpful error messages",
+        "CONFIG-T02-AC05": "Cache loaded config to avoid repeated file reads"
+      },
+      "acs_completed": [
+        "CONFIG-T02-AC01",
+        "CONFIG-T02-AC02",
+        "CONFIG-T02-AC03",
+        "CONFIG-T02-AC04",
+        "CONFIG-T02-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T23:50:00.000Z",
+      "depends_on": ["CONFIG--T01"],
+      "description": "Create config loading with precedence (CLI > env > file > defaults) and validation",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 2,
+      "notes": "Completed config loader with comprehensive functionality. (AC01) Created loadConfigFile() at src/config/loader.ts:64-89 with JSON/YAML auto-detection via detectConfigFormat(). Implemented discoverConfigFile() at loader.ts:37-61 with search order: yaml→yml→json. (AC02) Implemented mergeConfig() at loader.ts:149-174 with deep merge precedence: CLI options override file config, Zod defaults applied last. (AC03) Created substituteEnvVars() at loader.ts:108-138 with recursive ${VAR} replacement for strings, arrays, and objects. Throws error if env var undefined. (AC04) Integrated validateConfig() from CONFIG--T01 with detailed Zod error messages. loadConfig() wraps errors with context. (AC05) Implemented in-memory caching at loader.ts:22-24 with clearConfigCache(), isConfigCached() helpers. Cache key: configPath. skipCache option to force reload. Test suite: 29 comprehensive tests (100% passing). Coverage: env var substitution (strings, arrays, objects, missing vars), config merging (CLI override, deep merge), file loading (JSON, YAML, error handling), file discovery (precedence, null), integration (end-to-end, validation errors), caching (same reference, skip cache, clear). Installed js-yaml@4.1.0 and @types/js-yaml@4.0.9. Ready for CONFIG--T03.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-19T23:40:00.000Z",
+      "status": "completed",
+      "title": "Implement Config Loader"
+    },
+    "CONFIG--T03": {
+      "acceptance_criteria": {
+        "CONFIG-T03-AC01": "init command to generate config file",
+        "CONFIG-T03-AC02": "Choose format: --format <json|yaml> (default yaml)",
+        "CONFIG-T03-AC03": "Include comments explaining each option",
+        "CONFIG-T03-AC04": "Detect existing config and prompt before overwrite",
+        "CONFIG-T03-AC05": "Validate generated config with schema"
+      },
+      "acs_completed": [
+        "CONFIG-T03-AC01",
+        "CONFIG-T03-AC02",
+        "CONFIG-T03-AC03",
+        "CONFIG-T03-AC04",
+        "CONFIG-T03-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T22:57:00.000Z",
+      "depends_on": ["CONFIG--T02", "CLI--T01"],
+      "description": "Generate starter config files with comments and format selection",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed config generation command. (AC01) Created `init` command at cli.ts:177-250 with format validation and lazy import pattern. (AC02) Added --format flag with json|yaml support (default: yaml) and --output flag for custom paths. (AC03) Created comprehensive config template at generator.ts with YAML comments explaining all options: attachment resolution, Gemini API config, enrichment pipeline, render settings. Includes inline docs for API key sources, rate limits, numeric constraints, and boolean flags. JSON template includes _comment fields. (AC04) Implemented overwrite detection via configFileExists() function with clear error messages suggesting --force, --output, or manual removal. (AC05) Validated generated config structure with 25 comprehensive tests (all passing). Tests verify: YAML/JSON parsing, comment preservation, default values, numeric constraints (rateLimitDelay ≥0, maxRetries 0-10, checkpointInterval 1-10000, maxNestingDepth 1-100), environment variable placeholders (${GEMINI_API_KEY}), and overwrite protection workflow. CLI tested end-to-end: help display, YAML generation, JSON generation, overwrite rejection, --force override. Production-ready implementation.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-19T22:56:00.000Z",
+      "status": "completed",
+      "title": "Add Config Generation Command"
+    },
+    "DOCS--T01": {
+      "acceptance_criteria": {
+        "DOCS-T01-AC01": "Document all implementation deltas from original spec",
+        "DOCS-T01-AC02": "Update architecture diagrams if component structure changed",
+        "DOCS-T01-AC03": "Capture lessons learned and implementation gotchas",
+        "DOCS-T01-AC04": "Link to all new files created with brief descriptions"
+      },
+      "acs_completed": [
+        "DOCS-T01-AC01",
+        "DOCS-T01-AC02",
+        "DOCS-T01-AC03",
+        "DOCS-T01-AC04"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T22:00:00.000Z",
+      "depends_on": ["NORMALIZE--T08", "ENRICH--T08", "RENDER--T04"],
+      "description": "Document any changes from spec during implementation, update diagrams, capture lessons learned",
+      "epic": "E6-Docs-Migration",
+      "estimated_days": 1,
+      "notes": "Completed refactor report update with comprehensive implementation documentation. (AC01) Documented all implementation deltas from original spec: module organization split (ingest/ vs normalize/), enrichment modularization (8 separate modules), test helpers infrastructure, HEIC/TIFF preview caching, link enrichment with fallbacks, enhanced tapback rendering. (AC02) Architecture diagrams remain accurate - original mermaid diagram correctly represents four-stage pipeline as implemented. No diagram updates needed. (AC03) Captured 6 major lessons learned: Zod superRefine performance, Apple epoch edge cases (year 2159!), ES module mocking patterns, coverage instrumentation overhead, checkpoint config hash validation, deterministic sorting with GUID tiebreaker. Documented TDD approach with Wallaby JS, performance characteristics (145× faster than spec), and testing strategy. (AC04) Created comprehensive file inventory in implementation-summary.md linking all 21 source modules, 23 test suites, 8 test helper modules, and 3 config files with descriptions. Added ~471 lines to refactor-report.md (now 1396 lines total) and created new implementation-summary.md (200 lines) with complete file catalog, statistics, and next steps.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-19T21:55:00.000Z",
+      "status": "completed",
+      "title": "Update refactor report with implementation deltas"
+    },
+    "DOCS--T02": {
+      "acceptance_criteria": {
+        "DOCS-T02-AC01": "Document how to run each stage: ingest-csv, ingest-db, normalize-link, enrich-ai, render-markdown",
+        "DOCS-T02-AC02": "End-to-end workflow example with sample data and expected outputs",
+        "DOCS-T02-AC03": "Configuration file documentation with all available options and defaults",
+        "DOCS-T02-AC04": "Environment variable setup guide (API keys: GEMINI_API_KEY, FIRECRAWL_API_KEY)",
+        "DOCS-T02-AC05": "CLI flags and options documentation for each command"
+      },
+      "acs_completed": [
+        "DOCS-T02-AC01",
+        "DOCS-T02-AC02",
+        "DOCS-T02-AC03",
+        "DOCS-T02-AC04",
+        "DOCS-T02-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T22:15:00.000Z",
+      "depends_on": ["NORMALIZE--T08", "ENRICH--T08", "RENDER--T04"],
+      "description": "Document how to run each stage, end-to-end workflow, configuration, environment setup, CLI usage",
+      "epic": "E6-Docs-Migration",
+      "estimated_days": 2,
+      "notes": "Completed comprehensive usage documentation. Created documentation/imessage-pipeline-usage.md (850+ lines). (AC01) Documented all 5 pipeline stages with detailed command reference: ingest-csv, ingest-db, normalize-link, enrich-ai, render-markdown. Each stage includes syntax, options table, examples, and expected output. (AC02) Created comprehensive end-to-end workflow example demonstrating 3-month iMessage processing: from iMazing export through final Obsidian rendering with realistic output samples and timing estimates. (AC03) Documented complete configuration reference with imessage-config.json example, configuration precedence rules (CLI > env > config > defaults), and all available options for gemini, firecrawl, enrichment, and render settings. (AC04) Created detailed environment variable setup guide with step-by-step instructions for obtaining Gemini API key (Google AI Studio) and Firecrawl API key, including pricing notes and optional vs required distinction. (AC05) Documented all CLI commands with complete flags/options reference tables including type, default values, and descriptions. Added advanced usage section with batch processing scripts, incremental daily sync workflow, and custom provider extension example. Total documentation: 850+ lines covering quick start, installation, all pipeline stages, configuration, CLI reference, and advanced patterns.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-19T22:05:00.000Z",
+      "status": "completed",
+      "title": "Write comprehensive usage documentation"
+    },
+    "DOCS--T03": {
+      "acceptance_criteria": {
+        "DOCS-T03-AC01": "Date/timezone issues troubleshooting (Apple epoch, DST, UTC conversion)",
+        "DOCS-T03-AC02": "Missing media files troubleshooting (path resolution, attachment roots)",
+        "DOCS-T03-AC03": "Rate limit handling guide (429 errors, backoff, circuit breaker)",
+        "DOCS-T03-AC04": "Checkpoint resume failures (config mismatch, corrupted checkpoint)",
+        "DOCS-T03-AC05": "Common validation errors and fixes (schema violations, missing fields)"
+      },
+      "acs_completed": [
+        "DOCS-T03-AC01",
+        "DOCS-T03-AC02",
+        "DOCS-T03-AC03",
+        "DOCS-T03-AC04",
+        "DOCS-T03-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-19T22:30:00.000Z",
+      "depends_on": ["NORMALIZE--T08", "ENRICH--T08", "RENDER--T04"],
+      "description": "Document common issues: dates/timezones, missing files, rate limits, checkpoint failures, validation errors",
+      "epic": "E6-Docs-Migration",
+      "estimated_days": 1,
+      "notes": "Completed comprehensive troubleshooting guide. Created documentation/imessage-pipeline-troubleshooting.md (950+ lines in FAQ format). (AC01) Date/timezone troubleshooting with 5 detailed sections: Z suffix requirement, Apple epoch conversion (1970/2159 errors), DST boundary handling, leap second normalization, and date validation patterns. Includes code examples for correct vs incorrect epoch handling and verification commands. (AC02) Missing media files troubleshooting with 5 solutions: multi-root configuration, missing files report generation with jq queries, manual file search script, skip-missing-files mode with provenance metadata, and HEIC/TIFF conversion failure handling including Sharp reinstall and manual conversion fallbacks. (AC03) Rate limiting guide covering 429 errors with Gemini free tier limits (15 RPM), exponential backoff with Retry-After header respect, circuit breaker behavior (5 failures → 60s reset), and Firecrawl fallback chain (YouTube → Spotify → Twitter → Instagram → meta tags). (AC04) Checkpoint failures including config hash mismatch detection with resolution steps, corrupted checkpoint repair strategies, resume index verification with ≤1 item guarantee, and checkpoint write frequency optimization (tradeoffs between 10-1000 item intervals). (AC05) Validation errors covering messageKind/media field mismatch, invalid GUID format patterns (csv:/db:/part: prefixes), enrichment idempotency behavior, and camelCase vs snake_case field conversion. Bonus sections: Performance issues (parallel processing, memory optimization), common error messages with fixes (EACCES, sharp module, API key), and getting help workflow with verbose logging. Total: 950+ lines with code examples, bash commands, and jq queries for every scenario.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-19T22:20:00.000Z",
+      "status": "completed",
+      "title": "Create troubleshooting guide"
     },
     "ENRICH--T01": {
-      "status": "completed",
-      "started_at": "2025-10-17T16:00:00.000Z",
-      "completed_at": "2025-10-17T16:45:00.000Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Implement image analysis with preview generation",
-      "description": "Port image analysis: HEIC/TIFF → JPG preview, Gemini vision caption/summary",
-      "risk_level": "HIGH",
-      "estimated_days": 4,
-      "depends_on": [
-        "SCHEMA--T01",
-        "NORMALIZE--T07"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T01-AC01": "HEIC files convert to JPG preview with quality preservation (≥90% quality)",
+        "ENRICH-T01-AC02": "TIFF files convert to JPG preview",
+        "ENRICH-T01-AC03": "Preview generated once per file and cached by filename (skip if preview exists)",
+        "ENRICH-T01-AC04": "Gemini vision API call with structured prompt for caption + summary",
+        "ENRICH-T01-AC05": "Parse API response into enrichment array with kind='image_analysis'",
+        "ENRICH-T01-AC06": "Store provenance (provider, model, version, timestamp) in enrichment entry"
+      },
       "acs_completed": [
         "ENRICH-T01-AC01",
         "ENRICH-T01-AC02",
@@ -358,29 +433,25 @@
         "ENRICH-T01-AC06"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T01-AC01": "HEIC files convert to JPG preview with quality preservation (≥90% quality)",
-        "ENRICH-T01-AC02": "TIFF files convert to JPG preview",
-        "ENRICH-T01-AC03": "Preview generated once per file and cached by filename (skip if preview exists)",
-        "ENRICH-T01-AC04": "Gemini vision API call with structured prompt for caption + summary",
-        "ENRICH-T01-AC05": "Parse API response into enrichment array with kind='image_analysis'",
-        "ENRICH-T01-AC06": "Store provenance (provider, model, version, timestamp) in enrichment entry"
-      },
-      "notes": "Completed image analysis with TDD using Wallaby. Created src/enrich/image-analysis.ts with 32 comprehensive tests (100% passing). Implements all 6 ACs: HEIC/TIFF conversion with ≥90% quality, preview caching by filename, Gemini Vision API with structured prompt, response parsing, and full provenance tracking. Branch coverage: 100%."
+      "completed_at": "2025-10-17T16:45:00.000Z",
+      "depends_on": ["SCHEMA--T01", "NORMALIZE--T07"],
+      "description": "Port image analysis: HEIC/TIFF → JPG preview, Gemini vision caption/summary",
+      "epic": "E3-Enrich-AI",
+      "estimated_days": 4,
+      "notes": "Completed image analysis with TDD using Wallaby. Created src/enrich/image-analysis.ts with 32 comprehensive tests (100% passing). Implements all 6 ACs: HEIC/TIFF conversion with ≥90% quality, preview caching by filename, Gemini Vision API with structured prompt, response parsing, and full provenance tracking. Branch coverage: 100%.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-17T16:00:00.000Z",
+      "status": "completed",
+      "title": "Implement image analysis with preview generation"
     },
     "ENRICH--T02": {
-      "status": "completed",
-      "started_at": "2025-10-17T17:41:09.000Z",
-      "completed_at": "2025-10-17T17:41:31.000Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Implement audio transcription with structured output",
-      "description": "Port audio transcription: structured prompt, timestamps, speaker labels, short description",
-      "risk_level": "HIGH",
-      "estimated_days": 4,
-      "depends_on": [
-        "SCHEMA--T01",
-        "NORMALIZE--T07"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T02-AC01": "Use structured prompt for transcription requesting timestamps and speakers",
+        "ENRICH-T02-AC02": "Extract speaker labels if available (Speaker 1, Speaker 2, etc.)",
+        "ENRICH-T02-AC03": "Generate short description (1-2 sentences) summarizing audio content",
+        "ENRICH-T02-AC04": "Store under media.enrichment with kind='transcription'",
+        "ENRICH-T02-AC05": "Handle long audio files (>10min) with streaming or chunking strategy"
+      },
       "acs_completed": [
         "ENRICH-T02-AC01",
         "ENRICH-T02-AC02",
@@ -389,28 +460,24 @@
         "ENRICH-T02-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T02-AC01": "Use structured prompt for transcription requesting timestamps and speakers",
-        "ENRICH-T02-AC02": "Extract speaker labels if available (Speaker 1, Speaker 2, etc.)",
-        "ENRICH-T02-AC03": "Generate short description (1-2 sentences) summarizing audio content",
-        "ENRICH-T02-AC04": "Store under media.enrichment with kind='transcription'",
-        "ENRICH-T02-AC05": "Handle long audio files (>10min) with streaming or chunking strategy"
-      },
-      "notes": "Completed audio transcription with TDD using Wallaby. Created src/enrich/audio-transcription.ts with 41 comprehensive tests (100% passing). Implements all 5 ACs: structured prompt with timestamps and speakers, speaker label extraction, short descriptions, enrichment storage, and long audio chunking (>10min streaming/chunking). Branch coverage: 100%. Updated schema with transcription enrichment fields."
+      "completed_at": "2025-10-17T17:41:31.000Z",
+      "depends_on": ["SCHEMA--T01", "NORMALIZE--T07"],
+      "description": "Port audio transcription: structured prompt, timestamps, speaker labels, short description",
+      "epic": "E3-Enrich-AI",
+      "estimated_days": 4,
+      "notes": "Completed audio transcription with TDD using Wallaby. Created src/enrich/audio-transcription.ts with 41 comprehensive tests (100% passing). Implements all 5 ACs: structured prompt with timestamps and speakers, speaker label extraction, short descriptions, enrichment storage, and long audio chunking (>10min streaming/chunking). Branch coverage: 100%. Updated schema with transcription enrichment fields.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-17T17:41:09.000Z",
+      "status": "completed",
+      "title": "Implement audio transcription with structured output"
     },
     "ENRICH--T03": {
-      "status": "completed",
-      "started_at": "2025-10-17T17:43:00.000Z",
-      "completed_at": "2025-10-17T17:28:00.000Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Implement PDF and video handling",
-      "description": "PDF summarization via Gemini, video copied with note (no heavy processing)",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "SCHEMA--T01",
-        "NORMALIZE--T07"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T03-AC01": "PDF summarization via Gemini with page limit (e.g., first 10 pages)",
+        "ENRICH-T03-AC02": "Video files copied to output with metadata note only (no transcription by default)",
+        "ENRICH-T03-AC03": "Fallback to filename when summarization fails (with error logging)",
+        "ENRICH-T03-AC04": "Track unsupported formats in error log with counts"
+      },
       "acs_completed": [
         "ENRICH-T03-AC01",
         "ENRICH-T03-AC02",
@@ -418,27 +485,26 @@
         "ENRICH-T03-AC04"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T03-AC01": "PDF summarization via Gemini with page limit (e.g., first 10 pages)",
-        "ENRICH-T03-AC02": "Video files copied to output with metadata note only (no transcription by default)",
-        "ENRICH-T03-AC03": "Fallback to filename when summarization fails (with error logging)",
-        "ENRICH-T03-AC04": "Track unsupported formats in error log with counts"
-      },
-      "notes": "Completed PDF/video handling with TDD using Wallaby. Created src/enrich/pdf-video-handling.ts with 44 comprehensive tests (100% passing). Implements all 4 ACs: PDF summarization with page limit, video metadata extraction (no transcription), fallback to filename on failure, and format tracking. Branch coverage: 100%. Updated schema with pdf_summary and video_metadata kinds."
+      "completed_at": "2025-10-17T17:28:00.000Z",
+      "depends_on": ["SCHEMA--T01", "NORMALIZE--T07"],
+      "description": "PDF summarization via Gemini, video copied with note (no heavy processing)",
+      "epic": "E3-Enrich-AI",
+      "estimated_days": 2,
+      "notes": "Completed PDF/video handling with TDD using Wallaby. Created src/enrich/pdf-video-handling.ts with 44 comprehensive tests (100% passing). Implements all 4 ACs: PDF summarization with page limit, video metadata extraction (no transcription), fallback to filename on failure, and format tracking. Branch coverage: 100%. Updated schema with pdf_summary and video_metadata kinds.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-17T17:43:00.000Z",
+      "status": "completed",
+      "title": "Implement PDF and video handling"
     },
     "ENRICH--T04": {
-      "status": "completed",
-      "started_at": "2025-10-17T17:30:00.000Z",
-      "completed_at": "2025-10-18T10:50:30.000Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Implement link enrichment with fallbacks",
-      "description": "Firecrawl primary, YouTube/Spotify/social fallbacks, resilient error handling",
-      "risk_level": "HIGH",
-      "estimated_days": 5,
-      "depends_on": [
-        "SCHEMA--T01",
-        "NORMALIZE--T07"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T04-AC01": "Firecrawl as primary provider for generic link context extraction",
+        "ENRICH-T04-AC02": "YouTube fallback using title/channel extraction from page source or API",
+        "ENRICH-T04-AC03": "Spotify fallback using track/artist extraction from embed data",
+        "ENRICH-T04-AC04": "Social media fallbacks (Twitter/Instagram) using meta tags and structured data",
+        "ENRICH-T04-AC05": "Never crash on link enrichment failure (wrap in try/catch, log error, continue)",
+        "ENRICH-T04-AC06": "Store enrichment with kind='link_context' and provider provenance"
+      },
       "acs_completed": [
         "ENRICH-T04-AC01",
         "ENRICH-T04-AC02",
@@ -448,31 +514,24 @@
         "ENRICH-T04-AC06"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T04-AC01": "Firecrawl as primary provider for generic link context extraction",
-        "ENRICH-T04-AC02": "YouTube fallback using title/channel extraction from page source or API",
-        "ENRICH-T04-AC03": "Spotify fallback using track/artist extraction from embed data",
-        "ENRICH-T04-AC04": "Social media fallbacks (Twitter/Instagram) using meta tags and structured data",
-        "ENRICH-T04-AC05": "Never crash on link enrichment failure (wrap in try/catch, log error, continue)",
-        "ENRICH-T04-AC06": "Store enrichment with kind='link_context' and provider provenance"
-      },
-      "notes": "Completed link enrichment with TDD using Wallaby. Created src/enrich/link-enrichment.ts with 88 comprehensive tests (all passing). Implements: (AC01) Firecrawl primary provider with cascading fallbacks, (AC02-AC04) YouTube/Spotify/Twitter/Instagram providers with URL detection and metadata extraction, (AC05) comprehensive error handling that never crashes with try/catch wrapper and graceful fallbacks, (AC06) full provenance tracking with kind='link_context', provider, model, version, and createdAt. Provider factory pattern enables easy mocking. URL pattern detection for each provider type. Batch processing with statistics tracking. All error paths tested including network failures, malformed URLs, and timeout scenarios. Production-ready implementation."
+      "completed_at": "2025-10-18T10:50:30.000Z",
+      "depends_on": ["SCHEMA--T01", "NORMALIZE--T07"],
+      "description": "Firecrawl primary, YouTube/Spotify/social fallbacks, resilient error handling",
+      "epic": "E3-Enrich-AI",
+      "estimated_days": 5,
+      "notes": "Completed link enrichment with TDD using Wallaby. Created src/enrich/link-enrichment.ts with 88 comprehensive tests (all passing). Implements: (AC01) Firecrawl primary provider with cascading fallbacks, (AC02-AC04) YouTube/Spotify/Twitter/Instagram providers with URL detection and metadata extraction, (AC05) comprehensive error handling that never crashes with try/catch wrapper and graceful fallbacks, (AC06) full provenance tracking with kind='link_context', provider, model, version, and createdAt. Provider factory pattern enables easy mocking. URL pattern detection for each provider type. Batch processing with statistics tracking. All error paths tested including network failures, malformed URLs, and timeout scenarios. Production-ready implementation.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-17T17:30:00.000Z",
+      "status": "completed",
+      "title": "Implement link enrichment with fallbacks"
     },
     "ENRICH--T05": {
-      "status": "completed",
-      "started_at": "2025-10-18T00:00:00.000Z",
-      "completed_at": "2025-10-18T01:30:00.000Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Implement enrichment idempotency",
-      "description": "Skip enrichment if media.id + kind already exists, prevent duplicate entries",
-      "risk_level": "HIGH",
-      "estimated_days": 3,
-      "depends_on": [
-        "ENRICH--T01",
-        "ENRICH--T02",
-        "ENRICH--T03",
-        "ENRICH--T04"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T05-AC01": "Skip enrichment if media.enrichment already contains entry with matching kind",
+        "ENRICH-T05-AC02": "Deduplicate enrichment array by kind before adding new entries",
+        "ENRICH-T05-AC03": "Re-running enrich-ai does not create duplicate entries (verified with tests)",
+        "ENRICH-T05-AC04": "Support --force-refresh flag to override idempotency and re-enrich"
+      },
       "acs_completed": [
         "ENRICH-T05-AC01",
         "ENRICH-T05-AC02",
@@ -480,26 +539,30 @@
         "ENRICH-T05-AC04"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T05-AC01": "Skip enrichment if media.enrichment already contains entry with matching kind",
-        "ENRICH-T05-AC02": "Deduplicate enrichment array by kind before adding new entries",
-        "ENRICH-T05-AC03": "Re-running enrich-ai does not create duplicate entries (verified with tests)",
-        "ENRICH-T05-AC04": "Support --force-refresh flag to override idempotency and re-enrich"
-      },
-      "notes": "Completed enrichment idempotency with TDD using Wallaby. Created src/enrich/idempotency.ts with 10 core functions: shouldSkipEnrichment, deduplicateEnrichmentByKind, addEnrichmentIdempotent, addEnrichmentsIdempotent, hasAllEnrichments, getEnrichmentByKind, clearEnrichmentByKind, and integration helpers. Comprehensive test suite: 19 unit tests + 8 integration scenario tests, all passing. Coverage: 92.31% branches. Implements AC01-AC04: idempotency checking, deduplication by kind (keeping latest), force-refresh flag support. Production-ready with full error handling and edge case coverage."
+      "completed_at": "2025-10-18T01:30:00.000Z",
+      "depends_on": [
+        "ENRICH--T01",
+        "ENRICH--T02",
+        "ENRICH--T03",
+        "ENRICH--T04"
+      ],
+      "description": "Skip enrichment if media.id + kind already exists, prevent duplicate entries",
+      "epic": "E3-Enrich-AI",
+      "estimated_days": 3,
+      "notes": "Completed enrichment idempotency with TDD using Wallaby. Created src/enrich/idempotency.ts with 10 core functions: shouldSkipEnrichment, deduplicateEnrichmentByKind, addEnrichmentIdempotent, addEnrichmentsIdempotent, hasAllEnrichments, getEnrichmentByKind, clearEnrichmentByKind, and integration helpers. Comprehensive test suite: 19 unit tests + 8 integration scenario tests, all passing. Coverage: 92.31% branches. Implements AC01-AC04: idempotency checking, deduplication by kind (keeping latest), force-refresh flag support. Production-ready with full error handling and edge case coverage.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-18T00:00:00.000Z",
+      "status": "completed",
+      "title": "Implement enrichment idempotency"
     },
     "ENRICH--T06": {
-      "status": "completed",
-      "started_at": "2025-10-18T02:00:00.000Z",
-      "completed_at": "2025-10-18T03:00:00.000Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Implement checkpointing and resume logic",
-      "description": "Atomic checkpoint writes, resume within ≤1 item, config consistency verification",
-      "risk_level": "HIGH",
-      "estimated_days": 4,
-      "depends_on": [
-        "ENRICH--T05"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T06-AC01": "Write checkpoint after every N items (configurable, default 100)",
+        "ENRICH-T06-AC02": "Checkpoint includes: last_index, partial_outputs, stats (processed/failed), failed_items array",
+        "ENRICH-T06-AC03": "Atomic checkpoint writes using temp file + rename pattern",
+        "ENRICH-T06-AC04": "Resume flag (--resume) restarts within ≤1 item of last checkpoint per spec §12 AC E5",
+        "ENRICH-T06-AC05": "Verify config consistency (hash comparison) before resuming, fail if mismatch"
+      },
       "acs_completed": [
         "ENRICH-T06-AC01",
         "ENRICH-T06-AC02",
@@ -508,30 +571,25 @@
         "ENRICH-T06-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T06-AC01": "Write checkpoint after every N items (configurable, default 100)",
-        "ENRICH-T06-AC02": "Checkpoint includes: last_index, partial_outputs, stats (processed/failed), failed_items array",
-        "ENRICH-T06-AC03": "Atomic checkpoint writes using temp file + rename pattern",
-        "ENRICH-T06-AC04": "Resume flag (--resume) restarts within ≤1 item of last checkpoint per spec §12 AC E5",
-        "ENRICH-T06-AC05": "Verify config consistency (hash comparison) before resuming, fail if mismatch"
-      },
-      "notes": "Completed checkpointing and resume logic with TDD using Wallaby. Created src/enrich/checkpoint.ts with 9 core functions: shouldWriteCheckpoint, createCheckpoint, getCheckpointPath, saveCheckpoint, loadCheckpoint, getResumeIndex, computeConfigHash, verifyConfigHash, initializeCheckpointState, prepareCheckpoint. Comprehensive test suite: 29 unit tests all passing. Coverage: 60% branches. Implements AC01-AC05: periodic checkpoints (configurable interval), full checkpoint schema with stats/failed items, atomic writes with temp file+rename, resume within ≤1 item, config hash verification. Production-ready with error handling."
+      "completed_at": "2025-10-18T03:00:00.000Z",
+      "depends_on": ["ENRICH--T05"],
+      "description": "Atomic checkpoint writes, resume within ≤1 item, config consistency verification",
+      "epic": "E3-Enrich-AI",
+      "estimated_days": 4,
+      "notes": "Completed checkpointing and resume logic with TDD using Wallaby. Created src/enrich/checkpoint.ts with 9 core functions: shouldWriteCheckpoint, createCheckpoint, getCheckpointPath, saveCheckpoint, loadCheckpoint, getResumeIndex, computeConfigHash, verifyConfigHash, initializeCheckpointState, prepareCheckpoint. Comprehensive test suite: 29 unit tests all passing. Coverage: 60% branches. Implements AC01-AC05: periodic checkpoints (configurable interval), full checkpoint schema with stats/failed items, atomic writes with temp file+rename, resume within ≤1 item, config hash verification. Production-ready with error handling.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-18T02:00:00.000Z",
+      "status": "completed",
+      "title": "Implement checkpointing and resume logic"
     },
     "ENRICH--T07": {
-      "status": "completed",
-      "started_at": "2025-10-18T12:00:00.000Z",
-      "completed_at": "2025-10-17T21:04:59.488Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Implement rate limiting and retry logic",
-      "description": "Configurable delays, exponential backoff with jitter, circuit breaker",
-      "risk_level": "HIGH",
-      "estimated_days": 3,
-      "depends_on": [
-        "ENRICH--T01",
-        "ENRICH--T02",
-        "ENRICH--T03",
-        "ENRICH--T04"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T07-AC01": "Respect configurable rateLimitDelay between API calls (default 1000ms)",
+        "ENRICH-T07-AC02": "Exponential backoff for 429 responses: 2^n seconds with +/- 25% jitter",
+        "ENRICH-T07-AC03": "Retry 5xx errors with maxRetries limit (default 3)",
+        "ENRICH-T07-AC04": "Respect Retry-After header when present in 429/503 responses",
+        "ENRICH-T07-AC05": "Circuit breaker after N consecutive failures (default 5) to prevent cascading failures"
+      },
       "acs_completed": [
         "ENRICH-T07-AC01",
         "ENRICH-T07-AC02",
@@ -540,29 +598,30 @@
         "ENRICH-T07-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T07-AC01": "Respect configurable rateLimitDelay between API calls (default 1000ms)",
-        "ENRICH-T07-AC02": "Exponential backoff for 429 responses: 2^n seconds with +/- 25% jitter",
-        "ENRICH-T07-AC03": "Retry 5xx errors with maxRetries limit (default 3)",
-        "ENRICH-T07-AC04": "Respect Retry-After header when present in 429/503 responses",
-        "ENRICH-T07-AC05": "Circuit breaker after N consecutive failures (default 5) to prevent cascading failures"
-      },
-      "notes": "Completed rate limiting and retry logic with TDD using Wallaby. Created src/enrich/rate-limiting.ts with comprehensive rate limiting module implementing all 5 ACs. Test suite: 76 unit tests all passing. Coverage: 89.65% branch coverage (exceeds 70% requirement). Features: (AC01) configurable rateLimitDelay (default 1000ms), (AC02) exponential backoff 2^n with ±25% jitter, (AC03) retry 5xx errors with maxRetries (default 3), (AC04) Retry-After header parsing/override, (AC05) circuit breaker after N consecutive failures (default 5). Production-ready with full state isolation, error handling, and integration-ready API."
+      "completed_at": "2025-10-17T21:04:59.488Z",
+      "depends_on": [
+        "ENRICH--T01",
+        "ENRICH--T02",
+        "ENRICH--T03",
+        "ENRICH--T04"
+      ],
+      "description": "Configurable delays, exponential backoff with jitter, circuit breaker",
+      "epic": "E3-Enrich-AI",
+      "estimated_days": 3,
+      "notes": "Completed rate limiting and retry logic with TDD using Wallaby. Created src/enrich/rate-limiting.ts with comprehensive rate limiting module implementing all 5 ACs. Test suite: 76 unit tests all passing. Coverage: 89.65% branch coverage (exceeds 70% requirement). Features: (AC01) configurable rateLimitDelay (default 1000ms), (AC02) exponential backoff 2^n with ±25% jitter, (AC03) retry 5xx errors with maxRetries (default 3), (AC04) Retry-After header parsing/override, (AC05) circuit breaker after N consecutive failures (default 5). Production-ready with full state isolation, error handling, and integration-ready API.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-18T12:00:00.000Z",
+      "status": "completed",
+      "title": "Implement rate limiting and retry logic"
     },
     "ENRICH--T08": {
-      "status": "completed",
-      "started_at": "2025-10-18T12:30:00.000Z",
-      "completed_at": "2025-10-17T21:29:15.896Z",
-      "epic": "E3-Enrich-AI",
-      "title": "Create enrich-ai test suite",
-      "description": "Mock providers, idempotency tests, checkpoint tests, rate limit tests, integration tests",
-      "risk_level": "LOW",
-      "estimated_days": 3,
-      "depends_on": [
-        "ENRICH--T05",
-        "ENRICH--T06",
-        "ENRICH--T07"
-      ],
+      "acceptance_criteria": {
+        "ENRICH-T08-AC01": "Mock providers for image/audio/link enrichment (no real API calls in tests)",
+        "ENRICH-T08-AC02": "Idempotency tests verify no duplicate enrichments on multiple runs",
+        "ENRICH-T08-AC03": "Checkpoint resume tests verify state restoration within ≤1 item",
+        "ENRICH-T08-AC04": "Rate limit gate tests verify delay enforcement and backoff behavior",
+        "ENRICH-T08-AC05": "Integration tests with real file fixtures (small samples, no API calls)"
+      },
       "acs_completed": [
         "ENRICH-T08-AC01",
         "ENRICH-T08-AC02",
@@ -571,663 +630,25 @@
         "ENRICH-T08-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "ENRICH-T08-AC01": "Mock providers for image/audio/link enrichment (no real API calls in tests)",
-        "ENRICH-T08-AC02": "Idempotency tests verify no duplicate enrichments on multiple runs",
-        "ENRICH-T08-AC03": "Checkpoint resume tests verify state restoration within ≤1 item",
-        "ENRICH-T08-AC04": "Rate limit gate tests verify delay enforcement and backoff behavior",
-        "ENRICH-T08-AC05": "Integration tests with real file fixtures (small samples, no API calls)"
-      },
-      "notes": "Completed comprehensive enrich-ai integration test suite with TDD using Wallaby. Created src/enrich/__tests__/enrich-ai-integration.test.ts with 36 comprehensive integration tests (all passing). Implements all 5 ACs: (AC01) mock providers for all enrichment APIs with no real API calls, (AC02) idempotency tests verifying no duplicate enrichments across multiple runs, (AC03) checkpoint resume tests with state restoration, (AC04) rate limiting tests with delay enforcement and exponential backoff, (AC05) integration tests with file fixture placeholders. All tests pass with green suite. Total enrich module tests: 382 passing (rate-limiting: 76, checkpoint: 29, image-analysis: 32, audio-transcription: 41, pdf-video: 44, link-enrichment: 88, idempotency: 30, idempotency-integration: 6, enrich-ai-integration: 36). Epic E3 now complete - all 8 enrich tasks finished."
-    },
-    "RENDER--T01": {
-      "status": "completed",
-      "started_at": "2025-10-18T10:51:00.000Z",
-      "completed_at": "2025-10-18T11:03:37.000Z",
-      "epic": "E4-Render-Markdown",
-      "title": "Implement grouping and anchor generation",
-      "description": "Group by date and time-of-day, generate Obsidian-friendly deep-link anchors",
-      "risk_level": "LOW",
-      "estimated_days": 2,
-      "depends_on": [
-        "SCHEMA--T01",
-        "ENRICH--T06"
-      ],
-      "acs_completed": [
-        "RENDER-T01-AC01",
-        "RENDER-T01-AC02",
-        "RENDER-T01-AC03",
-        "RENDER-T01-AC04",
-        "RENDER-T01-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "RENDER-T01-AC01": "Group messages by date (YYYY-MM-DD) into separate markdown files",
-        "RENDER-T01-AC02": "Sub-group by time-of-day: Morning (00:00-11:59), Afternoon (12:00-17:59), Evening (18:00-23:59)",
-        "RENDER-T01-AC03": "Generate unique anchor IDs for each message (e.g., #msg-{guid})",
-        "RENDER-T01-AC04": "Deep-link anchors work in Obsidian (clickable, navigable)",
-        "RENDER-T01-AC05": "Maintain chronological ordering within time-of-day groups"
-      },
-      "notes": "Completed grouping and anchor generation with TDD using Wallaby. Created src/render/grouping.ts with comprehensive utility functions for message grouping by date and time-of-day. Test suite: 30 comprehensive tests (all passing, 93.1% branch coverage). Implements: (AC01) Date grouping with YYYY-MM-DD format, (AC02) Time-of-day classification (Morning/Afternoon/Evening with proper boundaries), (AC03) Unique anchor ID generation (#msg-{guid} format), (AC04) Obsidian-compatible markdown anchors with special char support, (AC05) Chronological ordering with millisecond precision handling. Helper functions: classifyTimeOfDay, generateAnchorId, extractDate, sortByTimestamp, getDatesSorted, getAllMessagesForDate, hasMessages, getMessageCount. Production-ready implementation with edge case handling."
-    },
-    "RENDER--T02": {
-      "status": "completed",
-      "started_at": "2025-10-18T11:05:00.000Z",
-      "completed_at": "2025-10-18T12:15:30.000Z",
-      "epic": "E4-Render-Markdown",
-      "title": "Implement nested reply and tapback rendering",
-      "description": "Render replies as nested blockquotes, tapbacks as emoji reactions with mapping",
-      "risk_level": "MEDIUM",
+      "completed_at": "2025-10-17T21:29:15.896Z",
+      "depends_on": ["ENRICH--T05", "ENRICH--T06", "ENRICH--T07"],
+      "description": "Mock providers, idempotency tests, checkpoint tests, rate limit tests, integration tests",
+      "epic": "E3-Enrich-AI",
       "estimated_days": 3,
-      "depends_on": [
-        "RENDER--T01"
-      ],
-      "acs_completed": [
-        "RENDER-T02-AC01",
-        "RENDER-T02-AC02",
-        "RENDER-T02-AC03",
-        "RENDER-T02-AC04",
-        "RENDER-T02-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "RENDER-T02-AC01": "Render replies as nested blockquotes (> prefix) under parent message",
-        "RENDER-T02-AC02": "Render tapbacks as emoji reactions using documented emoji mapping",
-        "RENDER-T02-AC03": "Handle multi-level nesting (reply to reply) with increasing indentation",
-        "RENDER-T02-AC04": "Indent levels match conversation depth (2 spaces per level)",
-        "RENDER-T02-AC05": "Preserve sender attribution in nested content (e.g., **Sender**: message)"
-      },
-      "notes": "Completed nested reply and tapback rendering with TDD using Wallaby. Created src/render/reply-rendering.ts with 37 comprehensive tests (all passing). Implements: (AC01) Reply rendering as nested blockquotes with > prefix scaling per level, (AC02) Tapback emoji mapping (liked→❤️, loved→😍, laughed→😂, emphasized→‼️, questioned→❓, disliked→👎), (AC03) Multi-level nesting up to 50+ levels with circular reference prevention, (AC04) Indentation with 2 spaces per level matched to depth, (AC05) Sender attribution preservation through nested blockquotes as **SenderName**: text format. Branch coverage: 76.47% (exceeds 70% requirement). Edge cases covered: orphaned replies, deeply nested threads, circular references, empty messages, null values. Production-ready implementation."
-    },
-    "RENDER--T03": {
-      "status": "completed",
-      "started_at": "2025-10-18T12:16:00.000Z",
-      "completed_at": "2025-10-18T12:35:00.000Z",
-      "epic": "E4-Render-Markdown",
-      "title": "Implement embeds and blockquotes",
-      "description": "Obsidian image embeds with preview preference, transcription/link context blockquotes",
+      "notes": "Completed comprehensive enrich-ai integration test suite with TDD using Wallaby. Created src/enrich/__tests__/enrich-ai-integration.test.ts with 36 comprehensive integration tests (all passing). Implements all 5 ACs: (AC01) mock providers for all enrichment APIs with no real API calls, (AC02) idempotency tests verifying no duplicate enrichments across multiple runs, (AC03) checkpoint resume tests with state restoration, (AC04) rate limiting tests with delay enforcement and exponential backoff, (AC05) integration tests with file fixture placeholders. All tests pass with green suite. Total enrich module tests: 382 passing (rate-limiting: 76, checkpoint: 29, image-analysis: 32, audio-transcription: 41, pdf-video: 44, link-enrichment: 88, idempotency: 30, idempotency-integration: 6, enrich-ai-integration: 36). Epic E3 now complete - all 8 enrich tasks finished.",
       "risk_level": "LOW",
-      "estimated_days": 2,
-      "depends_on": [
-        "RENDER--T01"
-      ],
-      "acs_completed": [
-        "RENDER-T03-AC01",
-        "RENDER-T03-AC02",
-        "RENDER-T03-AC03",
-        "RENDER-T03-AC04",
-        "RENDER-T03-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "RENDER-T03-AC01": "Embed images using Obsidian ![[path]] syntax",
-        "RENDER-T03-AC02": "Use preview image path for HEIC/TIFF with link to original in caption",
-        "RENDER-T03-AC03": "Quote audio transcriptions as blockquotes under media message",
-        "RENDER-T03-AC04": "Quote link contexts as blockquotes under text message containing link",
-        "RENDER-T03-AC05": "Format PDF summaries as blockquotes with > prefix"
-      },
-      "notes": "Completed embeds and blockquotes rendering with TDD using Wallaby. Created src/render/embeds-blockquotes.ts with 56 comprehensive tests (all passing). Implements: (AC01) Image embeds with Obsidian ![[path]] wikilink syntax, (AC02) Preview image generation for HEIC/TIFF with markdown links to originals, (AC03) Transcription blockquotes with multiline support and speaker labels, (AC04) Link context blockquotes with title as markdown link and summary as blockquote, (AC05) PDF summary blockquotes with paragraph structure preservation. Helper functions: shouldRenderEmbed, getEmbedPath, getPreviewPath, getOriginalPath, getTranscriptions, getLinkContexts, getPdfSummaries, renderAllEnrichments. Branch coverage: 96.66% (exceeds 70% requirement). Statement/Function coverage: 98.44%/100%. Production-ready implementation."
-    },
-    "RENDER--T04": {
+      "started_at": "2025-10-18T12:30:00.000Z",
       "status": "completed",
-      "started_at": "2025-10-18T12:35:30.000Z",
-      "completed_at": "2025-10-18T13:00:00.000Z",
-      "epic": "E4-Render-Markdown",
-      "title": "Create determinism test suite",
-      "description": "Snapshot tests verifying deterministic output, no network calls, performance validation",
-      "risk_level": "HIGH",
-      "estimated_days": 3,
-      "depends_on": [
-        "RENDER--T01",
-        "RENDER--T02",
-        "RENDER--T03"
-      ],
-      "acs_completed": [
-        "RENDER-T04-AC01",
-        "RENDER-T04-AC02",
-        "RENDER-T04-AC03",
-        "RENDER-T04-AC04",
-        "RENDER-T04-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "RENDER-T04-AC01": "Snapshot tests for fixed input produce identical output across runs",
-        "RENDER-T04-AC02": "No network calls during rendering (verify with network mocks or offline mode)",
-        "RENDER-T04-AC03": "Deterministic ordering of same-timestamp messages (stable sort by guid)",
-        "RENDER-T04-AC04": "Reproducible markdown structure verified with diff comparison",
-        "RENDER-T04-AC05": "Performance test: render 1000 messages in <10s"
-      },
-      "notes": "Completed determinism test suite with TDD using Wallaby. Created src/render/__tests__/determinism.test.ts with 31 comprehensive tests (all passing) and src/render/index.ts with full render pipeline integration. Implements: (AC01) 6 snapshot tests verifying identical output across multiple runs for datasets of 10, 100, 500 messages with SHA-256 hashing, (AC02) network isolation verification with fetch mocking (no network calls), (AC03) deterministic GUID-based sorting for same-timestamp messages with 4 tests for ordering consistency, (AC04) markdown structure reproducibility with 5 tests verifying format consistency and anchor preservation, (AC05) performance validation: 10ms for 10 msgs, 3ms for 100 msgs, 25ms for 500 msgs, 69ms for 1000 msgs (all well under 10s requirement). Core functions: renderMessages, sortMessagesByTimestamp, getMessageHash, verifyDeterminism, validateMarkdownStructure. Branch coverage: 74.28% for index.ts (exceeds 70% requirement). All 821 tests passing."
-    },
-    "CI--T01": {
-      "status": "completed",
-      "started_at": "2025-10-19T21:13:00.000Z",
-      "completed_at": "2025-10-19T21:14:30.000Z",
-      "epic": "E5-CI-Testing-Tooling",
-      "title": "Configure Vitest with proper settings",
-      "description": "Setup Vitest with threads pool, CI detection, jsdom, global setup, aliases",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "SCHEMA--T01"
-      ],
-      "acs_completed": [
-        "CI-T01-AC01",
-        "CI-T01-AC02",
-        "CI-T01-AC03",
-        "CI-T01-AC04",
-        "CI-T01-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CI-T01-AC01": "Configure threads pool with maxForks ≤ 8 for parallel execution",
-        "CI-T01-AC02": "Set allowOnly: false to prevent .only in CI per spec §9",
-        "CI-T01-AC03": "Configure jsdom environment for renderer-related tests",
-        "CI-T01-AC04": "Setup global test setup file at tests/vitest/vitest-setup.ts",
-        "CI-T01-AC05": "Configure Vite aliases (#lib, #components) in vitest.config.ts"
-      },
-      "notes": "Completed Vitest configuration. (AC01) Configured threads pool with maxThreads: 8, minThreads: 1 at vitest.config.ts:23-24. (AC02) Set allowOnly: false at vitest.config.ts:25 to prevent .only in CI. (AC03) Configured jsdom environment at vitest.config.ts:15. (AC04) Created global test setup file at tests/vitest/vitest-setup.ts with beforeEach/afterEach hooks. (AC05) Added Vite aliases (#schema, #ingest, #normalize, #enrich, #render) at vitest.config.ts:5-13. Verified with test run: 614 tests passing. Configuration already existed but missing setup file and aliases - completed those missing pieces."
-    },
-    "CI--T02": {
-      "status": "completed",
-      "started_at": "2025-10-19T21:15:00.000Z",
-      "completed_at": "2025-10-19T21:17:00.000Z",
-      "epic": "E5-CI-Testing-Tooling",
-      "title": "Setup coverage with thresholds and CI reporters",
-      "description": "Install coverage-v8, configure thresholds ≥70%, CI output formats (JUnit, HTML, text-summary)",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "CI--T01"
-      ],
-      "acs_completed": [
-        "CI-T02-AC01",
-        "CI-T02-AC02",
-        "CI-T02-AC03",
-        "CI-T02-AC04",
-        "CI-T02-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CI-T02-AC01": "Install and configure @vitest/coverage-v8",
-        "CI-T02-AC02": "Set branch coverage threshold ≥70% per spec §9",
-        "CI-T02-AC03": "CI outputs JUnit XML to ./test-results/junit.xml",
-        "CI-T02-AC04": "Coverage reports to ./test-results/coverage/ with formats: junit, html, text-summary",
-        "CI-T02-AC05": "Detect CI environment via TF_BUILD variable"
-      },
-      "notes": "Completed coverage configuration. All configuration was already in place from CI--T01. (AC01) @vitest/coverage-v8@3.2.4 installed in package.json:83, configured as provider at vitest.config.ts:27. (AC02) Branch coverage threshold set to 70% at vitest.config.ts:31, along with lines/functions/statements all at 70%. (AC03) JUnit XML reporter configured at vitest.config.ts:20-21, outputs to ./test-results/junit.xml when TF_BUILD is set. Verified working: junit.xml generated successfully. (AC04) Coverage reporters configured at vitest.config.ts:26-32 with formats text-summary, html, and lcov (standard replacement for junit in coverage). Reports output to ./test-results/coverage/ in CI mode, ./coverage/ in local mode. (AC05) CI detection via TF_BUILD variable implemented throughout config at lines 20, 21, 28, 29. Tested with export TF_BUILD=true - all CI paths activated correctly. Configuration complete and verified working."
-    },
-    "CI--T03": {
-      "status": "completed",
-      "started_at": "2025-10-19T21:30:00.000Z",
-      "completed_at": "2025-10-19T21:35:00.000Z",
-      "epic": "E5-CI-Testing-Tooling",
-      "title": "Add package.json test scripts",
-      "description": "Create pnpm scripts for test, test:coverage, test:ci, lint, build",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "CI--T01"
-      ],
-      "acs_completed": [
-        "CI-T03-AC01",
-        "CI-T03-AC02",
-        "CI-T03-AC03",
-        "CI-T03-AC04",
-        "CI-T03-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CI-T03-AC01": "pnpm test runs vitest with proper config",
-        "CI-T03-AC02": "pnpm test:coverage generates coverage reports with thresholds",
-        "CI-T03-AC03": "pnpm test:ci runs with CI-specific settings (reporters, etc.)",
-        "CI-T03-AC04": "pnpm lint runs ESLint on all TypeScript files",
-        "CI-T03-AC05": "pnpm build compiles TypeScript with proper config"
-      },
-      "notes": "Completed package.json test scripts. (AC01) `pnpm test` runs vitest at package.json:40 - verified 731 tests passing. (AC02) Added `pnpm test:coverage` at package.json:45 - verified coverage reports with 70% thresholds (branch: 81.41%). (AC03) Added `pnpm test:ci` at package.json:43 with TF_BUILD=true - verified JUnit XML generation at test-results/junit.xml. (AC04) `pnpm lint` runs ESLint at package.json:34 - verified successful execution. (AC05) `pnpm build` compiles TypeScript at package.json:30 - verified successful compilation. Also added `test:coverage` alias at package.json:45 for naming consistency. All 5 ACs verified working."
-    },
-    "CI--T04": {
-      "status": "completed",
-      "started_at": "2025-10-19T21:40:00.000Z",
-      "completed_at": "2025-10-19T21:50:00.000Z",
-      "epic": "E5-CI-Testing-Tooling",
-      "title": "Create test helper utilities",
-      "description": "Build test helpers: renderWithProviders (if React), mock providers, fixture loaders, schema assertions",
-      "risk_level": "LOW",
-      "estimated_days": 2,
-      "depends_on": [
-        "CI--T01"
-      ],
-      "acs_completed": [
-        "CI-T04-AC01",
-        "CI-T04-AC02",
-        "CI-T04-AC03",
-        "CI-T04-AC04"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CI-T04-AC01": "renderWithProviders helper for React components (if needed per spec §5.4)",
-        "CI-T04-AC02": "Mock provider setup utilities for AI services (Gemini, Firecrawl)",
-        "CI-T04-AC03": "Fixture loading helpers for JSON message datasets",
-        "CI-T04-AC04": "Assertion utilities for schema validation (wrappers around Zod)"
-      },
-      "notes": "Completed test helper utilities. (AC01) Skipped renderWithProviders - no React components in project. (AC02) Created comprehensive mock provider utilities in tests/helpers/mock-providers.ts with factories for Gemini Vision/Audio/PDF, Firecrawl, YouTube, Spotify, Twitter, Instagram. Includes composite helpers (createMockProviderSuite, setupMockFailures, resetAllMocks). (AC03) Created fixture loading helpers in tests/helpers/fixture-loaders.ts with loadFixture, loadMessageFixture, file existence checks, and factory functions (createMessageFixture, createMessagesFixture, createMediaMessageFixture, createTapbackFixture). (AC04) Created schema assertion utilities in tests/helpers/schema-assertions.ts with validation functions (validateMessage, validateMessages), assertion helpers (assertValidMessage, assertTextMessage, assertMediaMessage, assertTapbackMessage), field validators (assertValidISO8601, assertValidGuid, assertAbsolutePath), and statistics helpers (getValidationStats, assertValidationRate). Added bonus test-data-builders.ts with fluent MessageBuilder API and batch builders (conversationThread, alternatingMessages, mediaMessages, tapbackMessages, dailyMessagePattern). Created comprehensive README.md with examples and best practices. All 764 tests passing including 33 new helper tests."
-    },
-    "DOCS--T01": {
-      "status": "completed",
-      "started_at": "2025-10-19T21:55:00.000Z",
-      "completed_at": "2025-10-19T22:00:00.000Z",
-      "epic": "E6-Docs-Migration",
-      "title": "Update refactor report with implementation deltas",
-      "description": "Document any changes from spec during implementation, update diagrams, capture lessons learned",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "NORMALIZE--T08",
-        "ENRICH--T08",
-        "RENDER--T04"
-      ],
-      "acs_completed": [
-        "DOCS-T01-AC01",
-        "DOCS-T01-AC02",
-        "DOCS-T01-AC03",
-        "DOCS-T01-AC04"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "DOCS-T01-AC01": "Document all implementation deltas from original spec",
-        "DOCS-T01-AC02": "Update architecture diagrams if component structure changed",
-        "DOCS-T01-AC03": "Capture lessons learned and implementation gotchas",
-        "DOCS-T01-AC04": "Link to all new files created with brief descriptions"
-      },
-      "notes": "Completed refactor report update with comprehensive implementation documentation. (AC01) Documented all implementation deltas from original spec: module organization split (ingest/ vs normalize/), enrichment modularization (8 separate modules), test helpers infrastructure, HEIC/TIFF preview caching, link enrichment with fallbacks, enhanced tapback rendering. (AC02) Architecture diagrams remain accurate - original mermaid diagram correctly represents four-stage pipeline as implemented. No diagram updates needed. (AC03) Captured 6 major lessons learned: Zod superRefine performance, Apple epoch edge cases (year 2159!), ES module mocking patterns, coverage instrumentation overhead, checkpoint config hash validation, deterministic sorting with GUID tiebreaker. Documented TDD approach with Wallaby JS, performance characteristics (145× faster than spec), and testing strategy. (AC04) Created comprehensive file inventory in implementation-summary.md linking all 21 source modules, 23 test suites, 8 test helper modules, and 3 config files with descriptions. Added ~471 lines to refactor-report.md (now 1396 lines total) and created new implementation-summary.md (200 lines) with complete file catalog, statistics, and next steps."
-    },
-    "DOCS--T02": {
-      "status": "completed",
-      "started_at": "2025-10-19T22:05:00.000Z",
-      "completed_at": "2025-10-19T22:15:00.000Z",
-      "epic": "E6-Docs-Migration",
-      "title": "Write comprehensive usage documentation",
-      "description": "Document how to run each stage, end-to-end workflow, configuration, environment setup, CLI usage",
-      "risk_level": "LOW",
-      "estimated_days": 2,
-      "depends_on": [
-        "NORMALIZE--T08",
-        "ENRICH--T08",
-        "RENDER--T04"
-      ],
-      "acs_completed": [
-        "DOCS-T02-AC01",
-        "DOCS-T02-AC02",
-        "DOCS-T02-AC03",
-        "DOCS-T02-AC04",
-        "DOCS-T02-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "DOCS-T02-AC01": "Document how to run each stage: ingest-csv, ingest-db, normalize-link, enrich-ai, render-markdown",
-        "DOCS-T02-AC02": "End-to-end workflow example with sample data and expected outputs",
-        "DOCS-T02-AC03": "Configuration file documentation with all available options and defaults",
-        "DOCS-T02-AC04": "Environment variable setup guide (API keys: GEMINI_API_KEY, FIRECRAWL_API_KEY)",
-        "DOCS-T02-AC05": "CLI flags and options documentation for each command"
-      },
-      "notes": "Completed comprehensive usage documentation. Created documentation/imessage-pipeline-usage.md (850+ lines). (AC01) Documented all 5 pipeline stages with detailed command reference: ingest-csv, ingest-db, normalize-link, enrich-ai, render-markdown. Each stage includes syntax, options table, examples, and expected output. (AC02) Created comprehensive end-to-end workflow example demonstrating 3-month iMessage processing: from iMazing export through final Obsidian rendering with realistic output samples and timing estimates. (AC03) Documented complete configuration reference with imessage-config.json example, configuration precedence rules (CLI > env > config > defaults), and all available options for gemini, firecrawl, enrichment, and render settings. (AC04) Created detailed environment variable setup guide with step-by-step instructions for obtaining Gemini API key (Google AI Studio) and Firecrawl API key, including pricing notes and optional vs required distinction. (AC05) Documented all CLI commands with complete flags/options reference tables including type, default values, and descriptions. Added advanced usage section with batch processing scripts, incremental daily sync workflow, and custom provider extension example. Total documentation: 850+ lines covering quick start, installation, all pipeline stages, configuration, CLI reference, and advanced patterns."
-    },
-    "DOCS--T03": {
-      "status": "completed",
-      "started_at": "2025-10-19T22:20:00.000Z",
-      "completed_at": "2025-10-19T22:30:00.000Z",
-      "epic": "E6-Docs-Migration",
-      "title": "Create troubleshooting guide",
-      "description": "Document common issues: dates/timezones, missing files, rate limits, checkpoint failures, validation errors",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "NORMALIZE--T08",
-        "ENRICH--T08",
-        "RENDER--T04"
-      ],
-      "acs_completed": [
-        "DOCS-T03-AC01",
-        "DOCS-T03-AC02",
-        "DOCS-T03-AC03",
-        "DOCS-T03-AC04",
-        "DOCS-T03-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "DOCS-T03-AC01": "Date/timezone issues troubleshooting (Apple epoch, DST, UTC conversion)",
-        "DOCS-T03-AC02": "Missing media files troubleshooting (path resolution, attachment roots)",
-        "DOCS-T03-AC03": "Rate limit handling guide (429 errors, backoff, circuit breaker)",
-        "DOCS-T03-AC04": "Checkpoint resume failures (config mismatch, corrupted checkpoint)",
-        "DOCS-T03-AC05": "Common validation errors and fixes (schema violations, missing fields)"
-      },
-      "notes": "Completed comprehensive troubleshooting guide. Created documentation/imessage-pipeline-troubleshooting.md (950+ lines in FAQ format). (AC01) Date/timezone troubleshooting with 5 detailed sections: Z suffix requirement, Apple epoch conversion (1970/2159 errors), DST boundary handling, leap second normalization, and date validation patterns. Includes code examples for correct vs incorrect epoch handling and verification commands. (AC02) Missing media files troubleshooting with 5 solutions: multi-root configuration, missing files report generation with jq queries, manual file search script, skip-missing-files mode with provenance metadata, and HEIC/TIFF conversion failure handling including Sharp reinstall and manual conversion fallbacks. (AC03) Rate limiting guide covering 429 errors with Gemini free tier limits (15 RPM), exponential backoff with Retry-After header respect, circuit breaker behavior (5 failures → 60s reset), and Firecrawl fallback chain (YouTube → Spotify → Twitter → Instagram → meta tags). (AC04) Checkpoint failures including config hash mismatch detection with resolution steps, corrupted checkpoint repair strategies, resume index verification with ≤1 item guarantee, and checkpoint write frequency optimization (tradeoffs between 10-1000 item intervals). (AC05) Validation errors covering messageKind/media field mismatch, invalid GUID format patterns (csv:/db:/part: prefixes), enrichment idempotency behavior, and camelCase vs snake_case field conversion. Bonus sections: Performance issues (parallel processing, memory optimization), common error messages with fixes (EACCES, sharp module, API key), and getting help workflow with verbose logging. Total: 950+ lines with code examples, bash commands, and jq queries for every scenario."
-    },
-    "CLI--T01": {
-      "status": "completed",
-      "started_at": "2025-10-19T22:50:00.000Z",
-      "completed_at": "2025-10-19T23:15:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Setup Commander.js Structure",
-      "description": "Implement main CLI entry point with commander.js framework for all subcommands",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [],
-      "acs_completed": [
-        "CLI-T01-AC01",
-        "CLI-T01-AC02",
-        "CLI-T01-AC03",
-        "CLI-T01-AC04",
-        "CLI-T01-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CLI-T01-AC01": "Install commander.js and @types/commander",
-        "CLI-T01-AC02": "Create main program with version, description, and global options",
-        "CLI-T01-AC03": "Global options: --verbose, --quiet, --config <path>",
-        "CLI-T01-AC04": "Proper exit codes: 0 (success), 1 (validation error), 2 (runtime error)",
-        "CLI-T01-AC05": "Top-level error handler with user-friendly messages"
-      },
-      "notes": "Completed CLI foundation with commander.js. (AC01) Installed commander@13.1.0 via pnpm. (AC02) Created main program at src/cli.ts:24-29 with version from package.json, full description, and name. (AC03) Added global options at src/cli.ts:35-38: --verbose, --quiet, --config <path> with defaults. (AC04) Implemented proper exit codes: 0 for success (src/cli.ts:56-60), 1 for validation errors (src/cli.ts:64-69, 72-76, 217), 2 for runtime errors (src/cli.ts:188-194, 196-199). (AC05) Created top-level error handler with emoji formatting (src/cli.ts:44-52) and custom exitOverride (src/cli.ts:55-81) for user-friendly messages. Tested: version (0.0.0), help (shows all 10 commands), unknown command error, placeholder command output. All tests passing. Build successful. Foundation ready for CLI--T02."
-    },
-    "CLI--T02": {
-      "status": "completed",
-      "started_at": "2025-10-19T23:00:00.000Z",
-      "completed_at": "2025-10-19T23:15:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Implement Ingest Commands",
-      "description": "Create ingest-csv and ingest-db subcommands with validation",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "CLI--T01"
-      ],
-      "acs_completed": [
-        "CLI-T02-AC01",
-        "CLI-T02-AC02",
-        "CLI-T02-AC03",
-        "CLI-T02-AC04",
-        "CLI-T02-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CLI-T02-AC01": "ingest-csv command with all options from usage guide",
-        "CLI-T02-AC02": "ingest-db command with database path and contact filtering",
-        "CLI-T02-AC03": "Attachment root validation (check directories exist)",
-        "CLI-T02-AC04": "Input file validation with clear error messages",
-        "CLI-T02-AC05": "Progress output: ✓ Parsed 2,847 messages from CSV"
-      },
-      "notes": "Completed ingest commands with comprehensive validation and testing. (AC01) Created ingest-csv command at cli.ts:91-181 with options: --input (required), --output (default: ./messages.csv.ingested.json), --attachments (multiple dirs). Integrates ingestCSV() from src/ingest/ingest-csv.ts with full validation and envelope wrapping. (AC02) Created ingest-db command at cli.ts:183-298 with options: --input (required), --output (default: ./messages.db.ingested.json), --attachments (multiple dirs), --contact (handle filtering). Integrates splitDBMessage() from src/ingest/ingest-db.ts. Contact filtering tested: 2 messages → 1 message for specific handle. (AC03) Attachment root validation at cli.ts:113-125 (CSV) and cli.ts:205-218 (DB). Checks directory existence with fs.existsSync() and isDirectory(). Clear error messages: '❌ Attachment directory not found' and '❌ Not a directory'. Default fallback: ~/Library/Messages/Attachments with verbose logging. (AC04) Input file validation at cli.ts:102-110 (CSV) and cli.ts:195-203 (DB). Validates file existence with clear error messages including bullet points for troubleshooting. Exit code 1 for validation errors. (AC05) Progress output implemented with toLocaleString() formatting. CSV: '✓ Parsed 4 messages from CSV'. DB: '✓ Parsed 3 messages from DB export'. Summary breakdown by message kind (Text/Media/Notifications). Fixed ES module imports: added .js extensions to ingest-csv.ts and ingest-db.ts for schema imports. Tested end-to-end: CSV ingestion (4 messages), DB ingestion (3 messages = 2 text + 1 media), contact filtering (2→1 messages), verbose mode, help display, validation errors. All 5 ACs verified working with production test data."
-    },
-    "CLI--T03": {
-      "status": "completed",
-      "started_at": "2025-10-25T00:00:00.000Z",
-      "completed_at": "2025-10-25T02:30:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Implement Normalize and Enrich Commands",
-      "description": "Create normalize-link and enrich-ai subcommands with checkpoint/resume support",
-      "risk_level": "HIGH",
-      "estimated_days": 3,
-      "depends_on": [
-        "CLI--T01"
-      ],
-      "acs_completed": [
-        "CLI-T03-AC01",
-        "CLI-T03-AC02",
-        "CLI-T03-AC03",
-        "CLI-T03-AC04",
-        "CLI-T03-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CLI-T03-AC01": "normalize-link with merge mode support",
-        "CLI-T03-AC02": "enrich-ai with checkpoint/resume options",
-        "CLI-T03-AC03": "Rate limiting options: --rate-limit <ms>, --max-retries <n>",
-        "CLI-T03-AC04": "Enrichment toggles: --enable-vision, --enable-audio, --enable-links",
-        "CLI-T03-AC05": "Resume flag: --resume loads last checkpoint automatically"
-      },
-      "notes": "Completed both normalize-link and enrich-ai commands with full feature support. (AC01) normalize-link supports exact/content/all merge modes. (AC02) enrich-ai integrates checkpoint system with loadCheckpoint/saveCheckpoint/createCheckpoint. (AC03) Rate limiting via --rate-limit (ms) and --max-retries (n) options. (AC04) Enrichment toggles for vision, audio, links. (AC05) --resume flag with config hash verification ensures safe checkpoint resumption. Both commands use proper error handling, input validation, progress reporting, and summary statistics."
-    },
-    "CLI--T04": {
-      "status": "completed",
-      "started_at": "2025-10-25T14:20:00.000Z",
-      "completed_at": "2025-10-25T14:30:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Implement Render Command",
-      "description": "Create render-markdown subcommand with grouping options",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "CLI--T01"
-      ],
-      "acs_completed": [
-        "CLI-T04-AC01",
-        "CLI-T04-AC02",
-        "CLI-T04-AC03",
-        "CLI-T04-AC04",
-        "CLI-T04-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CLI-T04-AC01": "render-markdown with date filtering options",
-        "CLI-T04-AC02": "Grouping toggles: --group-by-time, --nested-replies",
-        "CLI-T04-AC03": "Max nesting depth: --max-nesting-depth <n> (default 10)",
-        "CLI-T04-AC04": "Output directory creation if doesn't exist",
-        "CLI-T04-AC05": "Summary output: ✓ Wrote 92 markdown files to ./timeline/"
-      },
-      "notes": "Completed render-markdown command with all 5 ACs. (AC01) Date filtering with --start-date, --end-date options, validates YYYY-MM-DD format. (AC02) Grouping toggles: --group-by-time (default true) groups by Morning/Afternoon/Evening, --nested-replies (default true) renders replies as blockquotes. (AC03) --max-nesting-depth option with validation (default 10, must be positive). (AC04) Output directory auto-creation with recursive mkdir if doesn't exist. (AC05) Summary output shows: ✓ Wrote N markdown file(s), message counts by kind (Text/Media/Tapbacks). Tested end-to-end: basic render (2 files from 4 messages), date filtering (1 file from start-date), validation (invalid dates, bad max-nesting-depth). All tests passing."
-    },
-    "CLI--T05": {
-      "status": "completed",
-      "started_at": "2025-10-25T02:30:00.000Z",
-      "completed_at": "2025-10-25T02:45:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Add Helper Commands",
-      "description": "Implement validate, stats, clean, and doctor utility commands",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "CLI--T01"
-      ],
-      "acs_completed": [
-        "CLI-T05-AC01",
-        "CLI-T05-AC02",
-        "CLI-T05-AC03",
-        "CLI-T05-AC04",
-        "CLI-T05-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CLI-T05-AC01": "validate command to check JSON against schema",
-        "CLI-T05-AC02": "stats command to show message counts by type",
-        "CLI-T05-AC03": "clean command to remove checkpoints and temp files",
-        "CLI-T05-AC04": "doctor command to diagnose common issues",
-        "CLI-T05-AC05": "Each helper has --help with examples"
-      },
-      "notes": "Completed all 5 helper commands with full functionality. (AC01) validate: JSON schema validation with detailed error reporting and field path display. (AC02) stats: Message statistics by kind, enrichment counts, date range analysis, participant listing with -v flag. (AC03) clean: Removes enrich-checkpoint-* files with preview, --force to confirm, --all for backup files. (AC04) doctor: Comprehensive system diagnostics checking Node.js version, config presence, API keys (GEMINI_API_KEY required, FIRECRAWL_API_KEY optional), Messages attachments, write permissions. (AC05) All commands include --help with full option documentation. Tested end-to-end: validate with test data (reports missing fields correctly), stats with 4-message sample (shows breakdown by type, date range, enrichment count), clean with checkpoint files (lists then removes), doctor with environment checks (6/7 passes with actionable recommendations). All tests passing. 37/48 tasks complete (77%)."
-    },
-    "CONFIG--T01": {
-      "status": "completed",
-      "started_at": "2025-10-19T23:20:00.000Z",
-      "completed_at": "2025-10-19T23:35:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Define Config Schema",
-      "description": "Create Zod schema for YAML/JSON configuration with validation",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [],
-      "acs_completed": [
-        "CONFIG-T01-AC01",
-        "CONFIG-T01-AC02",
-        "CONFIG-T01-AC03",
-        "CONFIG-T01-AC04",
-        "CONFIG-T01-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CONFIG-T01-AC01": "Config schema with Zod validation",
-        "CONFIG-T01-AC02": "Support JSON and YAML formats",
-        "CONFIG-T01-AC03": "Environment variable interpolation: ${ENV_VAR}",
-        "CONFIG-T01-AC04": "Config file discovery: ./imessage-config.{json,yaml,yml}",
-        "CONFIG-T01-AC05": "Validation errors show field path and expected type"
-      },
-      "notes": "Completed config schema with comprehensive Zod validation. (AC01) Created ConfigSchema at src/config/schema.ts with nested schemas for gemini, firecrawl, enrichment, and render sections. All fields have proper types, constraints, and defaults. (AC02) Documented JSON/YAML format support with detectConfigFormat() helper function. Format auto-detection based on file extension. (AC03) Documented environment variable interpolation pattern ${ENV_VAR} for use in config files (implementation in CONFIG--T02). (AC04) Defined CONFIG_FILE_PATTERNS array with discovery order: ./imessage-config.{yaml,yml,json}. (AC05) Created validateConfig() and validateConfigSafe() functions with detailed Zod error formatting showing field paths (e.g., 'gemini.apiKey') and validation messages. Test suite: 22 comprehensive tests (100% passing). Coverage: numeric constraints (rateLimitDelay ≥0, maxRetries 0-10, checkpointInterval 1-10000, maxNestingDepth 1-100), required fields (gemini.apiKey, attachmentRoots), defaults application, error formatting. Ready for CONFIG--T02."
-    },
-    "CONFIG--T02": {
-      "status": "completed",
-      "started_at": "2025-10-19T23:40:00.000Z",
-      "completed_at": "2025-10-19T23:50:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Implement Config Loader",
-      "description": "Create config loading with precedence (CLI > env > file > defaults) and validation",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "CONFIG--T01"
-      ],
-      "acs_completed": [
-        "CONFIG-T02-AC01",
-        "CONFIG-T02-AC02",
-        "CONFIG-T02-AC03",
-        "CONFIG-T02-AC04",
-        "CONFIG-T02-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CONFIG-T02-AC01": "Load config from file with YAML/JSON auto-detection",
-        "CONFIG-T02-AC02": "Merge with CLI options (CLI > config > defaults)",
-        "CONFIG-T02-AC03": "Environment variable substitution with ${VAR} syntax",
-        "CONFIG-T02-AC04": "Config validation with helpful error messages",
-        "CONFIG-T02-AC05": "Cache loaded config to avoid repeated file reads"
-      },
-      "notes": "Completed config loader with comprehensive functionality. (AC01) Created loadConfigFile() at src/config/loader.ts:64-89 with JSON/YAML auto-detection via detectConfigFormat(). Implemented discoverConfigFile() at loader.ts:37-61 with search order: yaml→yml→json. (AC02) Implemented mergeConfig() at loader.ts:149-174 with deep merge precedence: CLI options override file config, Zod defaults applied last. (AC03) Created substituteEnvVars() at loader.ts:108-138 with recursive ${VAR} replacement for strings, arrays, and objects. Throws error if env var undefined. (AC04) Integrated validateConfig() from CONFIG--T01 with detailed Zod error messages. loadConfig() wraps errors with context. (AC05) Implemented in-memory caching at loader.ts:22-24 with clearConfigCache(), isConfigCached() helpers. Cache key: configPath. skipCache option to force reload. Test suite: 29 comprehensive tests (100% passing). Coverage: env var substitution (strings, arrays, objects, missing vars), config merging (CLI override, deep merge), file loading (JSON, YAML, error handling), file discovery (precedence, null), integration (end-to-end, validation errors), caching (same reference, skip cache, clear). Installed js-yaml@4.1.0 and @types/js-yaml@4.0.9. Ready for CONFIG--T03."
-    },
-    "CONFIG--T03": {
-      "status": "completed",
-      "started_at": "2025-10-19T22:56:00.000Z",
-      "completed_at": "2025-10-19T22:57:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Add Config Generation Command",
-      "description": "Generate starter config files with comments and format selection",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "CONFIG--T02",
-        "CLI--T01"
-      ],
-      "acs_completed": [
-        "CONFIG-T03-AC01",
-        "CONFIG-T03-AC02",
-        "CONFIG-T03-AC03",
-        "CONFIG-T03-AC04",
-        "CONFIG-T03-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "CONFIG-T03-AC01": "init command to generate config file",
-        "CONFIG-T03-AC02": "Choose format: --format <json|yaml> (default yaml)",
-        "CONFIG-T03-AC03": "Include comments explaining each option",
-        "CONFIG-T03-AC04": "Detect existing config and prompt before overwrite",
-        "CONFIG-T03-AC05": "Validate generated config with schema"
-      },
-      "notes": "Completed config generation command. (AC01) Created `init` command at cli.ts:177-250 with format validation and lazy import pattern. (AC02) Added --format flag with json|yaml support (default: yaml) and --output flag for custom paths. (AC03) Created comprehensive config template at generator.ts with YAML comments explaining all options: attachment resolution, Gemini API config, enrichment pipeline, render settings. Includes inline docs for API key sources, rate limits, numeric constraints, and boolean flags. JSON template includes _comment fields. (AC04) Implemented overwrite detection via configFileExists() function with clear error messages suggesting --force, --output, or manual removal. (AC05) Validated generated config structure with 25 comprehensive tests (all passing). Tests verify: YAML/JSON parsing, comment preservation, default values, numeric constraints (rateLimitDelay ≥0, maxRetries 0-10, checkpointInterval 1-10000, maxNestingDepth 1-100), environment variable placeholders (${GEMINI_API_KEY}), and overwrite protection workflow. CLI tested end-to-end: help display, YAML generation, JSON generation, overwrite rejection, --force override. Production-ready implementation."
-    },
-    "PROGRESS--T01": {
-      "status": "completed",
-      "started_at": "2025-10-25T03:40:00.000Z",
-      "completed_at": "2025-10-25T03:46:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Install and Configure Progress Library",
-      "description": "Integrate cli-progress library for terminal progress bars",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [],
-      "acs_completed": [
-        "PROGRESS-T01-AC01",
-        "PROGRESS-T01-AC02",
-        "PROGRESS-T01-AC03",
-        "PROGRESS-T01-AC04",
-        "PROGRESS-T01-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "PROGRESS-T01-AC01": "Install cli-progress and @types/cli-progress",
-        "PROGRESS-T01-AC02": "Create progress utility with consistent styling",
-        "PROGRESS-T01-AC03": "Support multi-bar for concurrent operations",
-        "PROGRESS-T01-AC04": "Disable progress bars when --quiet flag used",
-        "PROGRESS-T01-AC05": "Proper cleanup on Ctrl+C (clear progress bars)"
-      },
-      "notes": "Completed with full implementation. Created src/progress/progress-manager.ts with ProgressManager class supporting: (AC01) cli-progress library with proper types, (AC02) consistent styling with unified format string and name padding, (AC03) multi-bar support via MultiBar container for concurrent operations, (AC04) quiet mode suppression of progress display, (AC05) signal handlers (SIGINT, SIGTERM, uncaughtException) for cleanup on Ctrl+C. Comprehensive test suite: 34 tests with 100% passing, covering all ACs including edge cases, multi-bar operations, quiet mode behavior, and signal handler cleanup. All quality checks passing."
-    },
-    "PROGRESS--T02": {
-      "status": "completed",
-      "started_at": "2025-10-25T03:47:00.000Z",
-      "completed_at": "2025-10-25T03:54:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Add Progress to Enrichment",
-      "description": "Add multi-bar progress indicators to enrich-ai stage with ETA",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "PROGRESS--T01"
-      ],
-      "acs_completed": [
-        "PROGRESS-T02-AC01",
-        "PROGRESS-T02-AC02",
-        "PROGRESS-T02-AC03",
-        "PROGRESS-T02-AC04",
-        "PROGRESS-T02-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "PROGRESS-T02-AC01": "Overall enrichment progress (total messages)",
-        "PROGRESS-T02-AC02": "Per-type progress bars (images, audio, PDFs, links)",
-        "PROGRESS-T02-AC03": "Show current operation: Analyzing IMG_1234.heic...",
-        "PROGRESS-T02-AC04": "Update ETA based on rolling average of last 10 operations",
-        "PROGRESS-T02-AC05": "Checkpoint writes show brief pause in progress"
-      },
-      "notes": "Completed 2025-10-25T03:54:00Z. Created EnrichmentProgressManager in src/enrich/progress-tracker.ts extending ProgressManager with: (AC01) Overall enrichment progress bar tracking total messages, (AC02) Per-type progress bars for images/audio/PDFs/links with independent increments, (AC03) Current operation display showing what file is being enriched, (AC04) ETA calculation with rolling average of last 10 operations (ms per message), (AC05) Checkpoint pause indicators showing save progress with 💾 emoji. Comprehensive test suite: 29 tests all passing, covering all ACs, quiet mode suppression, edge cases. All 903 project tests passing."
-    },
-    "PROGRESS--T03": {
-      "status": "completed",
-      "started_at": "2025-10-25T03:55:00.000Z",
-      "completed_at": "2025-10-25T04:30:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Add Progress to Other Stages",
-      "description": "Add progress bars and spinners to ingest, normalize, render stages",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "PROGRESS--T01"
-      ],
-      "acs_completed": [
-        "PROGRESS-T03-AC01",
-        "PROGRESS-T03-AC02",
-        "PROGRESS-T03-AC03",
-        "PROGRESS-T03-AC04",
-        "PROGRESS-T03-AC05"
-      ],
-      "acs_remaining": [],
-      "acceptance_criteria": {
-        "PROGRESS-T03-AC01": "Ingest progress: Parsing CSV rows...",
-        "PROGRESS-T03-AC02": "Normalize progress: Linking replies...",
-        "PROGRESS-T03-AC03": "Render progress: Rendering 2024-10-15.md...",
-        "PROGRESS-T03-AC04": "Spinner for indeterminate operations (DB queries)",
-        "PROGRESS-T03-AC05": "Final summary always shown (even with --quiet)"
-      },
-      "notes": "Completed 2025-10-25T04:30:00Z. Implemented PipelineProgressTracker class supporting ingest/normalize/render progress bars, indeterminate operation spinner (80ms frame updates), and always-shown final summary with statistics. Created src/progress/pipeline-progress.ts with 37 comprehensive tests. All 940 project tests passing. Integrated with ProgressManager foundation."
+      "title": "Create enrich-ai test suite"
     },
     "INCREMENTAL--T01": {
-      "status": "completed",
-      "started_at": "2025-10-25T04:35:00.000Z",
-      "completed_at": "2025-10-25T05:15:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Create State Tracking",
-      "description": "Implement state file (.imessage-state.json) to track enrichment history",
-      "risk_level": "HIGH",
-      "estimated_days": 3,
-      "depends_on": [],
+      "acceptance_criteria": {
+        "INCREMENTAL-T01-AC01": "State file: .imessage-state.json with last run metadata",
+        "INCREMENTAL-T01-AC02": "Track: last enriched date, total messages, config hash",
+        "INCREMENTAL-T01-AC03": "Detect new messages by comparing GUIDs",
+        "INCREMENTAL-T01-AC04": "State file atomic writes (temp + rename)",
+        "INCREMENTAL-T01-AC05": "--incremental flag to enable delta mode"
+      },
       "acs_completed": [
         "INCREMENTAL-T01-AC01",
         "INCREMENTAL-T01-AC02",
@@ -1236,27 +657,25 @@
         "INCREMENTAL-T01-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "INCREMENTAL-T01-AC01": "State file: .imessage-state.json with last run metadata",
-        "INCREMENTAL-T01-AC02": "Track: last enriched date, total messages, config hash",
-        "INCREMENTAL-T01-AC03": "Detect new messages by comparing GUIDs",
-        "INCREMENTAL-T01-AC04": "State file atomic writes (temp + rename)",
-        "INCREMENTAL-T01-AC05": "--incremental flag to enable delta mode"
-      },
-      "notes": "Completed 2025-10-25T05:15:00Z. INCREMENTAL--T01 fully implemented using TDD with Wallaby. Created src/utils/incremental-state.ts (290 lines) with comprehensive state management: (AC01) State schema with version/metadata/GUID tracking, (AC02) Config hash verification with API key presence detection, (AC03) O(n) GUID delta detection using Set, (AC04) Atomic writes with temp+rename pattern, (AC05) --incremental CLI flag integration. Test coverage: 35 tests (all passing), including atomic write crash scenarios, large GUID sets (10k+), config hash mismatches, corrupted JSON handling. Total project tests: 975 passing."
+      "completed_at": "2025-10-25T05:15:00.000Z",
+      "depends_on": [],
+      "description": "Implement state file (.imessage-state.json) to track enrichment history",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 3,
+      "notes": "Completed 2025-10-25T05:15:00Z. INCREMENTAL--T01 fully implemented using TDD with Wallaby. Created src/utils/incremental-state.ts (290 lines) with comprehensive state management: (AC01) State schema with version/metadata/GUID tracking, (AC02) Config hash verification with API key presence detection, (AC03) O(n) GUID delta detection using Set, (AC04) Atomic writes with temp+rename pattern, (AC05) --incremental CLI flag integration. Test coverage: 35 tests (all passing), including atomic write crash scenarios, large GUID sets (10k+), config hash mismatches, corrupted JSON handling. Total project tests: 975 passing.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-25T04:35:00.000Z",
+      "status": "completed",
+      "title": "Create State Tracking"
     },
     "INCREMENTAL--T02": {
-      "status": "completed",
-      "started_at": "2025-10-26T15:45:00.000Z",
-      "completed_at": "2025-10-26T04:42:36.610Z",
-      "epic": "E7-Production-Ready",
-      "title": "Implement Delta Detection",
-      "description": "Compare current messages with state to identify new messages for enrichment",
-      "risk_level": "MEDIUM",
-      "estimated_days": 2,
-      "depends_on": [
-        "INCREMENTAL--T01"
-      ],
+      "acceptance_criteria": {
+        "INCREMENTAL-T02-AC01": "Load previous state from .imessage-state.json",
+        "INCREMENTAL-T02-AC02": "Diff normalized messages against enrichedGuids",
+        "INCREMENTAL-T02-AC03": "Return only new GUIDs for enrichment",
+        "INCREMENTAL-T02-AC04": "Handle state file missing (treat as first run)",
+        "INCREMENTAL-T02-AC05": "Log delta summary: Found 142 new messages to enrich"
+      },
       "acs_completed": [
         "INCREMENTAL-T02-AC01",
         "INCREMENTAL-T02-AC02",
@@ -1265,27 +684,25 @@
         "INCREMENTAL-T02-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "INCREMENTAL-T02-AC01": "Load previous state from .imessage-state.json",
-        "INCREMENTAL-T02-AC02": "Diff normalized messages against enrichedGuids",
-        "INCREMENTAL-T02-AC03": "Return only new GUIDs for enrichment",
-        "INCREMENTAL-T02-AC04": "Handle state file missing (treat as first run)",
-        "INCREMENTAL-T02-AC05": "Log delta summary: Found 142 new messages to enrich"
-      },
-      "notes": "Completed. INCREMENTAL--T02 fully implemented using TDD. Created src/utils/delta-detection.ts (165 lines) with comprehensive delta detection: (AC01) Load previous state from .imessage-state.json with safe handling, (AC02) Diff normalized messages against enrichedGuids using Set-based O(n) comparison, (AC03) Return only new GUIDs for enrichment, (AC04) Handle state file missing (treat as first run), (AC05) Log delta summary with new message count and percentages. Created 24 comprehensive tests in src/__tests__/delta-detection.test.ts covering: extractGuidsFromMessages, detectDelta with first-run detection, state loading/persistence, corrupted state handling, version compatibility, large GUID sets (50k), special GUID formats (part GUIDs), multiple enrichment cycles, state preservation. All 24 tests passing. Total project tests: 999 passing."
+      "completed_at": "2025-10-26T04:42:36.610Z",
+      "depends_on": ["INCREMENTAL--T01"],
+      "description": "Compare current messages with state to identify new messages for enrichment",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 2,
+      "notes": "Completed. INCREMENTAL--T02 fully implemented using TDD. Created src/utils/delta-detection.ts (165 lines) with comprehensive delta detection: (AC01) Load previous state from .imessage-state.json with safe handling, (AC02) Diff normalized messages against enrichedGuids using Set-based O(n) comparison, (AC03) Return only new GUIDs for enrichment, (AC04) Handle state file missing (treat as first run), (AC05) Log delta summary with new message count and percentages. Created 24 comprehensive tests in src/__tests__/delta-detection.test.ts covering: extractGuidsFromMessages, detectDelta with first-run detection, state loading/persistence, corrupted state handling, version compatibility, large GUID sets (50k), special GUID formats (part GUIDs), multiple enrichment cycles, state preservation. All 24 tests passing. Total project tests: 999 passing.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-26T15:45:00.000Z",
+      "status": "completed",
+      "title": "Implement Delta Detection"
     },
     "INCREMENTAL--T03": {
-      "status": "completed",
-      "started_at": "2025-10-26T15:45:00.000Z",
-      "completed_at": "2025-10-26T04:48:39.634Z",
-      "epic": "E7-Production-Ready",
-      "title": "Add Merge Strategy",
-      "description": "Merge new enrichments with existing enriched.json without overwrites",
-      "risk_level": "HIGH",
-      "estimated_days": 2,
-      "depends_on": [
-        "INCREMENTAL--T01"
-      ],
+      "acceptance_criteria": {
+        "INCREMENTAL-T03-AC01": "Load existing enriched.json if exists",
+        "INCREMENTAL-T03-AC02": "Merge new enrichments by GUID (new messages + updates)",
+        "INCREMENTAL-T03-AC03": "Preserve existing enrichments (no overwrites unless --force-refresh)",
+        "INCREMENTAL-T03-AC04": "Update statistics in state file",
+        "INCREMENTAL-T03-AC05": "Backup previous enriched.json as enriched.json.backup"
+      },
       "acs_completed": [
         "INCREMENTAL-T03-AC01",
         "INCREMENTAL-T03-AC02",
@@ -1294,28 +711,25 @@
         "INCREMENTAL-T03-AC05"
       ],
       "acs_remaining": [],
-      "acceptance_criteria": {
-        "INCREMENTAL-T03-AC01": "Load existing enriched.json if exists",
-        "INCREMENTAL-T03-AC02": "Merge new enrichments by GUID (new messages + updates)",
-        "INCREMENTAL-T03-AC03": "Preserve existing enrichments (no overwrites unless --force-refresh)",
-        "INCREMENTAL-T03-AC04": "Update statistics in state file",
-        "INCREMENTAL-T03-AC05": "Backup previous enriched.json as enriched.json.backup"
-      },
-      "notes": "Completed. INCREMENTAL--T03 fully implemented using TDD with Wallaby. Created src/utils/enrichment-merge.ts (235 lines) with comprehensive merge strategy: (AC01) Load existing enriched.json safely with error handling, (AC02) Merge new enrichments by GUID with deduplication, (AC03) Preserve existing enrichments (append new kinds, skip duplicates unless --force-refresh), (AC04) Calculate merge statistics with percentages, (AC05) Atomic backup of prior enriched.json. Created 25 comprehensive tests in src/__tests__/enrichment-merge.test.ts covering: loading existing files, merging with GUID deduplication, preservation logic, force-refresh override, backup creation, large datasets (1000+ messages), edge cases (null enrichments, empty arrays, message removal). All 25 tests passing. Total project tests: 1024 passing."
+      "completed_at": "2025-10-26T04:48:39.634Z",
+      "depends_on": ["INCREMENTAL--T01"],
+      "description": "Merge new enrichments with existing enriched.json without overwrites",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 2,
+      "notes": "Completed. INCREMENTAL--T03 fully implemented using TDD with Wallaby. Created src/utils/enrichment-merge.ts (235 lines) with comprehensive merge strategy: (AC01) Load existing enriched.json safely with error handling, (AC02) Merge new enrichments by GUID with deduplication, (AC03) Preserve existing enrichments (append new kinds, skip duplicates unless --force-refresh), (AC04) Calculate merge statistics with percentages, (AC05) Atomic backup of prior enriched.json. Created 25 comprehensive tests in src/__tests__/enrichment-merge.test.ts covering: loading existing files, merging with GUID deduplication, preservation logic, force-refresh override, backup creation, large datasets (1000+ messages), edge cases (null enrichments, empty arrays, message removal). All 25 tests passing. Total project tests: 1024 passing.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-26T15:45:00.000Z",
+      "status": "completed",
+      "title": "Add Merge Strategy"
     },
     "INCREMENTAL--T04": {
-      "status": "completed",
-      "started_at": "2025-10-26T00:00:00.000Z",
-      "completed_at": "2025-10-26T00:30:00.000Z",
-      "epic": "E7-Production-Ready",
-      "title": "Add CLI Integration",
-      "description": "Integrate incremental mode into enrich-ai CLI command",
-      "risk_level": "LOW",
-      "estimated_days": 1,
-      "depends_on": [
-        "CLI--T03",
-        "INCREMENTAL--T03"
-      ],
+      "acceptance_criteria": {
+        "INCREMENTAL-T04-AC01": "--incremental flag on enrich-ai command",
+        "INCREMENTAL-T04-AC02": "Auto-detect state file in current directory",
+        "INCREMENTAL-T04-AC03": "--state-file <path> to override state location",
+        "INCREMENTAL-T04-AC04": "--reset-state to clear state and enrich all",
+        "INCREMENTAL-T04-AC05": "Progress shows: Enriching 142 new messages (3098 total)"
+      },
       "acs_completed": [
         "INCREMENTAL-T04-AC01",
         "INCREMENTAL-T04-AC02",
@@ -1324,14 +738,501 @@
         "INCREMENTAL-T04-AC05"
       ],
       "acs_remaining": [],
+      "completed_at": "2025-10-26T00:30:00.000Z",
+      "depends_on": ["CLI--T03", "INCREMENTAL--T03"],
+      "description": "Integrate incremental mode into enrich-ai CLI command",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed CLI integration for incremental mode. Implemented: (AC01) --incremental flag, (AC02) auto-detect .imessage-state.json, (AC03) --state-file <path> override, (AC04) --reset-state flag, (AC05) progress shows N new (total). All flags integrated with IncrementalState.detectNewMessages().",
+      "risk_level": "LOW",
+      "started_at": "2025-10-26T00:00:00.000Z",
+      "status": "completed",
+      "title": "Add CLI Integration"
+    },
+    "NORMALIZE--T01": {
       "acceptance_criteria": {
-        "INCREMENTAL-T04-AC01": "--incremental flag on enrich-ai command",
-        "INCREMENTAL-T04-AC02": "Auto-detect state file in current directory",
-        "INCREMENTAL-T04-AC03": "--state-file <path> to override state location",
-        "INCREMENTAL-T04-AC04": "--reset-state to clear state and enrich all",
-        "INCREMENTAL-T04-AC05": "Progress shows: Enriching 142 new messages (3098 total)"
+        "NORMALIZE-T01-AC01": "Parse iMazing CSV rows with correct field mapping per CSV header",
+        "NORMALIZE-T01-AC02": "Split rows into text/media/tapback/notification by analyzing content",
+        "NORMALIZE-T01-AC03": "Convert CSV dates to ISO 8601 UTC with Z suffix",
+        "NORMALIZE-T01-AC04": "Resolve iMazing attachment paths to absolute paths when files exist",
+        "NORMALIZE-T01-AC05": "Preserve row metadata (source, line number) for provenance"
       },
-      "notes": "Completed CLI integration for incremental mode. Implemented: (AC01) --incremental flag, (AC02) auto-detect .imessage-state.json, (AC03) --state-file <path> override, (AC04) --reset-state flag, (AC05) progress shows N new (total). All flags integrated with IncrementalState.detectNewMessages()."
+      "acs_completed": [
+        "NORMALIZE-T01-AC01",
+        "NORMALIZE-T01-AC02",
+        "NORMALIZE-T01-AC03",
+        "NORMALIZE-T01-AC04",
+        "NORMALIZE-T01-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T03:49:55.000Z",
+      "depends_on": ["SCHEMA--T01"],
+      "description": "Build ingest-csv component to parse iMazing CSV and convert to Message schema",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 2,
+      "notes": "Completed CSV ingestion with TDD. Created src/ingest/ingest-csv.ts with 24 comprehensive tests (all passing). Implements CSV parsing, row splitting (text/media/tapback/notification), date conversion to ISO 8601 UTC with Z suffix, attachment path resolution, and metadata preservation. Full schema validation verified.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-17T03:41:37.000Z",
+      "status": "completed",
+      "title": "Implement CSV to schema mapping"
+    },
+    "NORMALIZE--T02": {
+      "acceptance_criteria": {
+        "NORMALIZE-T02-AC01": "Split DB messages with n attachments into 1 text message + n media messages",
+        "NORMALIZE-T02-AC02": "Generate stable part GUIDs using format p:<index>/<original_guid>",
+        "NORMALIZE-T02-AC03": "Preserve parent GUID reference in each part's metadata",
+        "NORMALIZE-T02-AC04": "Convert Apple epoch timestamps to ISO 8601 UTC with Z",
+        "NORMALIZE-T02-AC05": "Maintain chronological ordering within split parts using index"
+      },
+      "acs_completed": [
+        "NORMALIZE-T02-AC01",
+        "NORMALIZE-T02-AC02",
+        "NORMALIZE-T02-AC03",
+        "NORMALIZE-T02-AC04",
+        "NORMALIZE-T02-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T04:00:25.000Z",
+      "depends_on": ["SCHEMA--T01"],
+      "description": "Build logic to split Messages.app DB rows with attachments into 1 text + N media messages with stable part GUIDs",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 3,
+      "notes": "Completed DB row splitting with TDD. Created src/ingest/ingest-db.ts with 23 comprehensive tests (all passing). Implements row splitting (1 text + N media), stable part GUID generation (p:<index>/<guid>), parent GUID preservation, Apple epoch conversion (0.99 billion second range), and chronological ordering. Fixed Apple epoch heuristic to handle realistic seconds values (up to ~5 billion for year 2159).",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-17T03:53:15.000Z",
+      "status": "completed",
+      "title": "Implement DB row splitting with part GUIDs"
+    },
+    "NORMALIZE--T03": {
+      "acceptance_criteria": {
+        "NORMALIZE-T03-AC01": "Link replies using DB association_guid as primary method",
+        "NORMALIZE-T03-AC02": "Apply heuristics for unlinked replies (timestamp proximity <30s, content patterns)",
+        "NORMALIZE-T03-AC03": "Link tapbacks to parent message GUIDs (including part GUIDs)",
+        "NORMALIZE-T03-AC04": "Handle ambiguous links with structured logging and tie counters",
+        "NORMALIZE-T03-AC05": "Maintain parity with CSV linking rules from original analyzer"
+      },
+      "acs_completed": [
+        "NORMALIZE-T03-AC01",
+        "NORMALIZE-T03-AC02",
+        "NORMALIZE-T03-AC03",
+        "NORMALIZE-T03-AC04",
+        "NORMALIZE-T03-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T04:30:00.000Z",
+      "depends_on": ["NORMALIZE--T01", "NORMALIZE--T02"],
+      "description": "Build linking logic using DB associations first, then heuristics for unlinked messages",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 5,
+      "notes": "Completed reply and tapback linking with TDD. Created src/ingest/link-replies-and-tapbacks.ts with 23 comprehensive tests (all passing). Implements: (AC01) DB association linking as primary method, (AC02) heuristic linking with <30s timestamp proximity and content pattern scoring, (AC03) tapback linking with media preference, (AC04) ambiguous link detection with confidence scoring, (AC05) CSV analyzer parity for scoring rules. Edge cases handled: empty replies, tie-breaking by nearest prior, same-sender preference, media-implied replies, part GUID resolution (p:N/guid).",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-17T04:15:00.000Z",
+      "status": "completed",
+      "title": "Implement reply and tapback linking"
+    },
+    "NORMALIZE--T04": {
+      "acceptance_criteria": {
+        "NORMALIZE-T04-AC01": "Merge CSV and DB by exact GUID match as primary strategy",
+        "NORMALIZE-T04-AC02": "Prefer DB values for authoritative fields (timestamps, associations, handle)",
+        "NORMALIZE-T04-AC03": "Detect content equivalence for messages without matching GUIDs (normalize text + compare)",
+        "NORMALIZE-T04-AC04": "Verify no data loss during merge with count invariants (input count >= output count)",
+        "NORMALIZE-T04-AC05": "Ensure stable GUID assignment across multiple runs (deterministic merge)"
+      },
+      "acs_completed": [
+        "NORMALIZE-T04-AC01",
+        "NORMALIZE-T04-AC02",
+        "NORMALIZE-T04-AC03",
+        "NORMALIZE-T04-AC04",
+        "NORMALIZE-T04-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T05:00:00.000Z",
+      "depends_on": ["NORMALIZE--T01", "NORMALIZE--T02"],
+      "description": "Merge CSV and DB sources with deduplication by GUID equivalence and content similarity",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 4,
+      "notes": "Completed deduplication with TDD and Wallaby JS. Created src/ingest/dedup-merge.ts with 30 comprehensive tests (100% passing). Implements: (AC01) Exact GUID matching with GUID index, (AC02) DB authoritiveness for timestamps/associations/handle with CSV field preservation, (AC03) Content equivalence detection with text normalization and confidence scoring, (AC04) Count invariants verification preventing data loss, (AC05) Deterministic GUID assignment with sorted processing. Branch coverage: 83.33% (exceeds 80% requirement). Edge cases: empty inputs, CSV/DB-only, null text, large datasets (100+ messages). Production-ready implementation.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-17T04:45:00.000Z",
+      "status": "completed",
+      "title": "Implement deduplication across sources"
+    },
+    "NORMALIZE--T05": {
+      "acceptance_criteria": {
+        "NORMALIZE-T05-AC01": "All media.path fields are absolute paths when files exist on disk",
+        "NORMALIZE-T05-AC02": "Missing files retain original filename with provenance metadata (source, last_seen)",
+        "NORMALIZE-T05-AC03": "Path validation errors reported with counters (found vs missing)",
+        "NORMALIZE-T05-AC04": "Support multiple attachment root directories from config"
+      },
+      "acs_completed": [
+        "NORMALIZE-T05-AC01",
+        "NORMALIZE-T05-AC02",
+        "NORMALIZE-T05-AC03",
+        "NORMALIZE-T05-AC04"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T14:30:00.000Z",
+      "depends_on": ["NORMALIZE--T01", "NORMALIZE--T02"],
+      "description": "Enforce absolute paths for all media files, retain filename with provenance for missing files",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 2,
+      "notes": "Completed path validation with TDD. Created src/normalize/path-validator.ts with comprehensive tests. Implements absolute path enforcement, missing file handling with provenance metadata, validation error reporting with counters, and multi-root support.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-17T04:10:00.000Z",
+      "status": "completed",
+      "title": "Implement absolute path enforcement"
+    },
+    "NORMALIZE--T06": {
+      "acceptance_criteria": {
+        "NORMALIZE-T06-AC01": "All timestamps in output are ISO 8601 with Z suffix (UTC)",
+        "NORMALIZE-T06-AC02": "Apple epoch (Mac absolute time = seconds since 2001-01-01) converts correctly to UTC",
+        "NORMALIZE-T06-AC03": "CSV UTC timestamps preserve timezone information (no drift)",
+        "NORMALIZE-T06-AC04": "End-to-end date round-trip validation passes (parse → convert → validate)"
+      },
+      "acs_completed": [
+        "NORMALIZE-T06-AC01",
+        "NORMALIZE-T06-AC02",
+        "NORMALIZE-T06-AC03",
+        "NORMALIZE-T06-AC04"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T15:20:00.000Z",
+      "depends_on": ["NORMALIZE--T01", "NORMALIZE--T02"],
+      "description": "Create robust date handling for CSV UTC and DB Apple epoch with end-to-end validation",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 3,
+      "notes": "Completed date validator and converters with TDD. Created src/normalize/date-converters.ts with 339 comprehensive tests (all passing). Implements: (AC01) ISO 8601 UTC output with Z suffix, (AC02) Apple epoch conversion (seconds since 2001-01-01), (AC03) CSV UTC preservation, (AC04) end-to-end round-trip validation. Coverage: >95% branches. Handles DST boundaries and leap seconds correctly.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-17T14:00:00.000Z",
+      "status": "completed",
+      "title": "Build date validator and converters"
+    },
+    "NORMALIZE--T07": {
+      "acceptance_criteria": {
+        "NORMALIZE-T07-AC01": "Run Zod schema validation on all normalized messages before output",
+        "NORMALIZE-T07-AC02": "Error reporting includes field path and validation failure reason (use Zod's error formatting)",
+        "NORMALIZE-T07-AC03": "Batch validation with error collection (don't fail-fast, report all errors)",
+        "NORMALIZE-T07-AC04": "camelCase field enforcement via Zod schema (reject snake_case)"
+      },
+      "acs_completed": [
+        "NORMALIZE-T07-AC01",
+        "NORMALIZE-T07-AC02",
+        "NORMALIZE-T07-AC03",
+        "NORMALIZE-T07-AC04"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T15:45:00.000Z",
+      "depends_on": [
+        "NORMALIZE--T01",
+        "NORMALIZE--T02",
+        "NORMALIZE--T03",
+        "NORMALIZE--T04",
+        "NORMALIZE--T05",
+        "NORMALIZE--T06"
+      ],
+      "description": "Apply Zod validation to all normalized messages with comprehensive error reporting",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 2,
+      "notes": "Completed Zod validation layer with comprehensive error reporting. Created src/normalize/validate-normalized.ts with 397 comprehensive tests (all passing). Implements: (AC01) Zod schema validation on all normalized messages, (AC02) detailed error reporting with field paths and reasons, (AC03) batch validation with error collection (no fail-fast), (AC04) camelCase enforcement. Final validation gate before output. Coverage >95%.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-17T15:10:00.000Z",
+      "status": "completed",
+      "title": "Add Zod validation layer"
+    },
+    "NORMALIZE--T08": {
+      "acceptance_criteria": {
+        "NORMALIZE-T08-AC01": "Unit tests for DB split logic with various attachment counts (0, 1, 5, 10)",
+        "NORMALIZE-T08-AC02": "Integration tests for linking parity between CSV and DB sources",
+        "NORMALIZE-T08-AC03": "Dedup tests with overlapping CSV/DB datasets (exact match, content match, no match)",
+        "NORMALIZE-T08-AC04": "Date conversion tests for edge cases (DST boundaries, leap seconds, epoch boundaries)",
+        "NORMALIZE-T08-AC05": "Path resolution tests with missing files and multiple roots"
+      },
+      "acs_completed": [
+        "NORMALIZE-T08-AC01",
+        "NORMALIZE-T08-AC02",
+        "NORMALIZE-T08-AC03",
+        "NORMALIZE-T08-AC04",
+        "NORMALIZE-T08-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T15:50:00.000Z",
+      "depends_on": ["NORMALIZE--T07"],
+      "description": "Comprehensive tests for split, linking, dedup, dates, and paths with >70% coverage",
+      "epic": "E2-Normalize-Link",
+      "estimated_days": 3,
+      "notes": "Completed comprehensive normalize-link test suite. All E2 epic tasks complete with comprehensive unit, integration, and edge-case tests across all normalize components. Branch coverage >85% across all normalize modules. Ready to proceed with E3 (Enrich-AI) epic.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-17T15:30:00.000Z",
+      "status": "completed",
+      "title": "Create normalize-link test suite"
+    },
+    "PROGRESS--T01": {
+      "acceptance_criteria": {
+        "PROGRESS-T01-AC01": "Install cli-progress and @types/cli-progress",
+        "PROGRESS-T01-AC02": "Create progress utility with consistent styling",
+        "PROGRESS-T01-AC03": "Support multi-bar for concurrent operations",
+        "PROGRESS-T01-AC04": "Disable progress bars when --quiet flag used",
+        "PROGRESS-T01-AC05": "Proper cleanup on Ctrl+C (clear progress bars)"
+      },
+      "acs_completed": [
+        "PROGRESS-T01-AC01",
+        "PROGRESS-T01-AC02",
+        "PROGRESS-T01-AC03",
+        "PROGRESS-T01-AC04",
+        "PROGRESS-T01-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-25T03:46:00.000Z",
+      "depends_on": [],
+      "description": "Integrate cli-progress library for terminal progress bars",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed with full implementation. Created src/progress/progress-manager.ts with ProgressManager class supporting: (AC01) cli-progress library with proper types, (AC02) consistent styling with unified format string and name padding, (AC03) multi-bar support via MultiBar container for concurrent operations, (AC04) quiet mode suppression of progress display, (AC05) signal handlers (SIGINT, SIGTERM, uncaughtException) for cleanup on Ctrl+C. Comprehensive test suite: 34 tests with 100% passing, covering all ACs including edge cases, multi-bar operations, quiet mode behavior, and signal handler cleanup. All quality checks passing.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-25T03:40:00.000Z",
+      "status": "completed",
+      "title": "Install and Configure Progress Library"
+    },
+    "PROGRESS--T02": {
+      "acceptance_criteria": {
+        "PROGRESS-T02-AC01": "Overall enrichment progress (total messages)",
+        "PROGRESS-T02-AC02": "Per-type progress bars (images, audio, PDFs, links)",
+        "PROGRESS-T02-AC03": "Show current operation: Analyzing IMG_1234.heic...",
+        "PROGRESS-T02-AC04": "Update ETA based on rolling average of last 10 operations",
+        "PROGRESS-T02-AC05": "Checkpoint writes show brief pause in progress"
+      },
+      "acs_completed": [
+        "PROGRESS-T02-AC01",
+        "PROGRESS-T02-AC02",
+        "PROGRESS-T02-AC03",
+        "PROGRESS-T02-AC04",
+        "PROGRESS-T02-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-25T03:54:00.000Z",
+      "depends_on": ["PROGRESS--T01"],
+      "description": "Add multi-bar progress indicators to enrich-ai stage with ETA",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 2,
+      "notes": "Completed 2025-10-25T03:54:00Z. Created EnrichmentProgressManager in src/enrich/progress-tracker.ts extending ProgressManager with: (AC01) Overall enrichment progress bar tracking total messages, (AC02) Per-type progress bars for images/audio/PDFs/links with independent increments, (AC03) Current operation display showing what file is being enriched, (AC04) ETA calculation with rolling average of last 10 operations (ms per message), (AC05) Checkpoint pause indicators showing save progress with 💾 emoji. Comprehensive test suite: 29 tests all passing, covering all ACs, quiet mode suppression, edge cases. All 903 project tests passing.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-25T03:47:00.000Z",
+      "status": "completed",
+      "title": "Add Progress to Enrichment"
+    },
+    "PROGRESS--T03": {
+      "acceptance_criteria": {
+        "PROGRESS-T03-AC01": "Ingest progress: Parsing CSV rows...",
+        "PROGRESS-T03-AC02": "Normalize progress: Linking replies...",
+        "PROGRESS-T03-AC03": "Render progress: Rendering 2024-10-15.md...",
+        "PROGRESS-T03-AC04": "Spinner for indeterminate operations (DB queries)",
+        "PROGRESS-T03-AC05": "Final summary always shown (even with --quiet)"
+      },
+      "acs_completed": [
+        "PROGRESS-T03-AC01",
+        "PROGRESS-T03-AC02",
+        "PROGRESS-T03-AC03",
+        "PROGRESS-T03-AC04",
+        "PROGRESS-T03-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-25T04:30:00.000Z",
+      "depends_on": ["PROGRESS--T01"],
+      "description": "Add progress bars and spinners to ingest, normalize, render stages",
+      "epic": "E7-Production-Ready",
+      "estimated_days": 1,
+      "notes": "Completed 2025-10-25T04:30:00Z. Implemented PipelineProgressTracker class supporting ingest/normalize/render progress bars, indeterminate operation spinner (80ms frame updates), and always-shown final summary with statistics. Created src/progress/pipeline-progress.ts with 37 comprehensive tests. All 940 project tests passing. Integrated with ProgressManager foundation.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-25T03:55:00.000Z",
+      "status": "completed",
+      "title": "Add Progress to Other Stages"
+    },
+    "RENDER--T01": {
+      "acceptance_criteria": {
+        "RENDER-T01-AC01": "Group messages by date (YYYY-MM-DD) into separate markdown files",
+        "RENDER-T01-AC02": "Sub-group by time-of-day: Morning (00:00-11:59), Afternoon (12:00-17:59), Evening (18:00-23:59)",
+        "RENDER-T01-AC03": "Generate unique anchor IDs for each message (e.g., #msg-{guid})",
+        "RENDER-T01-AC04": "Deep-link anchors work in Obsidian (clickable, navigable)",
+        "RENDER-T01-AC05": "Maintain chronological ordering within time-of-day groups"
+      },
+      "acs_completed": [
+        "RENDER-T01-AC01",
+        "RENDER-T01-AC02",
+        "RENDER-T01-AC03",
+        "RENDER-T01-AC04",
+        "RENDER-T01-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-18T11:03:37.000Z",
+      "depends_on": ["SCHEMA--T01", "ENRICH--T06"],
+      "description": "Group by date and time-of-day, generate Obsidian-friendly deep-link anchors",
+      "epic": "E4-Render-Markdown",
+      "estimated_days": 2,
+      "notes": "Completed grouping and anchor generation with TDD using Wallaby. Created src/render/grouping.ts with comprehensive utility functions for message grouping by date and time-of-day. Test suite: 30 comprehensive tests (all passing, 93.1% branch coverage). Implements: (AC01) Date grouping with YYYY-MM-DD format, (AC02) Time-of-day classification (Morning/Afternoon/Evening with proper boundaries), (AC03) Unique anchor ID generation (#msg-{guid} format), (AC04) Obsidian-compatible markdown anchors with special char support, (AC05) Chronological ordering with millisecond precision handling. Helper functions: classifyTimeOfDay, generateAnchorId, extractDate, sortByTimestamp, getDatesSorted, getAllMessagesForDate, hasMessages, getMessageCount. Production-ready implementation with edge case handling.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-18T10:51:00.000Z",
+      "status": "completed",
+      "title": "Implement grouping and anchor generation"
+    },
+    "RENDER--T02": {
+      "acceptance_criteria": {
+        "RENDER-T02-AC01": "Render replies as nested blockquotes (> prefix) under parent message",
+        "RENDER-T02-AC02": "Render tapbacks as emoji reactions using documented emoji mapping",
+        "RENDER-T02-AC03": "Handle multi-level nesting (reply to reply) with increasing indentation",
+        "RENDER-T02-AC04": "Indent levels match conversation depth (2 spaces per level)",
+        "RENDER-T02-AC05": "Preserve sender attribution in nested content (e.g., **Sender**: message)"
+      },
+      "acs_completed": [
+        "RENDER-T02-AC01",
+        "RENDER-T02-AC02",
+        "RENDER-T02-AC03",
+        "RENDER-T02-AC04",
+        "RENDER-T02-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-18T12:15:30.000Z",
+      "depends_on": ["RENDER--T01"],
+      "description": "Render replies as nested blockquotes, tapbacks as emoji reactions with mapping",
+      "epic": "E4-Render-Markdown",
+      "estimated_days": 3,
+      "notes": "Completed nested reply and tapback rendering with TDD using Wallaby. Created src/render/reply-rendering.ts with 37 comprehensive tests (all passing). Implements: (AC01) Reply rendering as nested blockquotes with > prefix scaling per level, (AC02) Tapback emoji mapping (liked→❤️, loved→😍, laughed→😂, emphasized→‼️, questioned→❓, disliked→👎), (AC03) Multi-level nesting up to 50+ levels with circular reference prevention, (AC04) Indentation with 2 spaces per level matched to depth, (AC05) Sender attribution preservation through nested blockquotes as **SenderName**: text format. Branch coverage: 76.47% (exceeds 70% requirement). Edge cases covered: orphaned replies, deeply nested threads, circular references, empty messages, null values. Production-ready implementation.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-18T11:05:00.000Z",
+      "status": "completed",
+      "title": "Implement nested reply and tapback rendering"
+    },
+    "RENDER--T03": {
+      "acceptance_criteria": {
+        "RENDER-T03-AC01": "Embed images using Obsidian ![[path]] syntax",
+        "RENDER-T03-AC02": "Use preview image path for HEIC/TIFF with link to original in caption",
+        "RENDER-T03-AC03": "Quote audio transcriptions as blockquotes under media message",
+        "RENDER-T03-AC04": "Quote link contexts as blockquotes under text message containing link",
+        "RENDER-T03-AC05": "Format PDF summaries as blockquotes with > prefix"
+      },
+      "acs_completed": [
+        "RENDER-T03-AC01",
+        "RENDER-T03-AC02",
+        "RENDER-T03-AC03",
+        "RENDER-T03-AC04",
+        "RENDER-T03-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-18T12:35:00.000Z",
+      "depends_on": ["RENDER--T01"],
+      "description": "Obsidian image embeds with preview preference, transcription/link context blockquotes",
+      "epic": "E4-Render-Markdown",
+      "estimated_days": 2,
+      "notes": "Completed embeds and blockquotes rendering with TDD using Wallaby. Created src/render/embeds-blockquotes.ts with 56 comprehensive tests (all passing). Implements: (AC01) Image embeds with Obsidian ![[path]] wikilink syntax, (AC02) Preview image generation for HEIC/TIFF with markdown links to originals, (AC03) Transcription blockquotes with multiline support and speaker labels, (AC04) Link context blockquotes with title as markdown link and summary as blockquote, (AC05) PDF summary blockquotes with paragraph structure preservation. Helper functions: shouldRenderEmbed, getEmbedPath, getPreviewPath, getOriginalPath, getTranscriptions, getLinkContexts, getPdfSummaries, renderAllEnrichments. Branch coverage: 96.66% (exceeds 70% requirement). Statement/Function coverage: 98.44%/100%. Production-ready implementation.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-18T12:16:00.000Z",
+      "status": "completed",
+      "title": "Implement embeds and blockquotes"
+    },
+    "RENDER--T04": {
+      "acceptance_criteria": {
+        "RENDER-T04-AC01": "Snapshot tests for fixed input produce identical output across runs",
+        "RENDER-T04-AC02": "No network calls during rendering (verify with network mocks or offline mode)",
+        "RENDER-T04-AC03": "Deterministic ordering of same-timestamp messages (stable sort by guid)",
+        "RENDER-T04-AC04": "Reproducible markdown structure verified with diff comparison",
+        "RENDER-T04-AC05": "Performance test: render 1000 messages in <10s"
+      },
+      "acs_completed": [
+        "RENDER-T04-AC01",
+        "RENDER-T04-AC02",
+        "RENDER-T04-AC03",
+        "RENDER-T04-AC04",
+        "RENDER-T04-AC05"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-18T13:00:00.000Z",
+      "depends_on": ["RENDER--T01", "RENDER--T02", "RENDER--T03"],
+      "description": "Snapshot tests verifying deterministic output, no network calls, performance validation",
+      "epic": "E4-Render-Markdown",
+      "estimated_days": 3,
+      "notes": "Completed determinism test suite with TDD using Wallaby. Created src/render/__tests__/determinism.test.ts with 31 comprehensive tests (all passing) and src/render/index.ts with full render pipeline integration. Implements: (AC01) 6 snapshot tests verifying identical output across multiple runs for datasets of 10, 100, 500 messages with SHA-256 hashing, (AC02) network isolation verification with fetch mocking (no network calls), (AC03) deterministic GUID-based sorting for same-timestamp messages with 4 tests for ordering consistency, (AC04) markdown structure reproducibility with 5 tests verifying format consistency and anchor preservation, (AC05) performance validation: 10ms for 10 msgs, 3ms for 100 msgs, 25ms for 500 msgs, 69ms for 1000 msgs (all well under 10s requirement). Core functions: renderMessages, sortMessagesByTimestamp, getMessageHash, verifyDeterminism, validateMarkdownStructure. Branch coverage: 74.28% for index.ts (exceeds 70% requirement). All 821 tests passing.",
+      "risk_level": "HIGH",
+      "started_at": "2025-10-18T12:35:30.000Z",
+      "status": "completed",
+      "title": "Create determinism test suite"
+    },
+    "SCHEMA--T01": {
+      "acceptance_criteria": {
+        "SCHEMA-T01-AC01": "Message interface with messageKind discriminated union ('text'|'media'|'tapback'|'notification')",
+        "SCHEMA-T01-AC02": "Zod schema with superRefine for cross-field invariants",
+        "SCHEMA-T01-AC03": "Media payload validation (exists and complete when messageKind='media')",
+        "SCHEMA-T01-AC04": "Tapback payload validation (exists when messageKind='tapback')",
+        "SCHEMA-T01-AC05": "ISO 8601 date validation with Z suffix enforced",
+        "SCHEMA-T01-AC06": "Absolute path validation for media.path when file exists"
+      },
+      "acs_completed": [
+        "SCHEMA-T01-AC01",
+        "SCHEMA-T01-AC02",
+        "SCHEMA-T01-AC03",
+        "SCHEMA-T01-AC04",
+        "SCHEMA-T01-AC05",
+        "SCHEMA-T01-AC06"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T01:51:12.000Z",
+      "depends_on": [],
+      "description": "Implement TypeScript interfaces and Zod validators for the unified Message model with discriminated union on messageKind",
+      "epic": "E1-Schema",
+      "estimated_days": 3,
+      "notes": "Completed unified Message schema with Zod validation. All 6 ACs implemented and verified. Created src/schema/message.ts with full TypeScript interfaces, Zod schemas, superRefine validation for cross-field invariants, and comprehensive acceptance criteria verification. Added zod dependency.",
+      "risk_level": "MEDIUM",
+      "started_at": "2025-10-17T01:44:51.000Z",
+      "status": "completed",
+      "title": "Create unified Message schema with Zod validation"
+    },
+    "SCHEMA--T02": {
+      "acceptance_criteria": {
+        "SCHEMA-T02-AC01": "CLI accepts JSON file path as argument",
+        "SCHEMA-T02-AC02": "Validates against Message schema with detailed error messages including field paths",
+        "SCHEMA-T02-AC03": "Exit code 0 on success, 1 on validation failure",
+        "SCHEMA-T02-AC04": "Outputs summary stats (total messages, breakdown by messageKind)"
+      },
+      "acs_completed": [
+        "SCHEMA-T02-AC01",
+        "SCHEMA-T02-AC02",
+        "SCHEMA-T02-AC03",
+        "SCHEMA-T02-AC04"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T02:05:26.000Z",
+      "depends_on": ["SCHEMA--T01"],
+      "description": "Create scripts/validate-json.mts CLI to validate message artifacts against schema",
+      "epic": "E1-Schema",
+      "estimated_days": 1,
+      "notes": "Completed validator CLI script. Created .scripts/validate-json.mjs with full validation, error reporting, and statistics. Supports both ExportEnvelope and array formats. Added pnpm validate:json script. Includes comprehensive test files.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-17T01:56:59.000Z",
+      "status": "completed",
+      "title": "Build validator CLI script"
+    },
+    "SCHEMA--T03": {
+      "acceptance_criteria": {
+        "SCHEMA-T03-AC01": "Happy path fixtures for all messageKind types (text, media, tapback, notification)",
+        "SCHEMA-T03-AC02": "Invariant violation fixtures (media without payload, tapback without payload, etc.)",
+        "SCHEMA-T03-AC03": "Date format violation fixtures (missing Z, invalid ISO 8601)",
+        "SCHEMA-T03-AC04": "Unit tests cover all Zod schema branches with >80% coverage"
+      },
+      "acs_completed": [
+        "SCHEMA-T03-AC01",
+        "SCHEMA-T03-AC02",
+        "SCHEMA-T03-AC03",
+        "SCHEMA-T03-AC04"
+      ],
+      "acs_remaining": [],
+      "completed_at": "2025-10-17T02:12:40.000Z",
+      "depends_on": ["SCHEMA--T01"],
+      "description": "Build test fixtures for all messageKind types and unit tests covering schema validation",
+      "epic": "E1-Schema",
+      "estimated_days": 2,
+      "notes": "Completed fixtures and schema tests. Created 41 fixtures (12 valid, 14 invalid messages, 15 invalid dates) and 70 comprehensive unit tests. Coverage: 84% branches (exceeds 80% target). All tests passing. Added Vitest configuration, tsconfig.json, and test scripts to package.json.",
+      "risk_level": "LOW",
+      "started_at": "2025-10-17T02:06:29.000Z",
+      "status": "completed",
+      "title": "Create fixtures and schema tests"
     }
   }
 }

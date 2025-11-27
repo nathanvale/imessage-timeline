@@ -9,11 +9,12 @@
 - Build a reliable, testable pipeline:
   - ingest → normalize/link → enrich (AI) → render (markdown)
 - Unify schema with media-as-message (no attachments array)
-- Preserve analyzer strengths: transcription quality, image/PDF summaries,
-  link context, previews, checkpoints, and readable markdown
+- Preserve analyzer strengths: transcription quality, image/PDF summaries, link
+  context, previews, checkpoints, and readable markdown
 - Produce deterministic outputs that can be validated and reproduced
 
 ### non-goals
+
 - Replacing upstream export tools (iMazing, Messages DB)
 - Full video transcription or heavy video processing
 - Online publishing; outputs are local JSON + Markdown files
@@ -23,26 +24,29 @@
 - Refer to `documentation/imessage-pipeline-refactor-report.md` for the full
   narrative and diagrams.
 - Four-stage pipeline with strict separation of concerns:
-  1) ingest (CSV/DB) → raw JSON
-  2) normalize-link → merge, dedup, link replies/tapbacks, validate
-  3) enrich-ai → AI-only augmentation, idempotent and resumable
-  4) render-markdown → deterministic daily markdown, no network calls
+  1. ingest (CSV/DB) → raw JSON
+  2. normalize-link → merge, dedup, link replies/tapbacks, validate
+  3. enrich-ai → AI-only augmentation, idempotent and resumable
+  4. render-markdown → deterministic daily markdown, no network calls
 
 ## 3. data model & invariants
 
-- Single `Message` model with `messageKind ∈ {'text','media','tapback','notification'}`
+- Single `Message` model with
+  `messageKind ∈ {'text','media','tapback','notification'}`
 - Media is a standalone message with a single `media` payload
 - Timestamps are ISO 8601 UTC with `Z`
 - DB rows may be split into parts with stable part GUIDs `p:<index>/<guid>`
 - Linking uses canonical GUIDs and heuristics (see report)
 
 ### schema
+
 - Implement with TypeScript interfaces and Zod validators
 - Use `superRefine` for cross-field invariants
 - Enrichment is stored under `message.media.enrichment: Array<MediaEnrichment>`
 - See report for the full schema block (copy to `src/schema/message.ts`)
 
 ### key invariants
+
 - If `messageKind = 'media'` → `media` exists and is complete
 - If `messageKind = 'tapback'` → `tapback` exists
 - Non-media messages must not carry a `media` payload
@@ -52,6 +56,7 @@
 ## 4. components & CLIs
 
 ### 4.1 ingest-csv
+
 - Input: iMazing CSV export + attachments dir
 - Output: `messages.csv.ingested.json`
 - Responsibilities:
@@ -60,6 +65,7 @@
   - Emit minimal linking info; do not perform cross-row linking
 
 ### 4.2 ingest-db
+
 - Input: Messages.app SQLite DB + attachments roots
 - Output: `messages.db.ingested.json`
 - Responsibilities:
@@ -68,6 +74,7 @@
   - Preserve row metadata for later splitting
 
 ### 4.3 normalize-link
+
 - Input: one or both ingests
 - Output: `messages.normalized.json`
 - Responsibilities:
@@ -79,6 +86,7 @@
   - Validate date correctness and path absolutes
 
 ### 4.4 enrich-ai
+
 - Input: `messages.normalized.json`
 - Output: `messages.enriched.json` + per-run checkpoint + optional
   `messages.full-descriptions.json`
@@ -91,6 +99,7 @@
   - Checkpointing, rate limits, retries; resumable execution
 
 ### 4.5 render-markdown
+
 - Input: `messages.enriched.json`
 - Output: per-day Markdown files under `outputDir`
 - Responsibilities:
@@ -145,6 +154,7 @@
   - Coverage to `./test-results/coverage/` with `junit`, `html`, `text-summary`
 
 ### test areas
+
 - Schema validation: happy path + invariants violations
 - Normalize-link: DB split to parts, part GUIDs, reply/tapback linking parity
 - Enrich-ai: image→preview, audio transcription prompt, link fallbacks
@@ -164,6 +174,7 @@
 ## 11. task decomposition
 
 ### epics
+
 - E1: Unified schema + validator
 - E2: Normalize-link implementation
 - E3: Enrich-ai extraction and hardening
@@ -174,11 +185,13 @@
 ### detailed tasks
 
 E1 — schema & validator
+
 - T1.1 Create `src/schema/message.ts` with types and Zod
 - T1.2 Implement `scripts/validate-json.mts` to validate artifacts
 - T1.3 Add fixtures and unit tests for schema invariants
 
 E2 — normalize-link
+
 - T2.1 Implement CSV→schema mapping
 - T2.2 Implement DB row split into parts with `p:<index>/<guid>`
 - T2.3 Implement reply/tapback linking (DB association first)
@@ -189,6 +202,7 @@ E2 — normalize-link
 - T2.8 Tests: split, linking parity, dedup, dates, paths
 
 E3 — enrich-ai
+
 - T3.1 Port image analysis + preview creation
 - T3.2 Port audio transcription prompt and parsers
 - T3.3 Port PDF summary and video handling
@@ -199,18 +213,21 @@ E3 — enrich-ai
 - T3.8 Tests: enrichment idempotency, rate limit gates, checkpoints
 
 E4 — render-markdown
+
 - T4.1 Port grouping (date/time-of-day) and anchors
 - T4.2 Render nested replies/tapbacks; emoji mapping
 - T4.3 Embed images with previews; quote transcripts and link context
 - T4.4 Determinism tests with snapshots; no network calls
 
 E5 — CI/tests/tooling
+
 - T5.1 Vitest config (threads ≤ 8, jsdom where needed)
 - T5.2 Coverage V8 with thresholds; CI reporters and outputs
 - T5.3 Setup tests runner scripts in `package.json` (pnpm)
 - T5.4 Add `renderWithProviders` test helper (if React involved later)
 
 E6 — docs & migration
+
 - T6.1 Update refactor report with any deltas from impl
 - T6.2 Usage docs: how to run each stage and E2E
 - T6.3 Troubleshooting: dates, paths, missing media, rate limits
@@ -218,14 +235,16 @@ E6 — docs & migration
 ## 12. acceptance criteria
 
 Global
+
 - A1. All produced dates are ISO 8601 with `Z`
-- A2. All media paths in normalized and enriched outputs are absolute when
-  files exist; missing files retain filename with provenance
+- A2. All media paths in normalized and enriched outputs are absolute when files
+  exist; missing files retain filename with provenance
 - A3. Schema validation passes (`validate-json`) for all artifacts
 - A4. CI runs Vitest with `allowOnly: false`, producing JUnit + coverage
 - A5. Coverage thresholds met (≥ 70% branches global)
 
 Normalize-link
+
 - N1. DB messages with `n` attachments become 1 text + `n` media messages, each
   with stable part GUIDs `p:<index>/<guid>`
 - N2. Replies/tapbacks link to the correct parent GUIDs; parity with CSV rules
@@ -234,6 +253,7 @@ Normalize-link
 - N5. Dates from CSV and DB align to UTC ISO `Z`
 
 Enrich-ai
+
 - E1. Image HEIC/TIFF produce a JPG preview once and reuse it
 - E2. Audio transcription includes timestamps, speaker labels, and a short
   description; stored under `media.enrichment`
@@ -244,6 +264,7 @@ Enrich-ai
 - E5. Checkpointing: `--resume` restarts within ≤ 1 item of prior state
 
 Render-markdown
+
 - R1. Output is deterministic for a fixed `messages.enriched.json`
 - R2. Sections grouped by Morning/Afternoon/Evening with deep-link anchors
 - R3. Replies/tapbacks rendered as nested quotes; emoji reactions map as
