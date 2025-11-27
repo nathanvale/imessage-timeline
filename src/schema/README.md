@@ -2,7 +2,9 @@
 
 ## Overview
 
-This directory contains the unified Message schema for the iMessage pipeline project. The schema is implemented using TypeScript interfaces and Zod validators to ensure both compile-time type safety and runtime validation.
+This directory contains the unified Message schema for the iMessage pipeline
+project. The schema is implemented using TypeScript interfaces and Zod
+validators to ensure both compile-time type safety and runtime validation.
 
 ## Files
 
@@ -19,45 +21,60 @@ This directory contains the unified Message schema for the iMessage pipeline pro
 ### Core Interfaces
 
 #### `Message`
+
 The main message interface with a discriminated union on `messageKind`:
+
 - `'text'` - Text message
 - `'media'` - Media message (requires `media` payload)
 - `'tapback'` - Reaction message (requires `tapback` payload)
 - `'notification'` - System notification message
 
 #### `MessageCore`
+
 Base interface containing shared fields across all message types including:
+
 - Identity: `guid`, `rowid`, `chatId`
 - Metadata: `service`, `handle`, `subject`
 - Dates: `date`, `dateRead`, `dateDelivered`, `dateEdited`
 - Thread info: `threadOriginatorGuid`, `numReplies`
 
 #### `MediaMeta`
+
 Represents a single media item with:
+
 - Identity: `id`, `filename`, `path`
 - Metadata: `size`, `mimeType`, `uti`, `mediaKind`
 - AI enrichment: `enrichment` array
 
 #### `MediaEnrichment`
+
 AI-generated enrichment data with provider provenance:
+
 - Image: `visionSummary`, `shortDescription`
 - Audio: `transcript`
 - Link: `url`, `title`, `summary`
 - Provenance: `provider`, `model`, `version`, `createdAt`
 
 #### `TapbackInfo`
+
 Reaction metadata:
-- Type: 'loved' | 'liked' | 'disliked' | 'laughed' | 'emphasized' | 'questioned' | 'emoji'
+
+- Type: 'loved' | 'liked' | 'disliked' | 'laughed' | 'emphasized' | 'questioned'
+  | 'emoji'
 - Action: 'added' | 'removed'
 - Target: `targetMessageGuid`, `targetMessagePart`, `targetText`
 
 #### `ReplyInfo`
+
 Reply metadata:
+
 - Context: `sender`, `date`, `text`
 - Target: `targetMessageGuid`
 
 #### `ExportEnvelope`
+
 Container for JSON exports:
+
 - Metadata: `schemaVersion`, `source`, `createdAt`
 - Payload: `messages` array
 - Extensions: `meta` record
@@ -76,14 +93,18 @@ Container for JSON exports:
 
 3. **Date Validation (SCHEMA-T01-AC05)**
    - All date fields MUST be ISO 8601 with Z suffix (UTC)
-   - Note: Zod's `datetime()` validator requires Z suffix specifically (e.g., `2025-10-17T10:00:00.000Z`)
-   - Timezone offsets (e.g., `+11:00`) are NOT accepted by Zod's built-in validator
-   - Validated fields: `date`, `dateRead`, `dateDelivered`, `dateEdited`, `exportTimestamp`
+   - Note: Zod's `datetime()` validator requires Z suffix specifically (e.g.,
+     `2025-10-17T10:00:00.000Z`)
+   - Timezone offsets (e.g., `+11:00`) are NOT accepted by Zod's built-in
+     validator
+   - Validated fields: `date`, `dateRead`, `dateDelivered`, `dateEdited`,
+     `exportTimestamp`
    - Nested dates: `replyingTo.date`, `enrichment.createdAt`
 
 4. **Path Validation (SCHEMA-T01-AC06)**
    - `media.path` MUST be absolute (start with `/`) when present
-   - Null paths allowed only for missing files (filename retained for provenance)
+   - Null paths allowed only for missing files (filename retained for
+     provenance)
 
 ## Usage
 
@@ -177,10 +198,13 @@ All acceptance criteria for SCHEMA-T01 have been implemented:
 
 - ✅ **SCHEMA-T01-AC01**: Message interface with messageKind discriminated union
 - ✅ **SCHEMA-T01-AC02**: Zod schema with superRefine for cross-field invariants
-- ✅ **SCHEMA-T01-AC03**: Media payload validation (exists and complete when messageKind='media')
-- ✅ **SCHEMA-T01-AC04**: Tapback payload validation (exists when messageKind='tapback')
+- ✅ **SCHEMA-T01-AC03**: Media payload validation (exists and complete when
+  messageKind='media')
+- ✅ **SCHEMA-T01-AC04**: Tapback payload validation (exists when
+  messageKind='tapback')
 - ✅ **SCHEMA-T01-AC05**: ISO 8601 date validation with Z suffix enforced
-- ✅ **SCHEMA-T01-AC06**: Absolute path validation for media.path when file exists
+- ✅ **SCHEMA-T01-AC06**: Absolute path validation for media.path when file
+  exists
 
 ## Testing
 
@@ -191,6 +215,7 @@ node scripts/verify-schema.mjs
 ```
 
 This script validates:
+
 - All schemas load without errors
 - Basic message parsing works
 - Cross-field invariants are enforced

@@ -22,7 +22,7 @@ export default defineConfig({
     globals: false,
     setupFiles: ['./tests/vitest/vitest-setup.ts'],
     include: ['**/*.{test,spec}.ts', '**/*.{test,spec}.tsx'],
-    exclude: ['dist/**', 'node_modules/**', '**/*.d.ts'],
+    exclude: ['dist/**', '**/node_modules/**', '**/*.d.ts', 'website/**'],
     // Unified reporters with coverage summary in CI
     reporters: process.env.TF_BUILD ? ['junit', 'default'] : ['default'],
     ...(process.env.TF_BUILD

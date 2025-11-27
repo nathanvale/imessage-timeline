@@ -33,7 +33,8 @@ export class ProgressManager {
     // Consistent format across all progress bars
     // Shows: [████████░░░░░░░░░░░░░░░░░░░░░░░] 35.5% | 1234/3456 | ETA: 12s | Current item
     this.format =
-      config.format ?? `{name} [{bar}] {percentage}% | {value}/{total} | ETA: {eta}s | {current}`
+      config.format ??
+      `{name} [{bar}] {percentage}% | {value}/{total} | ETA: {eta}s | {current}`
 
     // Setup signal handlers for cleanup on Ctrl+C
     this.setupSignalHandlers()
@@ -256,7 +257,9 @@ export async function withProgress<T>(
   quiet?: boolean,
 ): Promise<T> {
   const manager =
-    quiet === undefined ? new ProgressManager({}) : new ProgressManager({ quiet: quiet as boolean })
+    quiet === undefined
+      ? new ProgressManager({})
+      : new ProgressManager({ quiet: quiet as boolean })
   const bar = manager.createBar(name, total)
 
   try {

@@ -23,7 +23,10 @@ export function renderImageEmbed(path: string): string {
  * AC02: Render preview image with link to original
  * For HEIC/TIFF files, shows preview with link to original
  */
-export function renderPreviewImageWithLink(previewPath: string, originalPath: string): string {
+export function renderPreviewImageWithLink(
+  previewPath: string,
+  originalPath: string,
+): string {
   const filename = originalPath.split('/').pop() || 'original'
   return `![[${previewPath}]]\n[Original: ${filename}](${originalPath})`
 }
@@ -32,7 +35,9 @@ export function renderPreviewImageWithLink(previewPath: string, originalPath: st
  * AC03: Render transcription as blockquote
  * Handles multiline transcriptions with speaker labels and timestamps
  */
-export function renderTranscriptionBlockquote(enrichment: MediaEnrichment): string {
+export function renderTranscriptionBlockquote(
+  enrichment: MediaEnrichment,
+): string {
   if (enrichment.kind !== 'transcription' || !enrichment.transcription) {
     return ''
   }
@@ -45,7 +50,9 @@ export function renderTranscriptionBlockquote(enrichment: MediaEnrichment): stri
  * AC04: Render link context as blockquote
  * Shows title as markdown link and summary as blockquote
  */
-export function renderLinkContextBlockquote(enrichment: MediaEnrichment): string {
+export function renderLinkContextBlockquote(
+  enrichment: MediaEnrichment,
+): string {
   if (enrichment.kind !== 'link_context') {
     return ''
   }
@@ -78,7 +85,9 @@ export function renderLinkContextBlockquote(enrichment: MediaEnrichment): string
  * AC05: Render PDF summary as blockquote
  * Preserves paragraph structure with blockquote formatting
  */
-export function renderPdfSummaryBlockquote(enrichment: MediaEnrichment): string {
+export function renderPdfSummaryBlockquote(
+  enrichment: MediaEnrichment,
+): string {
   if (enrichment.kind !== 'pdf_summary' || !enrichment.pdfSummary) {
     return ''
   }
@@ -145,7 +154,10 @@ export function getOriginalPath(previewPath: string): string {
       return withoutJpg
     }
 
-    if (withoutJpg.toLowerCase().endsWith('.tiff') || withoutJpg.toLowerCase().endsWith('.tif')) {
+    if (
+      withoutJpg.toLowerCase().endsWith('.tiff') ||
+      withoutJpg.toLowerCase().endsWith('.tif')
+    ) {
       return withoutJpg
     }
   }
@@ -158,7 +170,7 @@ export function getOriginalPath(previewPath: string): string {
  */
 export function getEnrichmentsByKind(
   message: Message,
-  kind: MediaEnrichment['kind']
+  kind: MediaEnrichment['kind'],
 ): MediaEnrichment[] {
   if (message.messageKind !== 'media' || !message.media?.enrichment) {
     return []

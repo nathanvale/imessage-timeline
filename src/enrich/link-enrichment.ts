@@ -22,7 +22,7 @@
  * - Rate limit detection with fallback triggering
  */
 
-import type { Message, MediaEnrichment } from '#schema/message'
+import type { MediaEnrichment, Message } from '#schema/message'
 
 import { createLogger } from '#utils/logger'
 
@@ -455,9 +455,16 @@ export async function enrichLinkContext(
       guid: message.guid,
     })
 
-    // Return message with enrichment appended to media.enrichment if media exists
-    // For text messages, store in a different place or skip
-    return message
+    // For text messages, store enrichment in a linkEnrichments array on the message
+    // This preserves the original message structure while adding the enrichment data
+    const existingEnrichments =
+      (message as Message & { linkEnrichments?: MediaEnrichment[] })
+        .linkEnrichments || []
+
+    return {
+      ...message,
+      linkEnrichments: [...existingEnrichments, enrichment],
+    } as Message
   } catch (error) {
     logger.error(`Error enriching link`, {
       guid: message.guid,

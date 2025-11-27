@@ -47,9 +47,12 @@ type LinkingResult = {
  */
 export function linkRepliesToParents(
   messages: Message[],
-  options: LinkingOptions = {}
+  options: LinkingOptions = {},
 ): Message[] | LinkingResult {
-  const { trackAmbiguous = false, minConfidenceThreshold: _minConfidenceThreshold = 0.7 } = options
+  const {
+    trackAmbiguous = false,
+    minConfidenceThreshold: _minConfidenceThreshold = 0.7,
+  } = options
 
   // Build indices for fast lookup
   const byGuid = new Map<string, Message>()
@@ -58,11 +61,12 @@ export function linkRepliesToParents(
   messages.forEach((msg) => {
     byGuid.set(msg.guid, msg)
 
-    const secondBucket = new Date(msg.date).toISOString().slice(0, 19) // YYYY-MM-DDTHH:mm:ss
-    if (!byTimestamp.has(secondBucket)) {
-      byTimestamp.set(secondBucket, [])
+    // Use minute-based buckets for O(1) lookup in time window searches
+    const minuteBucket = new Date(msg.date).toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm
+    if (!byTimestamp.has(minuteBucket)) {
+      byTimestamp.set(minuteBucket, [])
     }
-    byTimestamp.get(secondBucket)!.push(msg)
+    byTimestamp.get(minuteBucket)!.push(msg)
   })
 
   const ambiguousLinks: AmbiguousLink[] = []
@@ -83,7 +87,12 @@ export function linkRepliesToParents(
     }
 
     // Try to link using heuristics
-    const candidates = findReplyParentCandidates(msg, messages, byGuid, byTimestamp)
+    const candidates = findReplyParentCandidates(
+      msg,
+      messages,
+      byGuid,
+      byTimestamp,
+    )
 
     if (candidates.length === 0) {
       return msg
@@ -136,7 +145,7 @@ export function linkRepliesToParents(
  */
 export function linkTapbacksToParents(
   messages: Message[],
-  options: LinkingOptions = {}
+  options: LinkingOptions = {},
 ): Message[] | LinkingResult {
   const { trackAmbiguous = false } = options
 
@@ -147,11 +156,12 @@ export function linkTapbacksToParents(
   messages.forEach((msg) => {
     byGuid.set(msg.guid, msg)
 
-    const secondBucket = new Date(msg.date).toISOString().slice(0, 19)
-    if (!byTimestamp.has(secondBucket)) {
-      byTimestamp.set(secondBucket, [])
+    // Use minute-based buckets for O(1) lookup in time window searches
+    const minuteBucket = new Date(msg.date).toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm
+    if (!byTimestamp.has(minuteBucket)) {
+      byTimestamp.set(minuteBucket, [])
     }
-    byTimestamp.get(secondBucket)!.push(msg)
+    byTimestamp.get(minuteBucket)!.push(msg)
   })
 
   const ambiguousLinks: AmbiguousLink[] = []
@@ -167,7 +177,12 @@ export function linkTapbacksToParents(
     }
 
     // Find parent for this tapback
-    const candidates = findTapbackParentCandidates(msg, messages, byGuid, byTimestamp)
+    const candidates = findTapbackParentCandidates(
+      msg,
+      messages,
+      byGuid,
+      byTimestamp,
+    )
 
     if (candidates.length === 0) {
       return msg
@@ -219,8 +234,12 @@ export function linkTapbacksToParents(
  * AC04: Detect and report ambiguous links with confidence scores
  */
 export function detectAmbiguousLinks(messages: Message[]) {
-  const ambiguous = linkRepliesToParents(messages, { trackAmbiguous: true }) as LinkingResult
-  const tapbackAmbiguous = linkTapbacksToParents(messages, { trackAmbiguous: true }) as LinkingResult
+  const ambiguous = linkRepliesToParents(messages, {
+    trackAmbiguous: true,
+  }) as LinkingResult
+  const tapbackAmbiguous = linkTapbacksToParents(messages, {
+    trackAmbiguous: true,
+  }) as LinkingResult
 
   const allAmbiguous = [
     ...(ambiguous.ambiguousLinks || []),
@@ -247,26 +266,64 @@ export function detectAmbiguousLinks(messages: Message[]) {
 // ============================================================================
 
 /**
+ * Get time bucket keys for a date within a window (for O(1) lookups)
+ */
+function getTimeBucketKeys(date: Date, windowMinutes: number): string[] {
+  const keys: string[] = []
+  const baseTime = date.getTime()
+
+  // Generate bucket keys for the window before the date
+  for (let i = 0; i <= windowMinutes; i++) {
+    const bucketDate = new Date(baseTime - i * 60 * 1000)
+    keys.push(bucketDate.toISOString().slice(0, 16)) // YYYY-MM-DDTHH:mm (minute bucket)
+  }
+
+  return keys
+}
+
+/**
  * Find candidate parent messages for a reply
  * Returns scored candidates
+ * Uses byTimestamp Map for O(1) bucket lookups instead of O(n) scan
  */
 function findReplyParentCandidates(
   reply: Message,
-  allMessages: Message[],
+  _allMessages: Message[],
   _byGuid: Map<string, Message>,
-  _byTimestamp: Map<string, Message[]>
+  byTimestamp: Map<string, Message[]>,
 ): ScoredCandidate[] {
-  const replyDate = new Date(reply.date).getTime()
+  const replyDate = new Date(reply.date)
+  const replyTime = replyDate.getTime()
   const candidates: ScoredCandidate[] = []
+  // Use replyTime for arithmetic operations (replyDate is Date object)
 
   // Extract snippet from reply if present (CSV pattern: "➜ Replying to: \"<snippet>\"")
-  const snippetMatch = reply.text?.match(/(?:➜\s*Replying to:?\s+[«"]([^»"]+)[»"]|Replying to:?\s+[«"]([^»"]+)[»"])/)
+  const snippetMatch = reply.text?.match(
+    /(?:➜\s*Replying to:?\s+[«"]([^»"]+)[»"]|Replying to:?\s+[«"]([^»"]+)[»"])/,
+  )
   const snippet = snippetMatch?.[1] || snippetMatch?.[2]
 
-  // Filter candidate messages (not tapbacks, not notifications)
-  const potentialParents = allMessages.filter(
-    (msg) => msg.messageKind !== 'tapback' && msg.messageKind !== 'notification' && msg.guid !== reply.guid
-  )
+  // Use time-bucketed lookup for O(1) average case per bucket
+  const bucketKeys = getTimeBucketKeys(replyDate, REPLY_SEARCH_WINDOW_MINUTES)
+  const seenGuids = new Set<string>()
+  const potentialParents: Message[] = []
+
+  for (const key of bucketKeys) {
+    const bucketMessages = byTimestamp.get(key)
+    if (bucketMessages) {
+      for (const msg of bucketMessages) {
+        if (
+          !seenGuids.has(msg.guid) &&
+          msg.messageKind !== 'tapback' &&
+          msg.messageKind !== 'notification' &&
+          msg.guid !== reply.guid
+        ) {
+          seenGuids.add(msg.guid)
+          potentialParents.push(msg)
+        }
+      }
+    }
+  }
 
   // Score each candidate
   for (const candidate of potentialParents) {
@@ -274,12 +331,15 @@ function findReplyParentCandidates(
       continue // Skip messages without text or media
     }
 
-    const candidateDate = new Date(candidate.date).getTime()
-    const timeDeltaMs = replyDate - candidateDate
+    const candidateTime = new Date(candidate.date).getTime()
+    const timeDeltaMs = replyTime - candidateTime
     const timeDeltaSeconds = timeDeltaMs / 1000
 
     // Skip if too old (not within search window)
-    if (timeDeltaSeconds < 0 || timeDeltaSeconds > REPLY_SEARCH_WINDOW_MINUTES * 60) {
+    if (
+      timeDeltaSeconds < 0 ||
+      timeDeltaSeconds > REPLY_SEARCH_WINDOW_MINUTES * 60
+    ) {
       continue
     }
 
@@ -311,7 +371,11 @@ function findReplyParentCandidates(
 
     // Media-implied replies (AC05: CSV parity)
     if (candidate.messageKind === 'media') {
-      if (!snippet || reply.text?.toLowerCase().includes('photo') || reply.text?.toLowerCase().includes('image')) {
+      if (
+        !snippet ||
+        reply.text?.toLowerCase().includes('photo') ||
+        reply.text?.toLowerCase().includes('image')
+      ) {
         score += 80
         reasons.push('media_candidate')
         hasContentMatch = true
@@ -354,8 +418,8 @@ function findReplyParentCandidates(
       return b.score - a.score
     }
     // Tiebreaker: nearest prior message (lowest time delta)
-    const aDelta = replyDate - new Date(a.message.date).getTime()
-    const bDelta = replyDate - new Date(b.message.date).getTime()
+    const aDelta = replyTime - new Date(a.message.date).getTime()
+    const bDelta = replyTime - new Date(b.message.date).getTime()
     return aDelta - bDelta
   })
 
@@ -365,28 +429,50 @@ function findReplyParentCandidates(
 /**
  * Find candidate parent messages for a tapback
  * Prefers media messages
+ * Uses byTimestamp Map for O(1) bucket lookups instead of O(n) scan
  */
 function findTapbackParentCandidates(
   tapback: Message,
-  allMessages: Message[],
+  _allMessages: Message[],
   _byGuid: Map<string, Message>,
-  _byTimestamp: Map<string, Message[]>
+  byTimestamp: Map<string, Message[]>,
 ): ScoredCandidate[] {
-  const tapbackDate = new Date(tapback.date).getTime()
+  const tapbackDate = new Date(tapback.date)
+  const tapbackTime = tapbackDate.getTime()
   const candidates: ScoredCandidate[] = []
 
-  // Filter candidate messages (not other tapbacks, not notifications)
-  const potentialParents = allMessages.filter(
-    (msg) => msg.messageKind !== 'tapback' && msg.messageKind !== 'notification' && msg.guid !== tapback.guid
-  )
+  // Use time-bucketed lookup for O(1) average case per bucket
+  const bucketKeys = getTimeBucketKeys(tapbackDate, REPLY_SEARCH_WINDOW_MINUTES)
+  const seenGuids = new Set<string>()
+  const potentialParents: Message[] = []
+
+  for (const key of bucketKeys) {
+    const bucketMessages = byTimestamp.get(key)
+    if (bucketMessages) {
+      for (const msg of bucketMessages) {
+        if (
+          !seenGuids.has(msg.guid) &&
+          msg.messageKind !== 'tapback' &&
+          msg.messageKind !== 'notification' &&
+          msg.guid !== tapback.guid
+        ) {
+          seenGuids.add(msg.guid)
+          potentialParents.push(msg)
+        }
+      }
+    }
+  }
 
   // Score each candidate
   for (const candidate of potentialParents) {
-    const candidateDate = new Date(candidate.date).getTime()
-    const timeDeltaSeconds = (tapbackDate - candidateDate) / 1000
+    const candidateTime = new Date(candidate.date).getTime()
+    const timeDeltaSeconds = (tapbackTime - candidateTime) / 1000
 
     // Skip if too old or in future
-    if (timeDeltaSeconds < 0 || timeDeltaSeconds > REPLY_SEARCH_WINDOW_MINUTES * 60) {
+    if (
+      timeDeltaSeconds < 0 ||
+      timeDeltaSeconds > REPLY_SEARCH_WINDOW_MINUTES * 60
+    ) {
       continue
     }
 

@@ -47,9 +47,10 @@ export function normalizeCSVDate(csvDate: string): string {
  * @param dateString - Date string to validate
  * @returns Object with valid flag and optional error message
  */
-export function validateDateFormat(
-  dateString: string
-): { valid: boolean; error?: string } {
+export function validateDateFormat(dateString: string): {
+  valid: boolean
+  error?: string
+} {
   // Check if empty or whitespace
   if (!dateString || typeof dateString !== 'string' || !dateString.trim()) {
     return { valid: false, error: 'Date string is empty or whitespace' }
@@ -95,10 +96,10 @@ export function validateDateFormat(
 
   // Extract components from original and reformed
   const originalParts = dateString.match(
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
   )
   const reformedParts = isoString.match(
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
   )
 
   if (!originalParts || !reformedParts) {
@@ -126,7 +127,10 @@ export function validateDateFormat(
  * @param converted - Converted/processed timestamp
  * @returns true if drift detected (timestamps differ significantly)
  */
-export function detectTimezoneDrift(original: string, converted: string): boolean {
+export function detectTimezoneDrift(
+  original: string,
+  converted: string,
+): boolean {
   const origTime = new Date(original).getTime()
   const convTime = new Date(converted).getTime()
 
@@ -154,7 +158,13 @@ export function roundTripDateValidation(dateString: string): {
     // Step 1: Validate original format
     const formatValidation = validateDateFormat(dateString)
     if (!formatValidation.valid) {
-      const result: { valid: boolean; driftDetected: boolean; input: string; normalized: string; error?: string } = {
+      const result: {
+        valid: boolean
+        driftDetected: boolean
+        input: string
+        normalized: string
+        error?: string
+      } = {
         valid: false,
         driftDetected: false,
         input: dateString,

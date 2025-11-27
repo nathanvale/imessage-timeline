@@ -26,7 +26,10 @@ type IdempotencyOptions = {
  * @param kind - Enrichment kind to check for
  * @returns true if enrichment with matching kind exists, false otherwise
  */
-export function shouldSkipEnrichment(message: Message, kind: MediaEnrichment['kind']): boolean {
+export function shouldSkipEnrichment(
+  message: Message,
+  kind: MediaEnrichment['kind'],
+): boolean {
   if (!message.media?.enrichment) {
     return false
   }
@@ -43,7 +46,9 @@ export function shouldSkipEnrichment(message: Message, kind: MediaEnrichment['ki
  * @param enrichments - Array of enrichments to deduplicate
  * @returns Deduplicated array with latest enrichment per kind
  */
-export function deduplicateEnrichmentByKind(enrichments: MediaEnrichment[]): MediaEnrichment[] {
+export function deduplicateEnrichmentByKind(
+  enrichments: MediaEnrichment[],
+): MediaEnrichment[] {
   const kindMap = new Map<MediaEnrichment['kind'], MediaEnrichment>()
 
   for (const enrichment of enrichments) {
@@ -84,7 +89,7 @@ export function deduplicateEnrichmentByKind(enrichments: MediaEnrichment[]): Med
 export function addEnrichmentIdempotent(
   message: Message,
   enrichment: MediaEnrichment,
-  options: IdempotencyOptions = {}
+  options: IdempotencyOptions = {},
 ): Message {
   const { forceRefresh = false } = options
 
@@ -97,7 +102,9 @@ export function addEnrichmentIdempotent(
   const currentEnrichments = message.media.enrichment || []
 
   // Check if enrichment with same kind already exists
-  const existingIndex = currentEnrichments.findIndex((e) => e.kind === enrichment.kind)
+  const existingIndex = currentEnrichments.findIndex(
+    (e) => e.kind === enrichment.kind,
+  )
 
   let updatedEnrichments: MediaEnrichment[]
 
@@ -144,7 +151,7 @@ export function addEnrichmentIdempotent(
 export function addEnrichmentsIdempotent(
   messages: Message[],
   enrichments: Map<string, MediaEnrichment>,
-  options: IdempotencyOptions = {}
+  options: IdempotencyOptions = {},
 ): Message[] {
   return messages.map((message) => {
     const enrichment = enrichments.get(message.guid)
@@ -166,7 +173,7 @@ export function addEnrichmentsIdempotent(
  */
 export function hasAllEnrichments(
   message: Message,
-  requiredKinds: MediaEnrichment['kind'][]
+  requiredKinds: MediaEnrichment['kind'][],
 ): boolean {
   if (!message.media?.enrichment) {
     return false
@@ -185,7 +192,7 @@ export function hasAllEnrichments(
  */
 export function getEnrichmentByKind(
   message: Message,
-  kind: MediaEnrichment['kind']
+  kind: MediaEnrichment['kind'],
 ): MediaEnrichment | undefined {
   if (!message.media?.enrichment) {
     return undefined
@@ -201,7 +208,10 @@ export function getEnrichmentByKind(
  * @param kind - Enrichment kind to remove
  * @returns Updated message without enrichment of specified kind
  */
-export function clearEnrichmentByKind(message: Message, kind: MediaEnrichment['kind']): Message {
+export function clearEnrichmentByKind(
+  message: Message,
+  kind: MediaEnrichment['kind'],
+): Message {
   if (!message.media?.enrichment) {
     return message
   }

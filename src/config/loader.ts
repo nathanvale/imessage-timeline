@@ -6,11 +6,11 @@
  */
 
 import { constants } from 'fs'
-import { readFile, access } from 'fs/promises'
+import { access, readFile } from 'fs/promises'
 
 import yaml from 'js-yaml'
 
-import { validateConfig, detectConfigFormat, type Config } from './schema.js'
+import { type Config, detectConfigFormat, validateConfig } from './schema.js'
 
 /**
  * In-memory cache for loaded configurations
@@ -49,7 +49,6 @@ export async function discoverConfigFile(
       return filePath
     } catch {
       // File doesn't exist or not readable, try next
-      continue
     }
   }
 
@@ -81,7 +80,8 @@ export async function loadConfigFile(filePath: string): Promise<unknown> {
     }
   } else if (format === 'yaml') {
     try {
-      return yaml.load(content)
+      // js-yaml v4+ is safe by default - use JSON_SCHEMA for extra safety
+      return yaml.load(content, { schema: yaml.JSON_SCHEMA })
     } catch (error) {
       throw new Error(
         `Failed to parse YAML config file ${filePath}: ${

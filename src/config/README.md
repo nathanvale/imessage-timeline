@@ -1,11 +1,12 @@
 # Configuration Module
 
-**Task**: CONFIG--T01 - Define Config Schema
-**Status**: ✅ Complete
+**Task**: CONFIG--T01 - Define Config Schema **Status**: ✅ Complete
 
 ## Overview
 
-This module provides Zod-based schema validation for iMessage Timeline configuration files. Supports both JSON and YAML formats with environment variable interpolation.
+This module provides Zod-based schema validation for iMessage Timeline
+configuration files. Supports both JSON and YAML formats with environment
+variable interpolation.
 
 ## Files
 
@@ -14,6 +15,7 @@ This module provides Zod-based schema validation for iMessage Timeline configura
 Core configuration schema with Zod validation.
 
 **Exports**:
+
 - `ConfigSchema` - Main Zod schema
 - `Config` - TypeScript type
 - `validateConfig()` - Parse and validate config (throws on error)
@@ -31,8 +33,8 @@ import { validateConfig } from './config/schema'
 
 const config = {
   gemini: {
-    apiKey: 'your-api-key'
-  }
+    apiKey: 'your-api-key',
+  },
 }
 
 try {
@@ -53,7 +55,7 @@ const result = validateConfigSafe(config)
 if (result.success) {
   console.log(result.data.gemini.apiKey)
 } else {
-  result.errors?.forEach(err => {
+  result.errors?.forEach((err) => {
     console.error(`${err.path}: ${err.message}`)
   })
 }
@@ -79,24 +81,24 @@ const format2 = detectConfigFormat('./imessage-config.json')
 
 ### Optional Fields with Defaults
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `version` | `"1.0"` | Config version |
-| `attachmentRoots` | `["~/Library/Messages/Attachments"]` | Attachment search paths |
-| `gemini.model` | `"gemini-1.5-pro"` | Gemini model name |
-| `gemini.rateLimitDelay` | `1000` | Delay between API calls (ms) |
-| `gemini.maxRetries` | `3` | Max retry attempts |
-| `firecrawl` | `undefined` | Optional Firecrawl config |
-| `enrichment.enableVisionAnalysis` | `true` | Enable image analysis |
-| `enrichment.enableAudioTranscription` | `true` | Enable audio transcription |
-| `enrichment.enableLinkEnrichment` | `true` | Enable link context |
-| `enrichment.imageCacheDir` | `"./.cache/images"` | Preview cache location |
-| `enrichment.checkpointInterval` | `100` | Checkpoint frequency |
-| `enrichment.forceRefresh` | `false` | Re-enrich existing |
-| `render.groupByTimeOfDay` | `true` | Time grouping |
-| `render.renderRepliesAsNested` | `true` | Nested replies |
-| `render.renderTapbacksAsEmoji` | `true` | Emoji tapbacks |
-| `render.maxNestingDepth` | `10` | Max reply depth |
+| Field                                 | Default                              | Description                  |
+| ------------------------------------- | ------------------------------------ | ---------------------------- |
+| `version`                             | `"1.0"`                              | Config version               |
+| `attachmentRoots`                     | `["~/Library/Messages/Attachments"]` | Attachment search paths      |
+| `gemini.model`                        | `"gemini-1.5-pro"`                   | Gemini model name            |
+| `gemini.rateLimitDelay`               | `1000`                               | Delay between API calls (ms) |
+| `gemini.maxRetries`                   | `3`                                  | Max retry attempts           |
+| `firecrawl`                           | `undefined`                          | Optional Firecrawl config    |
+| `enrichment.enableVisionAnalysis`     | `true`                               | Enable image analysis        |
+| `enrichment.enableAudioTranscription` | `true`                               | Enable audio transcription   |
+| `enrichment.enableLinkEnrichment`     | `true`                               | Enable link context          |
+| `enrichment.imageCacheDir`            | `"./.cache/images"`                  | Preview cache location       |
+| `enrichment.checkpointInterval`       | `100`                                | Checkpoint frequency         |
+| `enrichment.forceRefresh`             | `false`                              | Re-enrich existing           |
+| `render.groupByTimeOfDay`             | `true`                               | Time grouping                |
+| `render.renderRepliesAsNested`        | `true`                               | Nested replies               |
+| `render.renderTapbacksAsEmoji`        | `true`                               | Emoji tapbacks               |
+| `render.maxNestingDepth`              | `10`                                 | Max reply depth              |
 
 ### Numeric Constraints
 
@@ -113,7 +115,7 @@ const format2 = detectConfigFormat('./imessage-config.json')
 # CONFIG-T01-AC02: YAML format support
 # CONFIG-T01-AC03: Environment variable interpolation
 
-version: "1.0"
+version: '1.0'
 
 gemini:
   apiKey: ${GEMINI_API_KEY}
@@ -124,6 +126,7 @@ enrichment:
 ```
 
 **Discovery Order**:
+
 1. `./imessage-config.yaml`
 2. `./imessage-config.yml`
 3. `./imessage-config.json`
@@ -132,11 +135,11 @@ enrichment:
 
 ```json
 {
-  "version": "1.0",
   "gemini": {
     "apiKey": "${GEMINI_API_KEY}",
     "model": "gemini-1.5-pro"
-  }
+  },
+  "version": "1.0"
 }
 ```
 
@@ -146,7 +149,7 @@ enrichment:
 
 ```yaml
 gemini:
-  apiKey: ${GEMINI_API_KEY}  # Replaced at runtime
+  apiKey: ${GEMINI_API_KEY} # Replaced at runtime
 
 firecrawl:
   apiKey: ${FIRECRAWL_API_KEY}
@@ -162,9 +165,9 @@ CONFIG-T01-AC05: Validation errors include field paths and expected types.
 const result = validateConfigSafe({
   gemini: {
     apiKey: '',
-    maxRetries: 20
+    maxRetries: 20,
   },
-  attachmentRoots: []
+  attachmentRoots: [],
 })
 
 // result.errors:
@@ -178,6 +181,7 @@ const result = validateConfigSafe({
 ## Examples
 
 See `examples/` directory:
+
 - `imessage-config.yaml` - Full YAML example
 - `imessage-config.json` - Full JSON example
 - `imessage-config-minimal.yaml` - Minimal config with defaults
@@ -191,6 +195,7 @@ pnpm test src/config/__tests__/schema.test.ts
 ```
 
 **Coverage**: 22 tests covering:
+
 - Schema validation (minimal, full, defaults)
 - Required field enforcement
 - Numeric constraint validation
@@ -201,6 +206,7 @@ pnpm test src/config/__tests__/schema.test.ts
 ## Next Steps
 
 **CONFIG--T02**: Implement config loader with:
+
 - File discovery
 - YAML/JSON parsing
 - Environment variable substitution
@@ -209,6 +215,5 @@ pnpm test src/config/__tests__/schema.test.ts
 
 ---
 
-**Completion**: CONFIG--T01 ✅ (2025-10-19)
-**Tests**: 22/22 passing
-**Files**: 2 (schema.ts, schema.test.ts)
+**Completion**: CONFIG--T01 ✅ (2025-10-19) **Tests**: 22/22 passing **Files**:
+2 (schema.ts, schema.test.ts)

@@ -57,19 +57,17 @@ export type MockPdfSummaryResult = {
  * })
  */
 export function createMockGeminiVision() {
-  return vi.fn(
-    async (imagePath: string): Promise<MockImageAnalysisResult> => {
-      const filename = imagePath.split('/').pop() || 'image.jpg'
-      return {
-        visionSummary: `Mock detailed analysis of ${filename}`,
-        shortDescription: `Mock caption for ${filename}`,
-        provider: 'gemini',
-        model: 'gemini-1.5-pro',
-        version: '2025-10-17',
-        createdAt: new Date().toISOString(),
-      }
+  return vi.fn(async (imagePath: string): Promise<MockImageAnalysisResult> => {
+    const filename = imagePath.split('/').pop() || 'image.jpg'
+    return {
+      visionSummary: `Mock detailed analysis of ${filename}`,
+      shortDescription: `Mock caption for ${filename}`,
+      provider: 'gemini',
+      model: 'gemini-1.5-pro',
+      version: '2025-10-17',
+      createdAt: new Date().toISOString(),
     }
-  )
+  })
 }
 
 /**
@@ -247,7 +245,7 @@ export function createMockProviderSuite() {
  */
 export function setupMockFailures(
   mocks: ReturnType<typeof createMockProviderSuite>,
-  errorMessage: string = 'Mock API failure'
+  errorMessage: string = 'Mock API failure',
 ) {
   Object.values(mocks).forEach((mock) => {
     mock.mockRejectedValue(new Error(errorMessage))
@@ -261,7 +259,9 @@ export function setupMockFailures(
  * const mocks = createMockProviderSuite()
  * resetAllMocks(mocks)
  */
-export function resetAllMocks(mocks: ReturnType<typeof createMockProviderSuite>) {
+export function resetAllMocks(
+  mocks: ReturnType<typeof createMockProviderSuite>,
+) {
   Object.values(mocks).forEach((mock) => {
     mock.mockClear()
   })

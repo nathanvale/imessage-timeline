@@ -25,7 +25,7 @@ import { access, stat } from 'fs/promises'
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-import type { Message, MediaMeta, MediaEnrichment } from '#schema/message'
+import type { MediaEnrichment, MediaMeta, Message } from '#schema/message'
 
 import { createLogger } from '#utils/logger'
 
@@ -126,15 +126,28 @@ export async function transcribeAudioChunk(
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: modelName })
 
-    // For the API call, we would normally read and encode the audio file
-    // In production, this would be Base64 encoded audio data
-    // For testing, Gemini SDK will handle file uploads
+    // Read and encode the actual audio file
+    const { readFile } = await import('fs/promises')
+    const audioBuffer = await readFile(audioPath)
+    const audioBase64 = audioBuffer.toString('base64')
+
+    // Determine MIME type from file extension
+    const ext = audioPath.toLowerCase().split('.').pop() || 'm4a'
+    const mimeTypeMap: Record<string, string> = {
+      m4a: 'audio/mp4',
+      mp3: 'audio/mpeg',
+      wav: 'audio/wav',
+      aac: 'audio/aac',
+      ogg: 'audio/ogg',
+      flac: 'audio/flac',
+    }
+    const mimeType = mimeTypeMap[ext] || 'audio/mp4'
 
     const response = await model.generateContent([
       {
         inlineData: {
-          mimeType: 'audio/mp4',
-          data: Buffer.from('mock-audio-data').toString('base64'), // Would be actual audio in production
+          mimeType,
+          data: audioBase64,
         },
       },
       GEMINI_AUDIO_PROMPT,

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * iMessage Timeline CLI
  *
@@ -7,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs'
-import { resolve, dirname } from 'path'
+import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
 import { Command, type CommanderError } from 'commander'
@@ -16,9 +17,9 @@ import type { DBMessage } from './ingest/ingest-db.js'
 import type { Message } from './schema/message.js'
 
 import {
+  humanError,
   humanInfo,
   humanWarn,
-  humanError,
   setHumanLoggingEnabled,
 } from '#utils/human'
 import { createLogger, setCorrelationId, setLogLevel } from '#utils/logger'
@@ -419,7 +420,11 @@ program
       )
 
       if (verbose) {
-        cliLogger.info('Reading DB export', { input, attachmentRoots, contact })
+        cliLogger.info('Reading DB export', {
+          input,
+          attachmentRoots,
+          contact,
+        })
       }
 
       // Read and parse DB export JSON
@@ -852,6 +857,20 @@ program
         createCheckpoint,
       } = await import('./enrich/checkpoint.js')
 
+      // Import actual enrichment functions
+      const { analyzeImage } = await import('./enrich/image-analysis.js')
+      const { analyzeAudio } = await import('./enrich/audio-transcription.js')
+      const { enrichLinkContext } = await import('./enrich/link-enrichment.js')
+      const { createRateLimiter } = await import('./enrich/rate-limiting.js')
+
+      // Create rate limiter with circuit breaker
+      const rateLimiter = createRateLimiter({
+        rateLimitDelay,
+        maxRetries: maxRetriesNum,
+        circuitBreakerThreshold: 5,
+        circuitBreakerResetMs: 60000,
+      })
+
       // Compute config hash for checkpoint verification (AC05: Config consistency)
       const enrichConfig = {
         enableVisionAnalysis: enableVision,
@@ -957,13 +976,100 @@ program
           : `Processing ${messages.length.toLocaleString()} messages`
       humanInfo(`\n🚀 Starting enrichment: ${progressMsg}`)
 
+      // Build enrichment configs
+      const geminiApiKey = process.env.GEMINI_API_KEY || ''
+      const firecrawlApiKey = process.env.FIRECRAWL_API_KEY
+
+      const imageConfig = {
+        enableVisionAnalysis: enableVision ?? true,
+        geminiApiKey,
+        geminiModel: 'gemini-1.5-pro',
+        imageCacheDir: '/tmp/image-cache',
+      }
+
+      const audioConfig = {
+        enableAudioTranscription: enableAudio ?? true,
+        geminiApiKey,
+        geminiModel: 'gemini-1.5-pro',
+        rateLimitDelay,
+        maxRetries: maxRetriesNum,
+      }
+
+      const linkConfig = {
+        enableLinkAnalysis: enableLinks ?? true,
+        ...(firecrawlApiKey ? { firecrawlApiKey } : {}),
+        rateLimitDelay,
+        maxRetries: maxRetriesNum,
+      }
+
+      // Build set of new message GUIDs for incremental filtering
+      const newGuidSet = new Set(newMessageGuids)
+
       for (let i = startIndex; i < messages.length; i++) {
         const message = messages[i]
 
         try {
-          // For now, just copy message (actual enrichment would go here)
-          // The enrichment logic is already in src/enrich/ modules
-          enrichedMessages.push(message)
+          // INCREMENTAL--T04: Skip already-enriched messages in incremental mode
+          const shouldEnrich =
+            !incremental || !previousState || newGuidSet.has(message.guid || '')
+
+          let enrichedMessage = message
+
+          if (shouldEnrich) {
+            // Check circuit breaker before making API calls
+            if (rateLimiter.isCircuitOpen()) {
+              // Circuit is open - skip enrichment but don't fail
+              if (verbose) {
+                humanWarn(
+                  `⚠️  Circuit breaker open - skipping enrichment for message ${i}`,
+                )
+              }
+            } else {
+              // Apply rate limiting delay between API calls
+              const rateLimitDelayMs = rateLimiter.shouldRateLimit()
+              if (rateLimitDelayMs > 0) {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, rateLimitDelayMs),
+                )
+              }
+              rateLimiter.recordCall()
+
+              // Enrich based on message type and config
+              if (
+                enableVision &&
+                message.messageKind === 'media' &&
+                message.media?.mediaKind === 'image'
+              ) {
+                enrichedMessage = await analyzeImage(
+                  enrichedMessage,
+                  imageConfig,
+                )
+                rateLimiter.recordSuccess()
+              } else if (
+                enableAudio &&
+                message.messageKind === 'media' &&
+                message.media?.mediaKind === 'audio'
+              ) {
+                enrichedMessage = await analyzeAudio(
+                  enrichedMessage,
+                  audioConfig,
+                )
+                rateLimiter.recordSuccess()
+              } else if (
+                enableLinks &&
+                message.messageKind === 'text' &&
+                message.text
+              ) {
+                enrichedMessage = await enrichLinkContext(
+                  enrichedMessage,
+                  linkConfig,
+                )
+                rateLimiter.recordSuccess()
+              }
+            }
+          }
+
+          enrichedMessages.push(enrichedMessage)
           totalProcessed++
 
           // AC01: Write checkpoint at intervals

@@ -103,8 +103,8 @@ export function createIncrementalState(
  * @returns SHA-256 hex digest of current config
  */
 function generateConfigHash(): string {
-  // For now, hash empty config (future: include API key presence, CLI flags)
-  const hasGeminiKey = process.env.GOOGLE_API_KEY !== undefined
+  // Hash config including API key presence (not the actual key)
+  const hasGeminiKey = process.env.GEMINI_API_KEY !== undefined
   const hasFirecrawlKey = process.env.FIRECRAWL_API_KEY !== undefined
 
   const config = JSON.stringify({

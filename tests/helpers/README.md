@@ -1,15 +1,19 @@
 # Test Helper Utilities
 
-Centralized test utilities for the iMessage pipeline project. These helpers provide consistent, reusable patterns for testing across all modules.
+Centralized test utilities for the iMessage pipeline project. These helpers
+provide consistent, reusable patterns for testing across all modules.
 
 ## Overview
 
 This directory contains four main categories of test helpers:
 
-1. **Mock Providers** (`mock-providers.ts`) - Mock AI services (Gemini, Firecrawl)
+1. **Mock Providers** (`mock-providers.ts`) - Mock AI services (Gemini,
+   Firecrawl)
 2. **Fixture Loaders** (`fixture-loaders.ts`) - Load and create test data
-3. **Schema Assertions** (`schema-assertions.ts`) - Validate messages with clear error messages
-4. **Test Data Builders** (`test-data-builders.ts`) - Fluent API for creating test messages
+3. **Schema Assertions** (`schema-assertions.ts`) - Validate messages with clear
+   error messages
+4. **Test Data Builders** (`test-data-builders.ts`) - Fluent API for creating
+   test messages
 
 ## Usage
 
@@ -56,16 +60,16 @@ describe('Enrichment Tests', () => {
 
 ### Available Mock Providers
 
-| Function | Purpose | Example |
-|----------|---------|---------|
-| `createMockGeminiVision()` | Image analysis | Vision API responses |
-| `createMockGeminiAudio()` | Audio transcription | Transcription results |
-| `createMockGeminiPdf()` | PDF summarization | PDF summaries |
-| `createMockFirecrawl()` | Link context extraction | Web page metadata |
-| `createMockYouTube()` | YouTube metadata | Video titles, channels |
-| `createMockSpotify()` | Spotify metadata | Track, artist info |
-| `createMockTwitter()` | Twitter/X metadata | Tweet content |
-| `createMockInstagram()` | Instagram metadata | Post captions |
+| Function                   | Purpose                 | Example                |
+| -------------------------- | ----------------------- | ---------------------- |
+| `createMockGeminiVision()` | Image analysis          | Vision API responses   |
+| `createMockGeminiAudio()`  | Audio transcription     | Transcription results  |
+| `createMockGeminiPdf()`    | PDF summarization       | PDF summaries          |
+| `createMockFirecrawl()`    | Link context extraction | Web page metadata      |
+| `createMockYouTube()`      | YouTube metadata        | Video titles, channels |
+| `createMockSpotify()`      | Spotify metadata        | Track, artist info     |
+| `createMockTwitter()`      | Twitter/X metadata      | Tweet content          |
+| `createMockInstagram()`    | Instagram metadata      | Post captions          |
 
 ### Composite Helpers
 
@@ -199,7 +203,11 @@ if (fixtureExists('optional-data.json')) {
 ### Quick Start
 
 ```typescript
-import { assertValidMessage, assertTextMessage, getValidationStats } from '../helpers'
+import {
+  assertValidMessage,
+  assertTextMessage,
+  getValidationStats,
+} from '../helpers'
 
 describe('Schema Validation', () => {
   it('should validate message', () => {
@@ -364,13 +372,18 @@ const media = messageBuilder()
 #### Tapback Messages
 
 ```typescript
-const tapback = messageBuilder().tapback('liked', 'parent-guid-123').from('Alice').build()
+const tapback = messageBuilder()
+  .tapback('liked', 'parent-guid-123')
+  .from('Alice')
+  .build()
 ```
 
 #### Notification Messages
 
 ```typescript
-const notification = messageBuilder().notification('User left the conversation').build()
+const notification = messageBuilder()
+  .notification('User left the conversation')
+  .build()
 ```
 
 ### Batch Builders
@@ -444,7 +457,9 @@ describe('Complete Integration Example', () => {
   it('should process conversation with enrichment', async () => {
     // Create test data
     const thread = conversationThread(5)
-    const imgMsg = messageBuilder().image('photo.jpg', '/abs/path/photo.jpg').build()
+    const imgMsg = messageBuilder()
+      .image('photo.jpg', '/abs/path/photo.jpg')
+      .build()
 
     // Validate base messages
     thread.forEach((msg) => {
@@ -574,7 +589,8 @@ pnpm test tests/helpers/__tests__
 
 When adding new helper functions:
 
-1. **Add to appropriate module** (`mock-providers.ts`, `fixture-loaders.ts`, etc.)
+1. **Add to appropriate module** (`mock-providers.ts`, `fixture-loaders.ts`,
+   etc.)
 2. **Export from `index.ts`** for easy importing
 3. **Add tests** to `__tests__/test-helpers.test.ts`
 4. **Update this README** with usage examples
@@ -610,7 +626,8 @@ const messages = createGroupChatFixture(['Alice', 'Bob', 'Charlie'])
 
 ## Related Documentation
 
-- **Schema Documentation**: See `src/schema/message.ts` for Message type definitions
+- **Schema Documentation**: See `src/schema/message.ts` for Message type
+  definitions
 - **Test Configuration**: See `vitest.config.ts` for test setup
 - **Global Test Setup**: See `tests/vitest/vitest-setup.ts` for global hooks
 
@@ -618,7 +635,8 @@ const messages = createGroupChatFixture(['Alice', 'Bob', 'Charlie'])
 
 ## Questions or Issues?
 
-If you encounter issues with the test helpers or have suggestions for improvements, please:
+If you encounter issues with the test helpers or have suggestions for
+improvements, please:
 
 1. Check the test files in `__tests__/` for working examples
 2. Review the inline JSDoc comments in each module
@@ -626,5 +644,4 @@ If you encounter issues with the test helpers or have suggestions for improvemen
 
 ---
 
-**Last Updated**: 2025-10-19
-**CI Task**: CI--T04 (Create test helper utilities)
+**Last Updated**: 2025-10-19 **CI Task**: CI--T04 (Create test helper utilities)

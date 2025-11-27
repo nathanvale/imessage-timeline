@@ -52,21 +52,36 @@ export function getTapbackEmoji(tapbackType: string): string {
 /**
  * AC01: Find all replies to a specific message
  */
-export function findRepliesForMessage(parentGuid: string, messages: Message[]): Message[] {
-  return messages.filter((msg) => msg.replyingTo?.targetMessageGuid === parentGuid)
+export function findRepliesForMessage(
+  parentGuid: string,
+  messages: Message[],
+): Message[] {
+  return messages.filter(
+    (msg) => msg.replyingTo?.targetMessageGuid === parentGuid,
+  )
 }
 
 /**
  * AC02: Find all tapbacks for a specific message
  */
-export function findTapbacksForMessage(parentGuid: string, messages: Message[]): Message[] {
-  return messages.filter((msg) => msg.messageKind === 'tapback' && msg.tapback?.targetMessageGuid === parentGuid)
+export function findTapbacksForMessage(
+  parentGuid: string,
+  messages: Message[],
+): Message[] {
+  return messages.filter(
+    (msg) =>
+      msg.messageKind === 'tapback' &&
+      msg.tapback?.targetMessageGuid === parentGuid,
+  )
 }
 
 /**
  * AC04: Calculate indentation level (how deep in the reply chain)
  */
-export function calculateIndentationLevel(messageGuid: string, messages: Message[]): number {
+export function calculateIndentationLevel(
+  messageGuid: string,
+  messages: Message[],
+): number {
   const messageMap = new Map(messages.map((m) => [m.guid, m]))
   const message = messageMap.get(messageGuid)
 
@@ -96,7 +111,10 @@ export function calculateIndentationLevel(messageGuid: string, messages: Message
  * AC04: Format reply with proper indentation (2 spaces per level)
  * Returns prefix for blockquote (>, > >, > > >, etc.)
  */
-export function formatReplyWithIndentation(message: Message, level: number): string {
+export function formatReplyWithIndentation(
+  message: Message,
+  level: number,
+): string {
   const indent = ' '.repeat(level * 2)
   const blockquotePrefix = '>'.repeat(level + 1)
   return `${indent}${blockquotePrefix}`
@@ -105,7 +123,10 @@ export function formatReplyWithIndentation(message: Message, level: number): str
 /**
  * AC01, AC05: Render reply as nested blockquote with sender attribution
  */
-export function renderReplyAsBlockquote(message: Message, level: number): string {
+export function renderReplyAsBlockquote(
+  message: Message,
+  level: number,
+): string {
   if (message.messageKind !== 'text' && !message.text) {
     return ''
   }
@@ -130,7 +151,9 @@ export function renderReplyAsBlockquote(message: Message, level: number): string
   }
 
   // Additional lines get full blockquote prefix
-  const additionalLines = textLines.slice(1).map((line) => `${indent}${blockquotePrefix} ${line}`)
+  const additionalLines = textLines
+    .slice(1)
+    .map((line) => `${indent}${blockquotePrefix} ${line}`)
 
   return [firstLine, ...additionalLines].join('\n')
 }
@@ -155,7 +178,10 @@ export type ReplyTree = {
   children: ReplyTree[]
 }
 
-export function buildReplyTree(parentGuid: string, messages: Message[]): ReplyTree | null {
+export function buildReplyTree(
+  parentGuid: string,
+  messages: Message[],
+): ReplyTree | null {
   const messageMap = new Map(messages.map((m) => [m.guid, m]))
   const message = messageMap.get(parentGuid)
 
@@ -185,7 +211,7 @@ export function buildReplyTree(parentGuid: string, messages: Message[]): ReplyTr
  */
 export function getTapbacksGrouped(
   parentGuid: string,
-  messages: Message[]
+  messages: Message[],
 ): Record<string, Message[]> {
   const tapbacks = findTapbacksForMessage(parentGuid, messages)
   const grouped: Record<string, Message[]> = {}
@@ -206,7 +232,7 @@ export function getTapbacksGrouped(
  */
 export function getReplyChain(
   messageGuid: string,
-  messages: Message[]
+  messages: Message[],
 ): Message[] {
   const messageMap = new Map(messages.map((m) => [m.guid, m]))
   const chain: Message[] = []
@@ -240,7 +266,7 @@ export type FormattedReplyThread = {
 
 export function formatReplyThread(
   parentGuid: string,
-  messages: Message[]
+  messages: Message[],
 ): FormattedReplyThread | null {
   const messageMap = new Map(messages.map((m) => [m.guid, m]))
   const parentMessage = messageMap.get(parentGuid)

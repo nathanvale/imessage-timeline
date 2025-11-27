@@ -68,10 +68,14 @@ export class RateLimiter {
   }
 
   private validateConfig(config: RateLimitConfig): void {
-    if (config.rateLimitDelay < 0) throw new Error('rateLimitDelay must be non-negative')
-    if (config.maxRetries < 0) throw new Error('maxRetries must be non-negative')
-    if (config.circuitBreakerThreshold < 1) throw new Error('circuitBreakerThreshold must be >= 1')
-    if (config.circuitBreakerResetMs < 0) throw new Error('circuitBreakerResetMs must be non-negative')
+    if (config.rateLimitDelay < 0)
+      throw new Error('rateLimitDelay must be non-negative')
+    if (config.maxRetries < 0)
+      throw new Error('maxRetries must be non-negative')
+    if (config.circuitBreakerThreshold < 1)
+      throw new Error('circuitBreakerThreshold must be >= 1')
+    if (config.circuitBreakerResetMs < 0)
+      throw new Error('circuitBreakerResetMs must be non-negative')
   }
 
   // ============================================================================
@@ -136,7 +140,9 @@ export class RateLimiter {
    * @param retryAfterValue - header value
    * @returns delay in ms, or null if invalid
    */
-  private parseRetryAfterHeader(retryAfterValue: string | number | undefined): number | null {
+  private parseRetryAfterHeader(
+    retryAfterValue: string | number | undefined,
+  ): number | null {
     if (retryAfterValue === undefined || retryAfterValue === null) {
       return null
     }
@@ -181,7 +187,7 @@ export class RateLimiter {
    */
   public getRetryStrategy(
     response: ApiResponse,
-    attemptNumber: number
+    attemptNumber: number,
   ): { shouldRetry: boolean; delayMs: number } {
     const { status, headers } = response
 
@@ -304,7 +310,9 @@ export class RateLimiter {
 /**
  * Create a new rate limiter with default configuration
  */
-export function createRateLimiter(config?: Partial<RateLimitConfig>): RateLimiter {
+export function createRateLimiter(
+  config?: Partial<RateLimitConfig>,
+): RateLimiter {
   return new RateLimiter(config)
 }
 

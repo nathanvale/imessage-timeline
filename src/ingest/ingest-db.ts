@@ -41,7 +41,11 @@ const APPLE_EPOCH_OFFSET = 978307200
  * - N media messages (one per attachment)
  * All parts share same groupGuid (original DB guid) and timestamps
  */
-export function splitDBMessage(dbMessage: DBMessage, lineNumber: number, _options: IngestOptions): Message[] {
+export function splitDBMessage(
+  dbMessage: DBMessage,
+  lineNumber: number,
+  _options: IngestOptions,
+): Message[] {
   const messages: Message[] = []
   const originalGuid = dbMessage.guid
   const attachments = dbMessage.attachments || []
@@ -130,7 +134,7 @@ export function generatePartGUID(originalGuid: string, index: number): string {
 /**
  * Convert Apple epoch timestamp to ISO 8601 UTC with Z suffix
  * Apple epoch = seconds since 2001-01-01 00:00:00 UTC
- * 
+ *
  * Handles:
  * - Seconds precision: 718110777
  * - Milliseconds precision: 718110777000
@@ -170,7 +174,9 @@ export function convertAppleEpochToISO8601(appleEpoch: number): string | null {
 /**
  * Infer media kind from MIME type
  */
-export function inferMediaKind(mimeType: string): 'image' | 'audio' | 'video' | 'pdf' | 'unknown' {
+export function inferMediaKind(
+  mimeType: string,
+): 'image' | 'audio' | 'video' | 'pdf' | 'unknown' {
   if (!mimeType) return 'unknown'
 
   if (mimeType.startsWith('image/')) return 'image'
@@ -184,7 +190,10 @@ export function inferMediaKind(mimeType: string): 'image' | 'audio' | 'video' | 
 /**
  * Main entry point: Ingest DB messages and split into normalized schema
  */
-export function ingestDBMessages(dbMessages: DBMessage[], options: IngestOptions): Message[] {
+export function ingestDBMessages(
+  dbMessages: DBMessage[],
+  options: IngestOptions,
+): Message[] {
   const messages: Message[] = []
   let lineNumber = 1
 

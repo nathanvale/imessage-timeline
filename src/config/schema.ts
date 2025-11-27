@@ -192,6 +192,6 @@ export function detectConfigFormat(filePath: string): ConfigFormat {
   }
 
   throw new Error(
-    `Unsupported config file format: ${filePath}. Supported formats: .json, .yaml, .yml`
+    `Unsupported config file format: ${filePath}. Supported formats: .json, .yaml, .yml`,
   )
 }

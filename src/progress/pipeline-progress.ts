@@ -87,8 +87,12 @@ export class PipelineProgressTracker {
   /**
    * AC02: Normalize progress - Linking replies and deduplication
    */
-  public createNormalizeProgressBar(operation: 'linking' | 'dedup', total: number) {
-    const label = operation === 'linking' ? 'Normalize: Linking' : 'Normalize: Dedup'
+  public createNormalizeProgressBar(
+    operation: 'linking' | 'dedup',
+    total: number,
+  ) {
+    const label =
+      operation === 'linking' ? 'Normalize: Linking' : 'Normalize: Dedup'
     return this.progressManager.createBar(label, total)
   }
 
@@ -103,14 +107,18 @@ export class PipelineProgressTracker {
   ): void {
     if (this.quiet) return
 
-    const label = operation === 'linking' ? 'Normalize: Linking' : 'Normalize: Dedup'
+    const label =
+      operation === 'linking' ? 'Normalize: Linking' : 'Normalize: Dedup'
     const description = currentItem || 'Processing...'
 
     this.progressManager.setProgress(label, current)
     this.progressManager.updateCurrent(label, description)
 
     // Update stats
-    this.stats.normalizedMessages = Math.max(this.stats.normalizedMessages, current)
+    this.stats.normalizedMessages = Math.max(
+      this.stats.normalizedMessages,
+      current,
+    )
   }
 
   /**
@@ -123,10 +131,16 @@ export class PipelineProgressTracker {
   /**
    * Update render progress
    */
-  public updateRenderProgress(current: number, total: number, filename?: string): void {
+  public updateRenderProgress(
+    current: number,
+    total: number,
+    filename?: string,
+  ): void {
     if (this.quiet) return
 
-    const description = filename ? `Rendering ${filename}...` : 'Generating markdown...'
+    const description = filename
+      ? `Rendering ${filename}...`
+      : 'Generating markdown...'
 
     this.progressManager.setProgress('Render: Markdown', current)
     this.progressManager.updateCurrent('Render: Markdown', description)
@@ -268,7 +282,9 @@ export async function withSpinner<T>(
   callback: () => Promise<T>,
   quiet?: boolean,
 ): Promise<T> {
-  const tracker = new PipelineProgressTracker(quiet !== undefined ? { quiet } : {})
+  const tracker = new PipelineProgressTracker(
+    quiet !== undefined ? { quiet } : {},
+  )
   tracker.startSpinner(operation)
 
   try {
