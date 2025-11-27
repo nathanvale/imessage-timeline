@@ -5,8 +5,8 @@
  * Provides consistent fixture loading across test suites with type safety.
  */
 
-import { readFileSync, existsSync } from 'fs'
-import { resolve } from 'path'
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 import type { Message } from '../../src/schema/message'
 
@@ -15,24 +15,24 @@ import type { Message } from '../../src/schema/message'
 // ============================================================================
 
 export type FixtureOptions = {
-  /** Base directory for fixtures (default: tests/fixtures) */
-  baseDir?: string
-  /** Whether to parse JSON (default: true) */
-  parseJson?: boolean
-  /** Whether to throw on missing file (default: true) */
-  throwOnMissing?: boolean
+	/** Base directory for fixtures (default: tests/fixtures) */
+	baseDir?: string
+	/** Whether to parse JSON (default: true) */
+	parseJson?: boolean
+	/** Whether to throw on missing file (default: true) */
+	throwOnMissing?: boolean
 }
 
 export type MessageFixture = {
-  messages: Message[]
-  metadata?: {
-    source?: string
-    count?: number
-    dateRange?: {
-      start: string
-      end: string
-    }
-  }
+	messages: Message[]
+	metadata?: {
+		source?: string
+		count?: number
+		dateRange?: {
+			start: string
+			end: string
+		}
+	}
 }
 
 // ============================================================================
@@ -51,37 +51,37 @@ export type MessageFixture = {
  * const csv = loadFixture('csv/melanie-messages.csv', { parseJson: false })
  */
 export function loadFixture<T = unknown>(
-  filename: string,
-  options: FixtureOptions = {},
+	filename: string,
+	options: FixtureOptions = {},
 ): T {
-  const {
-    baseDir = resolve(process.cwd(), 'tests/fixtures'),
-    parseJson = true,
-    throwOnMissing = true,
-  } = options
+	const {
+		baseDir = resolve(process.cwd(), 'tests/fixtures'),
+		parseJson = true,
+		throwOnMissing = true,
+	} = options
 
-  const fullPath = resolve(baseDir, filename)
+	const fullPath = resolve(baseDir, filename)
 
-  if (!existsSync(fullPath)) {
-    if (throwOnMissing) {
-      throw new Error(`Fixture file not found: ${fullPath}`)
-    }
-    return null as T
-  }
+	if (!existsSync(fullPath)) {
+		if (throwOnMissing) {
+			throw new Error(`Fixture file not found: ${fullPath}`)
+		}
+		return null as T
+	}
 
-  const content = readFileSync(fullPath, 'utf-8')
+	const content = readFileSync(fullPath, 'utf-8')
 
-  if (parseJson) {
-    try {
-      return JSON.parse(content) as T
-    } catch (error) {
-      throw new Error(
-        `Failed to parse JSON fixture ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
-    }
-  }
+	if (parseJson) {
+		try {
+			return JSON.parse(content) as T
+		} catch (error) {
+			throw new Error(
+				`Failed to parse JSON fixture ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
+		}
+	}
 
-  return content as T
+	return content as T
 }
 
 /**
@@ -95,15 +95,15 @@ export function loadFixture<T = unknown>(
  * console.log(`Loaded ${messages.length} messages`)
  */
 export function loadMessageFixture(filename: string): MessageFixture {
-  const data = loadFixture<MessageFixture>(filename)
+	const data = loadFixture<MessageFixture>(filename)
 
-  if (!data.messages || !Array.isArray(data.messages)) {
-    throw new Error(
-      `Invalid message fixture: ${filename} (missing 'messages' array)`,
-    )
-  }
+	if (!data.messages || !Array.isArray(data.messages)) {
+		throw new Error(
+			`Invalid message fixture: ${filename} (missing 'messages' array)`,
+		)
+	}
 
-  return data
+	return data
 }
 
 /**
@@ -119,9 +119,9 @@ export function loadMessageFixture(filename: string): MessageFixture {
  * }
  */
 export function fixtureExists(filename: string, baseDir?: string): boolean {
-  const dir = baseDir || resolve(process.cwd(), 'tests/fixtures')
-  const fullPath = resolve(dir, filename)
-  return existsSync(fullPath)
+	const dir = baseDir || resolve(process.cwd(), 'tests/fixtures')
+	const fullPath = resolve(dir, filename)
+	return existsSync(fullPath)
 }
 
 // ============================================================================
@@ -140,8 +140,8 @@ export function fixtureExists(filename: string, baseDir?: string): boolean {
  * console.log(path) // /abs/path/to/tests/fixtures/test.json
  */
 export function getFixturePath(filename: string, baseDir?: string): string {
-  const dir = baseDir || resolve(process.cwd(), 'tests/fixtures')
-  return resolve(dir, filename)
+	const dir = baseDir || resolve(process.cwd(), 'tests/fixtures')
+	return resolve(dir, filename)
 }
 
 /**
@@ -155,8 +155,8 @@ export function getFixturePath(filename: string, baseDir?: string): string {
  * console.log(messagesDir) // /abs/path/to/tests/fixtures/messages
  */
 export function getFixturesDir(subdir?: string): string {
-  const baseDir = resolve(process.cwd(), 'tests/fixtures')
-  return subdir ? resolve(baseDir, subdir) : baseDir
+	const baseDir = resolve(process.cwd(), 'tests/fixtures')
+	return subdir ? resolve(baseDir, subdir) : baseDir
 }
 
 // ============================================================================
@@ -174,7 +174,7 @@ export function getFixturesDir(subdir?: string): string {
  * // Parse with your CSV parser
  */
 export function loadCsvFixture(filename: string): string {
-  return loadFixture<string>(filename, { parseJson: false })
+	return loadFixture<string>(filename, { parseJson: false })
 }
 
 /**
@@ -187,7 +187,7 @@ export function loadCsvFixture(filename: string): string {
  * const markdown = loadTextFixture('expected-output.md')
  */
 export function loadTextFixture(filename: string): string {
-  return loadFixture<string>(filename, { parseJson: false })
+	return loadFixture<string>(filename, { parseJson: false })
 }
 
 /**
@@ -200,11 +200,11 @@ export function loadTextFixture(filename: string): string {
  * const messages = loadJsonLinesFixture('stream-output.jsonl')
  */
 export function loadJsonLinesFixture<T = unknown>(filename: string): T[] {
-  const content = loadFixture<string>(filename, { parseJson: false })
-  return content
-    .split('\n')
-    .filter((line) => line.trim().length > 0)
-    .map((line) => JSON.parse(line) as T)
+	const content = loadFixture<string>(filename, { parseJson: false })
+	return content
+		.split('\n')
+		.filter((line) => line.trim().length > 0)
+		.map((line) => JSON.parse(line) as T)
 }
 
 // ============================================================================
@@ -221,26 +221,26 @@ export function loadJsonLinesFixture<T = unknown>(filename: string): T[] {
  * const msg = createMessageFixture({ text: 'Test message', isFromMe: true })
  */
 export function createMessageFixture(
-  overrides: Partial<Message> = {},
+	overrides: Partial<Message> = {},
 ): Message {
-  const defaults: Message = {
-    guid: `test-${Date.now()}-${Math.random()}`,
-    messageKind: 'text',
-    isFromMe: false,
-    date: new Date().toISOString(),
-    text: 'Test message content',
-    handle: 'Test User',
-    service: 'iMessage',
-    isRead: false,
-    metadata: {
-      source: 'test-fixture',
-    },
-  }
+	const defaults: Message = {
+		guid: `test-${Date.now()}-${Math.random()}`,
+		messageKind: 'text',
+		isFromMe: false,
+		date: new Date().toISOString(),
+		text: 'Test message content',
+		handle: 'Test User',
+		service: 'iMessage',
+		isRead: false,
+		metadata: {
+			source: 'test-fixture',
+		},
+	}
 
-  return {
-    ...defaults,
-    ...overrides,
-  }
+	return {
+		...defaults,
+		...overrides,
+	}
 }
 
 /**
@@ -257,13 +257,13 @@ export function createMessageFixture(
  * }))
  */
 export function createMessagesFixture(
-  count: number,
-  overridesFn?: (index: number) => Partial<Message>,
+	count: number,
+	overridesFn?: (index: number) => Partial<Message>,
 ): Message[] {
-  return Array.from({ length: count }, (_, i) => {
-    const overrides = overridesFn ? overridesFn(i) : {}
-    return createMessageFixture(overrides)
-  })
+	return Array.from({ length: count }, (_, i) => {
+		const overrides = overridesFn ? overridesFn(i) : {}
+		return createMessageFixture(overrides)
+	})
 }
 
 /**
@@ -279,29 +279,29 @@ export function createMessagesFixture(
  * })
  */
 export function createMediaMessageFixture(
-  mediaKind: 'image' | 'audio' | 'video' | 'pdf',
-  overrides: Partial<Message> = {},
+	mediaKind: 'image' | 'audio' | 'video' | 'pdf',
+	overrides: Partial<Message> = {},
 ): Message {
-  const extensions = {
-    image: 'jpg',
-    audio: 'm4a',
-    video: 'mov',
-    pdf: 'pdf',
-  }
+	const extensions = {
+		image: 'jpg',
+		audio: 'm4a',
+		video: 'mov',
+		pdf: 'pdf',
+	}
 
-  const ext = extensions[mediaKind]
-  const filename = `test-${mediaKind}.${ext}`
+	const ext = extensions[mediaKind]
+	const filename = `test-${mediaKind}.${ext}`
 
-  return createMessageFixture({
-    messageKind: 'media',
-    media: {
-      id: `media-${Date.now()}`,
-      filename,
-      path: `/test/path/${filename}`,
-      mediaKind,
-    },
-    ...overrides,
-  })
+	return createMessageFixture({
+		messageKind: 'media',
+		media: {
+			id: `media-${Date.now()}`,
+			filename,
+			path: `/test/path/${filename}`,
+			mediaKind,
+		},
+		...overrides,
+	})
 }
 
 /**
@@ -316,27 +316,27 @@ export function createMediaMessageFixture(
  * const reaction = createTapbackFixture('liked', 'parent-guid-123')
  */
 export function createTapbackFixture(
-  tapbackKind:
-    | 'liked'
-    | 'loved'
-    | 'laughed'
-    | 'emphasized'
-    | 'questioned'
-    | 'disliked',
-  parentGuid: string,
-  overrides: Partial<Message> = {},
+	tapbackKind:
+		| 'liked'
+		| 'loved'
+		| 'laughed'
+		| 'emphasized'
+		| 'questioned'
+		| 'disliked',
+	parentGuid: string,
+	overrides: Partial<Message> = {},
 ): Message {
-  return createMessageFixture({
-    messageKind: 'tapback',
-    tapback: {
-      // Schema-compliant fields
-      type: tapbackKind,
-      action: 'added',
-      targetMessageGuid: parentGuid,
-      // Legacy/test-friendly aliases
-      tapbackKind,
-      targetGuid: parentGuid,
-    } as unknown as Message['tapback'],
-    ...overrides,
-  })
+	return createMessageFixture({
+		messageKind: 'tapback',
+		tapback: {
+			// Schema-compliant fields
+			type: tapbackKind,
+			action: 'added',
+			targetMessageGuid: parentGuid,
+			// Legacy/test-friendly aliases
+			tapbackKind,
+			targetGuid: parentGuid,
+		} as unknown as Message['tapback'],
+		...overrides,
+	})
 }

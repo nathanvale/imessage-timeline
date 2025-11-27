@@ -21,7 +21,7 @@
  * - Pipeline never crashes on enrichment errors
  */
 
-import { access, stat } from 'fs/promises'
+import { access, stat } from 'node:fs/promises'
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
@@ -30,19 +30,19 @@ import type { MediaEnrichment, MediaMeta, Message } from '#schema/message'
 import { createLogger } from '#utils/logger'
 
 type AudioTranscriptionConfig = {
-  enableAudioTranscription: boolean
-  geminiApiKey: string
-  geminiModel?: string
-  maxAudioChunkDuration?: number // minutes
-  rateLimitDelay?: number // milliseconds
-  maxRetries?: number
+	enableAudioTranscription: boolean
+	geminiApiKey: string
+	geminiModel?: string
+	maxAudioChunkDuration?: number // minutes
+	rateLimitDelay?: number // milliseconds
+	maxRetries?: number
 }
 
 type TranscriptionData = {
-  transcription: string
-  speakers: string[]
-  timestamps: Array<{ time: string; speaker: string; content: string }>
-  shortDescription: string
+	transcription: string
+	speakers: string[]
+	timestamps: Array<{ time: string; speaker: string; content: string }>
+	shortDescription: string
 }
 
 const logger = createLogger('enrich:audio-transcription')
@@ -79,8 +79,8 @@ Short Description: [1-2 sentence summary here]`
  * Audio bitrate typically 128kbps for M4A/AAC
  */
 function estimateAudioDuration(fileSizeBytes: number): number {
-  const bitRate = 128 * 1024 // 128 kbps in bytes per second
-  return Math.ceil(fileSizeBytes / bitRate)
+	const bitRate = 128 * 1024 // 128 kbps in bytes per second
+	return Math.ceil(fileSizeBytes / bitRate)
 }
 
 /**
@@ -88,20 +88,20 @@ function estimateAudioDuration(fileSizeBytes: number): number {
  * Returns chunk info needed for streaming API
  */
 function getAudioChunks(
-  durationSeconds: number,
-  maxChunkDuration: number = 600,
+	durationSeconds: number,
+	maxChunkDuration = 600,
 ): Array<{ startSec: number; endSec: number; index: number }> {
-  const chunks: Array<{ startSec: number; endSec: number; index: number }> = []
+	const chunks: Array<{ startSec: number; endSec: number; index: number }> = []
 
-  for (let i = 0; i * maxChunkDuration < durationSeconds; i++) {
-    chunks.push({
-      index: i,
-      startSec: i * maxChunkDuration,
-      endSec: Math.min((i + 1) * maxChunkDuration, durationSeconds),
-    })
-  }
+	for (let i = 0; i * maxChunkDuration < durationSeconds; i++) {
+		chunks.push({
+			index: i,
+			startSec: i * maxChunkDuration,
+			endSec: Math.min((i + 1) * maxChunkDuration, durationSeconds),
+		})
+	}
 
-  return chunks
+	return chunks
 }
 
 /**
@@ -110,102 +110,102 @@ function getAudioChunks(
  * AC04: Create enrichment with provenance
  */
 export async function transcribeAudioChunk(
-  audioPath: string,
-  chunkIndex: number,
-  config: Partial<AudioTranscriptionConfig>,
+	audioPath: string,
+	chunkIndex: number,
+	config: Partial<AudioTranscriptionConfig>,
 ): Promise<TranscriptionData> {
-  const apiKey = config.geminiApiKey
-  const modelName = config.geminiModel || 'gemini-1.5-pro'
+	const apiKey = config.geminiApiKey
+	const modelName = config.geminiModel || 'gemini-1.5-pro'
 
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is required for audio transcription')
-  }
+	if (!apiKey) {
+		throw new Error('GEMINI_API_KEY is required for audio transcription')
+	}
 
-  try {
-    // AC01: Create Gemini client and call with structured prompt
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: modelName })
+	try {
+		// AC01: Create Gemini client and call with structured prompt
+		const genAI = new GoogleGenerativeAI(apiKey)
+		const model = genAI.getGenerativeModel({ model: modelName })
 
-    // Read and encode the actual audio file
-    const { readFile } = await import('fs/promises')
-    const audioBuffer = await readFile(audioPath)
-    const audioBase64 = audioBuffer.toString('base64')
+		// Read and encode the actual audio file
+		const { readFile } = await import('node:fs/promises')
+		const audioBuffer = await readFile(audioPath)
+		const audioBase64 = audioBuffer.toString('base64')
 
-    // Determine MIME type from file extension
-    const ext = audioPath.toLowerCase().split('.').pop() || 'm4a'
-    const mimeTypeMap: Record<string, string> = {
-      m4a: 'audio/mp4',
-      mp3: 'audio/mpeg',
-      wav: 'audio/wav',
-      aac: 'audio/aac',
-      ogg: 'audio/ogg',
-      flac: 'audio/flac',
-    }
-    const mimeType = mimeTypeMap[ext] || 'audio/mp4'
+		// Determine MIME type from file extension
+		const ext = audioPath.toLowerCase().split('.').pop() || 'm4a'
+		const mimeTypeMap: Record<string, string> = {
+			m4a: 'audio/mp4',
+			mp3: 'audio/mpeg',
+			wav: 'audio/wav',
+			aac: 'audio/aac',
+			ogg: 'audio/ogg',
+			flac: 'audio/flac',
+		}
+		const mimeType = mimeTypeMap[ext] || 'audio/mp4'
 
-    const response = await model.generateContent([
-      {
-        inlineData: {
-          mimeType,
-          data: audioBase64,
-        },
-      },
-      GEMINI_AUDIO_PROMPT,
-    ])
+		const response = await model.generateContent([
+			{
+				inlineData: {
+					mimeType,
+					data: audioBase64,
+				},
+			},
+			GEMINI_AUDIO_PROMPT,
+		])
 
-    const responseText = response.response.text()
-    logger.debug(
-      `Gemini response received (chunk ${chunkIndex}): ${responseText.substring(0, 200)}...`,
-    )
+		const responseText = response.response.text()
+		logger.debug(
+			`Gemini response received (chunk ${chunkIndex}): ${responseText.substring(0, 200)}...`,
+		)
 
-    // AC02: Parse speaker labels from response
-    const speakerMatches = responseText.match(/Speaker \d+/g) ?? []
-    const speakers: string[] = Array.from(new Set<string>(speakerMatches)) // Unique speakers in order
+		// AC02: Parse speaker labels from response
+		const speakerMatches = responseText.match(/Speaker \d+/g) ?? []
+		const speakers: string[] = Array.from(new Set<string>(speakerMatches)) // Unique speakers in order
 
-    // AC03: Extract short description
-    const shortDescriptionMatch = responseText.match(
-      /Short Description:\\s*(.+?)(?=\n|$)/is,
-    )
-    const shortDescription =
-      shortDescriptionMatch?.[1]?.trim() || 'Audio transcription available'
+		// AC03: Extract short description
+		const shortDescriptionMatch = responseText.match(
+			/Short Description:\\s*(.+?)(?=\n|$)/is,
+		)
+		const shortDescription =
+			shortDescriptionMatch?.[1]?.trim() || 'Audio transcription available'
 
-    // Extract full transcription section
-    const transcriptionMatch = responseText.match(
-      /Transcription:\s*([\s\S]+?)(?=\n\nTimestamps:|$)/i,
-    )
-    const transcription = transcriptionMatch?.[1]?.trim() || responseText
+		// Extract full transcription section
+		const transcriptionMatch = responseText.match(
+			/Transcription:\s*([\s\S]+?)(?=\n\nTimestamps:|$)/i,
+		)
+		const transcription = transcriptionMatch?.[1]?.trim() || responseText
 
-    // Extract timestamps section
-    const timestampsMatch = responseText.match(
-      /Timestamps:\s*([\s\S]+?)(?=\n\nShort Description:|$)/i,
-    )
-    const timestampsText = timestampsMatch?.[1]?.trim() || ''
+		// Extract timestamps section
+		const timestampsMatch = responseText.match(
+			/Timestamps:\s*([\s\S]+?)(?=\n\nShort Description:|$)/i,
+		)
+		const timestampsText = timestampsMatch?.[1]?.trim() || ''
 
-    // Parse individual timestamps
-    const timestamps = timestampsText
-      .split('\n')
-      .filter((line: string) => line.trim())
-      .map((line: string) => {
-        const match = line.match(/(\d{2}:\d{2})\s*-\s*Speaker (\d+):\s*(.+)/)
-        return {
-          time: match?.[1] || '00:00',
-          speaker: `Speaker ${match?.[2] || '1'}`,
-          content: match?.[3] || line,
-        }
-      })
+		// Parse individual timestamps
+		const timestamps = timestampsText
+			.split('\n')
+			.filter((line: string) => line.trim())
+			.map((line: string) => {
+				const match = line.match(/(\d{2}:\d{2})\s*-\s*Speaker (\d+):\s*(.+)/)
+				return {
+					time: match?.[1] || '00:00',
+					speaker: `Speaker ${match?.[2] || '1'}`,
+					content: match?.[3] || line,
+				}
+			})
 
-    return {
-      transcription,
-      speakers,
-      timestamps,
-      shortDescription,
-    }
-  } catch (error) {
-    logger.error(`Gemini API error for ${audioPath} (chunk ${chunkIndex})`, {
-      error,
-    })
-    throw error
-  }
+		return {
+			transcription,
+			speakers,
+			timestamps,
+			shortDescription,
+		}
+	} catch (error) {
+		logger.error(`Gemini API error for ${audioPath} (chunk ${chunkIndex})`, {
+			error,
+		})
+		throw error
+	}
 }
 
 /**
@@ -213,70 +213,70 @@ export async function transcribeAudioChunk(
  * Merges results from all chunks into single transcription
  */
 export async function handleLongAudio(
-  audioPath: string,
-  durationSeconds: number,
-  config: Partial<AudioTranscriptionConfig>,
+	audioPath: string,
+	durationSeconds: number,
+	config: Partial<AudioTranscriptionConfig>,
 ): Promise<TranscriptionData> {
-  const maxChunkDuration = (config.maxAudioChunkDuration || 10) * 60 // Convert to seconds
+	const maxChunkDuration = (config.maxAudioChunkDuration || 10) * 60 // Convert to seconds
 
-  if (durationSeconds <= maxChunkDuration) {
-    // Single chunk - call directly
-    return transcribeAudioChunk(audioPath, 0, config)
-  }
+	if (durationSeconds <= maxChunkDuration) {
+		// Single chunk - call directly
+		return transcribeAudioChunk(audioPath, 0, config)
+	}
 
-  // AC05: Split into chunks
-  const chunks = getAudioChunks(durationSeconds, maxChunkDuration)
-  logger.info(`Processing ${chunks.length} audio chunks for ${audioPath}`, {
-    duration: durationSeconds,
-    chunkDuration: maxChunkDuration,
-  })
+	// AC05: Split into chunks
+	const chunks = getAudioChunks(durationSeconds, maxChunkDuration)
+	logger.info(`Processing ${chunks.length} audio chunks for ${audioPath}`, {
+		duration: durationSeconds,
+		chunkDuration: maxChunkDuration,
+	})
 
-  const chunkResults: TranscriptionData[] = []
+	const chunkResults: TranscriptionData[] = []
 
-  for (const chunk of chunks) {
-    try {
-      const result = await transcribeAudioChunk(audioPath, chunk.index, config)
-      chunkResults.push(result)
+	for (const chunk of chunks) {
+		try {
+			const result = await transcribeAudioChunk(audioPath, chunk.index, config)
+			chunkResults.push(result)
 
-      // AC05: Respect rate limiting between chunks
-      if (chunk.index < chunks.length - 1 && config.rateLimitDelay) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, config.rateLimitDelay),
-        )
-      }
-    } catch (err) {
-      logger.warn(
-        `Failed to transcribe chunk ${chunk.index}, continuing with others`,
-        {
-          error: err instanceof Error ? err.message : String(err),
-        },
-      )
-      // Continue with next chunk even if this one fails
-    }
-  }
+			// AC05: Respect rate limiting between chunks
+			if (chunk.index < chunks.length - 1 && config.rateLimitDelay) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, config.rateLimitDelay),
+				)
+			}
+		} catch (err) {
+			logger.warn(
+				`Failed to transcribe chunk ${chunk.index}, continuing with others`,
+				{
+					error: err instanceof Error ? err.message : String(err),
+				},
+			)
+			// Continue with next chunk even if this one fails
+		}
+	}
 
-  if (chunkResults.length === 0) {
-    throw new Error(`Failed to transcribe any chunks for ${audioPath}`)
-  }
+	if (chunkResults.length === 0) {
+		throw new Error(`Failed to transcribe any chunks for ${audioPath}`)
+	}
 
-  // AC05: Merge all chunk transcriptions
-  const mergedTranscription = chunkResults
-    .map((r) => r.transcription)
-    .join('\n\n')
-  const allSpeakers = [...new Set(chunkResults.flatMap((r) => r.speakers))]
-  const mergedTimestamps = chunkResults.flatMap((r) => r.timestamps)
+	// AC05: Merge all chunk transcriptions
+	const mergedTranscription = chunkResults
+		.map((r) => r.transcription)
+		.join('\n\n')
+	const allSpeakers = [...new Set(chunkResults.flatMap((r) => r.speakers))]
+	const mergedTimestamps = chunkResults.flatMap((r) => r.timestamps)
 
-  // AC03: Generate merged short description (use last chunk's description as primary)
-  const shortDescription =
-    chunkResults[chunkResults.length - 1]?.shortDescription ||
-    'Audio transcription available'
+	// AC03: Generate merged short description (use last chunk's description as primary)
+	const shortDescription =
+		chunkResults[chunkResults.length - 1]?.shortDescription ||
+		'Audio transcription available'
 
-  return {
-    transcription: mergedTranscription,
-    speakers: allSpeakers,
-    timestamps: mergedTimestamps,
-    shortDescription,
-  }
+	return {
+		transcription: mergedTranscription,
+		speakers: allSpeakers,
+		timestamps: mergedTimestamps,
+		shortDescription,
+	}
 }
 
 /**
@@ -284,52 +284,52 @@ export async function handleLongAudio(
  * Handles chunk detection, API calls, and response parsing
  */
 export async function transcribeAudio(
-  audioPath: string,
-  config: Partial<AudioTranscriptionConfig>,
+	audioPath: string,
+	config: Partial<AudioTranscriptionConfig>,
 ): Promise<MediaEnrichment> {
-  try {
-    // Estimate audio duration from file size
-    const fileStats = await stat(audioPath)
-    const durationSeconds = estimateAudioDuration(fileStats.size)
+	try {
+		// Estimate audio duration from file size
+		const fileStats = await stat(audioPath)
+		const durationSeconds = estimateAudioDuration(fileStats.size)
 
-    logger.info(`Transcribing audio: ${audioPath}`, {
-      fileSizeKB: Math.round(fileStats.size / 1024),
-      estimatedDuration: Math.round(durationSeconds / 60),
-    })
+		logger.info(`Transcribing audio: ${audioPath}`, {
+			fileSizeKB: Math.round(fileStats.size / 1024),
+			estimatedDuration: Math.round(durationSeconds / 60),
+		})
 
-    // AC05: Handle long audio with chunking if needed
-    const transcriptionData = await handleLongAudio(
-      audioPath,
-      durationSeconds,
-      config,
-    )
+		// AC05: Handle long audio with chunking if needed
+		const transcriptionData = await handleLongAudio(
+			audioPath,
+			durationSeconds,
+			config,
+		)
 
-    // AC04: Create enrichment entry with full provenance
-    const modelName = config.geminiModel || 'gemini-1.5-pro'
-    const version = new Date().toISOString().split('T')[0] || 'unknown'
-    const enrichment: MediaEnrichment = {
-      kind: 'transcription',
-      provider: 'gemini',
-      model: modelName,
-      version, // YYYY-MM-DD
-      createdAt: new Date().toISOString(),
-      transcription: transcriptionData.transcription,
-      speakers: transcriptionData.speakers,
-      timestamps: transcriptionData.timestamps,
-      shortDescription: transcriptionData.shortDescription,
-    }
+		// AC04: Create enrichment entry with full provenance
+		const modelName = config.geminiModel || 'gemini-1.5-pro'
+		const version = new Date().toISOString().split('T')[0] || 'unknown'
+		const enrichment: MediaEnrichment = {
+			kind: 'transcription',
+			provider: 'gemini',
+			model: modelName,
+			version, // YYYY-MM-DD
+			createdAt: new Date().toISOString(),
+			transcription: transcriptionData.transcription,
+			speakers: transcriptionData.speakers,
+			timestamps: transcriptionData.timestamps,
+			shortDescription: transcriptionData.shortDescription,
+		}
 
-    logger.info(`Audio transcription complete for ${audioPath}`, {
-      kind: enrichment.kind,
-      speakerCount: enrichment.speakers?.length,
-      duration: Math.round(durationSeconds / 60),
-    })
+		logger.info(`Audio transcription complete for ${audioPath}`, {
+			kind: enrichment.kind,
+			speakerCount: enrichment.speakers?.length,
+			duration: Math.round(durationSeconds / 60),
+		})
 
-    return enrichment
-  } catch (error) {
-    logger.error(`Transcription error for ${audioPath}`, { error })
-    throw error
-  }
+		return enrichment
+	} catch (error) {
+		logger.error(`Transcription error for ${audioPath}`, { error })
+		throw error
+	}
 }
 
 /**
@@ -344,87 +344,87 @@ export async function transcribeAudio(
  * 5. Add enrichment with provenance (AC04)
  */
 export async function analyzeAudio(
-  message: Message,
-  config: Partial<AudioTranscriptionConfig>,
+	message: Message,
+	config: Partial<AudioTranscriptionConfig>,
 ): Promise<Message> {
-  // Skip if not enabled
-  if (!config.enableAudioTranscription) {
-    logger.debug(`Audio transcription disabled in config`)
-    return message
-  }
+	// Skip if not enabled
+	if (!config.enableAudioTranscription) {
+		logger.debug('Audio transcription disabled in config')
+		return message
+	}
 
-  // Skip if not a media message
-  if (message.messageKind !== 'media' || !message.media) {
-    return message
-  }
+	// Skip if not a media message
+	if (message.messageKind !== 'media' || !message.media) {
+		return message
+	}
 
-  // Skip if media is not audio
-  if (message.media.mediaKind !== 'audio') {
-    logger.debug(`Skipping non-audio media`, {
-      mediaKind: message.media.mediaKind,
-    })
-    return message
-  }
+	// Skip if media is not audio
+	if (message.media.mediaKind !== 'audio') {
+		logger.debug('Skipping non-audio media', {
+			mediaKind: message.media.mediaKind,
+		})
+		return message
+	}
 
-  // Skip if path is missing
-  if (!message.media.path) {
-    logger.warn(`Skipping audio with missing path`, {
-      filename: message.media.filename,
-    })
-    return message
-  }
+	// Skip if path is missing
+	if (!message.media.path) {
+		logger.warn('Skipping audio with missing path', {
+			filename: message.media.filename,
+		})
+		return message
+	}
 
-  // Check if audio file exists
-  try {
-    await access(message.media.path)
-  } catch {
-    logger.warn(`Audio file not found at path`, { path: message.media.path })
-    return message
-  }
+	// Check if audio file exists
+	try {
+		await access(message.media.path)
+	} catch {
+		logger.warn('Audio file not found at path', { path: message.media.path })
+		return message
+	}
 
-  try {
-    // AC01-AC05: Transcribe audio (handles chunking, API calls, parsing)
-    const enrichment = await transcribeAudio(message.media.path, config)
+	try {
+		// AC01-AC05: Transcribe audio (handles chunking, API calls, parsing)
+		const enrichment = await transcribeAudio(message.media.path, config)
 
-    // Check idempotency: don't re-transcribe if already done
-    const existingTranscription = message.media.enrichment?.find(
-      (e) =>
-        e.kind === 'transcription' &&
-        e.provider === (config.geminiModel ? 'gemini' : 'gemini'),
-    )
+		// Check idempotency: don't re-transcribe if already done
+		const existingTranscription = message.media.enrichment?.find(
+			(e) =>
+				e.kind === 'transcription' &&
+				e.provider === (config.geminiModel ? 'gemini' : 'gemini'),
+		)
 
-    if (existingTranscription) {
-      logger.debug(`Transcription already exists, skipping re-analysis`, {
-        model: existingTranscription.model,
-        guid: message.guid,
-      })
-      return message
-    }
+		if (existingTranscription) {
+			logger.debug('Transcription already exists, skipping re-analysis', {
+				model: existingTranscription.model,
+				guid: message.guid,
+			})
+			return message
+		}
 
-    // Update message with enrichment
-    const updatedMedia: MediaMeta = {
-      ...message.media,
-      enrichment: [...(message.media.enrichment || []), enrichment],
-    }
+		// Update message with enrichment
+		const updatedMedia: MediaMeta = {
+			...message.media,
+			enrichment: [...(message.media.enrichment || []), enrichment],
+		}
 
-    logger.info(`Audio enriched`, {
-      filename: message.media.filename,
-      guid: message.guid,
-    })
+		logger.info('Audio enriched', {
+			filename: message.media.filename,
+			guid: message.guid,
+		})
 
-    return {
-      ...message,
-      media: updatedMedia,
-    }
-  } catch (error) {
-    logger.error(`Error analyzing audio`, {
-      filename: message.media?.filename,
-      guid: message.guid,
-      error: error instanceof Error ? error.message : String(error),
-    })
-    // Don't crash pipeline - return original message
-    return message
-  }
+		return {
+			...message,
+			media: updatedMedia,
+		}
+	} catch (error) {
+		logger.error('Error analyzing audio', {
+			filename: message.media?.filename,
+			guid: message.guid,
+			error: error instanceof Error ? error.message : String(error),
+		})
+		// Don't crash pipeline - return original message
+		return message
+	}
 }
 
 /**
@@ -433,44 +433,44 @@ export async function analyzeAudio(
  * Each message is processed independently; errors don't stop the batch
  */
 export async function analyzeAudios(
-  messages: Message[],
-  config: Partial<AudioTranscriptionConfig>,
+	messages: Message[],
+	config: Partial<AudioTranscriptionConfig>,
 ): Promise<Message[]> {
-  const results: Message[] = []
-  let successCount = 0
-  let skipCount = 0
-  let errorCount = 0
+	const results: Message[] = []
+	let successCount = 0
+	let skipCount = 0
+	let errorCount = 0
 
-  for (const message of messages) {
-    try {
-      const analyzed = await analyzeAudio(message, config)
-      // Track if enrichment was added
-      if (
-        analyzed.media?.enrichment &&
-        analyzed.media.enrichment.length >
-          (message.media?.enrichment?.length || 0)
-      ) {
-        successCount++
-      } else {
-        skipCount++
-      }
-      results.push(analyzed)
-    } catch (err) {
-      errorCount++
-      logger.error(`Failed to analyze message`, {
-        guid: message.guid,
-        error: err instanceof Error ? err.message : String(err),
-      })
-      // Keep original message if analysis fails
-      results.push(message)
-    }
-  }
+	for (const message of messages) {
+		try {
+			const analyzed = await analyzeAudio(message, config)
+			// Track if enrichment was added
+			if (
+				analyzed.media?.enrichment &&
+				analyzed.media.enrichment.length >
+					(message.media?.enrichment?.length || 0)
+			) {
+				successCount++
+			} else {
+				skipCount++
+			}
+			results.push(analyzed)
+		} catch (err) {
+			errorCount++
+			logger.error('Failed to analyze message', {
+				guid: message.guid,
+				error: err instanceof Error ? err.message : String(err),
+			})
+			// Keep original message if analysis fails
+			results.push(message)
+		}
+	}
 
-  logger.info(`Batch audio transcription complete`, {
-    successCount,
-    skipCount,
-    errorCount,
-    total: messages.length,
-  })
-  return results
+	logger.info('Batch audio transcription complete', {
+		successCount,
+		skipCount,
+		errorCount,
+		total: messages.length,
+	})
+	return results
 }

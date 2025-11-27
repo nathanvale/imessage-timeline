@@ -13,42 +13,42 @@ import { z } from 'zod'
  * Gemini API configuration for AI-powered enrichment
  */
 const GeminiConfigSchema = z.object({
-  apiKey: z.string().min(1, 'Gemini API key is required'),
-  model: z.string().default('gemini-1.5-pro'),
-  rateLimitDelay: z.number().min(0).default(1000),
-  maxRetries: z.number().min(0).max(10).default(3),
+	apiKey: z.string().min(1, 'Gemini API key is required'),
+	model: z.string().default('gemini-1.5-pro'),
+	rateLimitDelay: z.number().min(0).default(1000),
+	maxRetries: z.number().min(0).max(10).default(3),
 })
 
 /**
  * Firecrawl API configuration for link enrichment (optional)
  */
 const FirecrawlConfigSchema = z
-  .object({
-    apiKey: z.string().optional(),
-    enabled: z.boolean().default(true),
-  })
-  .optional()
+	.object({
+		apiKey: z.string().optional(),
+		enabled: z.boolean().default(true),
+	})
+	.optional()
 
 /**
  * Enrichment pipeline configuration
  */
 const EnrichmentConfigSchema = z.object({
-  enableVisionAnalysis: z.boolean().default(true),
-  enableAudioTranscription: z.boolean().default(true),
-  enableLinkEnrichment: z.boolean().default(true),
-  imageCacheDir: z.string().default('./.cache/images'),
-  checkpointInterval: z.number().min(1).max(10000).default(100),
-  forceRefresh: z.boolean().default(false),
+	enableVisionAnalysis: z.boolean().default(true),
+	enableAudioTranscription: z.boolean().default(true),
+	enableLinkEnrichment: z.boolean().default(true),
+	imageCacheDir: z.string().default('./.cache/images'),
+	checkpointInterval: z.number().min(1).max(10000).default(100),
+	forceRefresh: z.boolean().default(false),
 })
 
 /**
  * Markdown rendering configuration
  */
 const RenderConfigSchema = z.object({
-  groupByTimeOfDay: z.boolean().default(true),
-  renderRepliesAsNested: z.boolean().default(true),
-  renderTapbacksAsEmoji: z.boolean().default(true),
-  maxNestingDepth: z.number().min(1).max(100).default(10),
+	groupByTimeOfDay: z.boolean().default(true),
+	renderRepliesAsNested: z.boolean().default(true),
+	renderTapbacksAsEmoji: z.boolean().default(true),
+	maxNestingDepth: z.number().min(1).max(100).default(10),
 })
 
 /**
@@ -60,27 +60,27 @@ const RenderConfigSchema = z.object({
  * - CONFIG-T01-AC05: Validation errors with field paths
  */
 export const ConfigSchema = z.object({
-  version: z.string().default('1.0'),
-  attachmentRoots: z
-    .array(z.string().min(1, 'Attachment root path cannot be empty'))
-    .min(1, 'At least one attachment root is required')
-    .default(['~/Library/Messages/Attachments']),
-  gemini: GeminiConfigSchema,
-  firecrawl: FirecrawlConfigSchema,
-  enrichment: EnrichmentConfigSchema.default({
-    enableVisionAnalysis: true,
-    enableAudioTranscription: true,
-    enableLinkEnrichment: true,
-    imageCacheDir: './.cache/images',
-    checkpointInterval: 100,
-    forceRefresh: false,
-  }),
-  render: RenderConfigSchema.default({
-    groupByTimeOfDay: true,
-    renderRepliesAsNested: true,
-    renderTapbacksAsEmoji: true,
-    maxNestingDepth: 10,
-  }),
+	version: z.string().default('1.0'),
+	attachmentRoots: z
+		.array(z.string().min(1, 'Attachment root path cannot be empty'))
+		.min(1, 'At least one attachment root is required')
+		.default(['~/Library/Messages/Attachments']),
+	gemini: GeminiConfigSchema,
+	firecrawl: FirecrawlConfigSchema,
+	enrichment: EnrichmentConfigSchema.default({
+		enableVisionAnalysis: true,
+		enableAudioTranscription: true,
+		enableLinkEnrichment: true,
+		imageCacheDir: './.cache/images',
+		checkpointInterval: 100,
+		forceRefresh: false,
+	}),
+	render: RenderConfigSchema.default({
+		groupByTimeOfDay: true,
+		renderRepliesAsNested: true,
+		renderTapbacksAsEmoji: true,
+		maxNestingDepth: 10,
+	}),
 })
 
 /**
@@ -109,7 +109,7 @@ export type Config = z.infer<typeof ConfigSchema>
  * ```
  */
 export function validateConfig(config: unknown): Config {
-  return ConfigSchema.parse(config)
+	return ConfigSchema.parse(config)
 }
 
 /**
@@ -119,23 +119,23 @@ export function validateConfig(config: unknown): Config {
  * @returns Validation result with success flag and data/errors
  */
 export function validateConfigSafe(config: unknown): {
-  success: boolean
-  data?: Config
-  errors?: Array<{ path: string; message: string }>
+	success: boolean
+	data?: Config
+	errors?: Array<{ path: string; message: string }>
 } {
-  const result = ConfigSchema.safeParse(config)
+	const result = ConfigSchema.safeParse(config)
 
-  if (result.success) {
-    return { success: true, data: result.data }
-  }
+	if (result.success) {
+		return { success: true, data: result.data }
+	}
 
-  return {
-    success: false,
-    errors: result.error.errors.map((err) => ({
-      path: err.path.join('.'),
-      message: err.message,
-    })),
-  }
+	return {
+		success: false,
+		errors: result.error.errors.map((err) => ({
+			path: err.path.join('.'),
+			message: err.message,
+		})),
+	}
 }
 
 /**
@@ -144,22 +144,22 @@ export function validateConfigSafe(config: unknown): {
  * Used as fallback when no config file is present
  */
 export const DEFAULT_CONFIG: Partial<Config> = {
-  version: '1.0',
-  attachmentRoots: ['~/Library/Messages/Attachments'],
-  enrichment: {
-    enableVisionAnalysis: true,
-    enableAudioTranscription: true,
-    enableLinkEnrichment: true,
-    imageCacheDir: './.cache/images',
-    checkpointInterval: 100,
-    forceRefresh: false,
-  },
-  render: {
-    groupByTimeOfDay: true,
-    renderRepliesAsNested: true,
-    renderTapbacksAsEmoji: true,
-    maxNestingDepth: 10,
-  },
+	version: '1.0',
+	attachmentRoots: ['~/Library/Messages/Attachments'],
+	enrichment: {
+		enableVisionAnalysis: true,
+		enableAudioTranscription: true,
+		enableLinkEnrichment: true,
+		imageCacheDir: './.cache/images',
+		checkpointInterval: 100,
+		forceRefresh: false,
+	},
+	render: {
+		groupByTimeOfDay: true,
+		renderRepliesAsNested: true,
+		renderTapbacksAsEmoji: true,
+		maxNestingDepth: 10,
+	},
 }
 
 /**
@@ -171,9 +171,9 @@ export const DEFAULT_CONFIG: Partial<Config> = {
  * 3. ./imessage-config.json
  */
 export const CONFIG_FILE_PATTERNS = [
-  './imessage-config.yaml',
-  './imessage-config.yml',
-  './imessage-config.json',
+	'./imessage-config.yaml',
+	'./imessage-config.yml',
+	'./imessage-config.json',
 ] as const
 
 /**
@@ -185,13 +185,14 @@ export type ConfigFormat = 'json' | 'yaml'
  * Detect config file format from file extension
  */
 export function detectConfigFormat(filePath: string): ConfigFormat {
-  if (filePath.endsWith('.json')) {
-    return 'json'
-  } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
-    return 'yaml'
-  }
+	if (filePath.endsWith('.json')) {
+		return 'json'
+	}
+	if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+		return 'yaml'
+	}
 
-  throw new Error(
-    `Unsupported config file format: ${filePath}. Supported formats: .json, .yaml, .yml`,
-  )
+	throw new Error(
+		`Unsupported config file format: ${filePath}. Supported formats: .json, .yaml, .yml`,
+	)
 }

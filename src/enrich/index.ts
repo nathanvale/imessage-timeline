@@ -19,22 +19,22 @@ export * from './link-enrichment'
 export * from './idempotency'
 
 import {
-  shouldSkipEnrichment,
-  addEnrichmentIdempotent,
-  deduplicateEnrichmentByKind,
+	addEnrichmentIdempotent,
+	deduplicateEnrichmentByKind,
+	shouldSkipEnrichment,
 } from './idempotency'
 
-import type { Message, MediaEnrichment } from '#schema/message'
+import type { MediaEnrichment, Message } from '#schema/message'
 
 type EnrichmentConfig = {
-  enableVisionAnalysis?: boolean
-  enableLinkAnalysis?: boolean
-  geminiApiKey?: string
-  geminiModel?: string
-  imageCacheDir?: string
-  firecrawlApiKey?: string
-  rateLimitDelay?: number
-  forceRefresh?: boolean
+	enableVisionAnalysis?: boolean
+	enableLinkAnalysis?: boolean
+	geminiApiKey?: string
+	geminiModel?: string
+	imageCacheDir?: string
+	firecrawlApiKey?: string
+	rateLimitDelay?: number
+	forceRefresh?: boolean
 }
 
 /**
@@ -49,13 +49,13 @@ type EnrichmentConfig = {
  * @returns Updated message with enrichment applied idempotently
  */
 export function applyEnrichmentIdempotent(
-  message: Message,
-  enrichment: MediaEnrichment,
-  config: EnrichmentConfig = {},
+	message: Message,
+	enrichment: MediaEnrichment,
+	config: EnrichmentConfig = {},
 ): Message {
-  const { forceRefresh = false } = config
+	const { forceRefresh = false } = config
 
-  return addEnrichmentIdempotent(message, enrichment, { forceRefresh })
+	return addEnrichmentIdempotent(message, enrichment, { forceRefresh })
 }
 
 /**
@@ -67,15 +67,15 @@ export function applyEnrichmentIdempotent(
  * @returns true if should skip, false if should proceed
  */
 export function shouldSkipEnrichmentForKind(
-  message: Message,
-  kind: MediaEnrichment['kind'],
-  forceRefresh: boolean = false,
+	message: Message,
+	kind: MediaEnrichment['kind'],
+	forceRefresh = false,
 ): boolean {
-  if (forceRefresh) {
-    return false
-  }
+	if (forceRefresh) {
+		return false
+	}
 
-  return shouldSkipEnrichment(message, kind)
+	return shouldSkipEnrichment(message, kind)
 }
 
 /**
@@ -87,22 +87,22 @@ export function shouldSkipEnrichmentForKind(
  * @returns Message with deduplicated enrichment
  */
 export function ensureDeduplicatedEnrichment(message: Message): Message {
-  if (!message.media?.enrichment) {
-    return message
-  }
+	if (!message.media?.enrichment) {
+		return message
+	}
 
-  const deduped = deduplicateEnrichmentByKind(message.media.enrichment)
+	const deduped = deduplicateEnrichmentByKind(message.media.enrichment)
 
-  if (deduped.length === message.media.enrichment.length) {
-    // No change needed
-    return message
-  }
+	if (deduped.length === message.media.enrichment.length) {
+		// No change needed
+		return message
+	}
 
-  return {
-    ...message,
-    media: {
-      ...message.media,
-      enrichment: deduped,
-    },
-  }
+	return {
+		...message,
+		media: {
+			...message.media,
+			enrichment: deduped,
+		},
+	}
 }

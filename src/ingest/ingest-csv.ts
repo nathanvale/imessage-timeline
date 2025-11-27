@@ -1,42 +1,42 @@
-import { readFileSync, existsSync, readdirSync } from 'fs'
-import * as os from 'os'
-import * as path from 'path'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import * as os from 'node:os'
+import * as path from 'node:path'
 
 import { parse } from 'csv-parse/sync'
 
 import { MessageSchema } from '../schema/message.js'
 
-import type { Message, ExportEnvelope } from '../schema/message.js'
+import type { ExportEnvelope, Message } from '../schema/message.js'
 
 export type IngestOptions = {
-  attachmentRoots: string[]
-  messageDate?: string
+	attachmentRoots: string[]
+	messageDate?: string
 }
 
 export type CSVRow = {
-  [key: string]: string | undefined
+	[key: string]: string | undefined
 }
 
 /**
  * Main entry point: Ingest CSV file and convert to unified Message schema
  */
 export function ingestCSV(
-  csvFilePath: string,
-  options: IngestOptions,
+	csvFilePath: string,
+	options: IngestOptions,
 ): Message[] {
-  const csvContent = readFileSync(csvFilePath, 'utf-8')
-  const rows = parse(csvContent, { columns: true }) as CSVRow[]
+	const csvContent = readFileSync(csvFilePath, 'utf-8')
+	const rows = parse(csvContent, { columns: true }) as CSVRow[]
 
-  const messages: Message[] = []
-  let lineNumber = 2 // Start at 2 (header is line 1)
+	const messages: Message[] = []
+	let lineNumber = 2 // Start at 2 (header is line 1)
 
-  for (const row of rows) {
-    const rowMessages = parseCSVRow(row, lineNumber, options)
-    messages.push(...rowMessages)
-    lineNumber++
-  }
+	for (const row of rows) {
+		const rowMessages = parseCSVRow(row, lineNumber, options)
+		messages.push(...rowMessages)
+		lineNumber++
+	}
 
-  return messages
+	return messages
 }
 
 /**
@@ -46,141 +46,141 @@ export function ingestCSV(
  * AC01: Parse iMazing CSV rows with correct field mapping per CSV header
  */
 export function parseCSVRow(
-  row: CSVRow,
-  lineNumber: number,
-  options: IngestOptions,
+	row: CSVRow,
+	lineNumber: number,
+	options: IngestOptions,
 ): Message[] {
-  const messages: Message[] = []
+	const messages: Message[] = []
 
-  // Extract iMazing CSV fields (headers have spaces, not underscores)
-  const messageDate = row['Message Date']
-  const deliveredDate = row['Delivered Date']
-  const readDate = row['Read Date']
-  const editedDate = row['Edited Date']
-  const service = row['Service']
-  const type = row['Type']
-  const senderName = row['Sender Name']
-  const senderID = row['Sender ID']
-  const status = row['Status']
-  const text = row['Text']
-  const subject = row['Subject']
-  const attachment = row['Attachment']
-  const attachmentType = row['Attachment type']
-  const replyingTo = row['Replying to']
+	// Extract iMazing CSV fields (headers have spaces, not underscores)
+	const messageDate = row['Message Date']
+	const deliveredDate = row['Delivered Date']
+	const readDate = row['Read Date']
+	const editedDate = row['Edited Date']
+	const service = row.Service
+	const type = row.Type
+	const senderName = row['Sender Name']
+	const senderID = row['Sender ID']
+	const status = row.Status
+	const text = row.Text
+	const subject = row.Subject
+	const attachment = row.Attachment
+	const attachmentType = row['Attachment type']
+	const replyingTo = row['Replying to']
 
-  // AC03: Convert CSV dates to ISO 8601 UTC with Z suffix
-  const date = convertToISO8601(messageDate || '')
-  if (!date) return [] // Skip rows with invalid dates
+	// AC03: Convert CSV dates to ISO 8601 UTC with Z suffix
+	const date = convertToISO8601(messageDate || '')
+	if (!date) return [] // Skip rows with invalid dates
 
-  // AC02: Split rows into text/media/tapback/notification by analyzing content
-  // Determine messageKind and isFromMe from Type field
-  const isFromMe = type === 'Outgoing' || type === 'Sent'
-  let messageKind: 'text' | 'media' | 'tapback' | 'notification' = 'text'
+	// AC02: Split rows into text/media/tapback/notification by analyzing content
+	// Determine messageKind and isFromMe from Type field
+	const isFromMe = type === 'Outgoing' || type === 'Sent'
+	let messageKind: 'text' | 'media' | 'tapback' | 'notification' = 'text'
 
-  if (type === 'Notification') {
-    messageKind = 'notification'
-  }
+	if (type === 'Notification') {
+		messageKind = 'notification'
+	}
 
-  // Base message object with common fields
-  const baseMessage: Partial<Message> = {
-    isFromMe,
-    date,
-  }
+	// Base message object with common fields
+	const baseMessage: Partial<Message> = {
+		isFromMe,
+		date,
+	}
 
-  // Conditionally add optional fields to satisfy exactOptionalPropertyTypes
-  const handle = senderName || senderID
-  if (handle) baseMessage.handle = handle
-  if (service) baseMessage.service = service
-  if (subject) baseMessage.subject = subject
-  if (readDate) baseMessage.dateRead = convertToISO8601(readDate)
-  if (deliveredDate) baseMessage.dateDelivered = convertToISO8601(deliveredDate)
-  if (editedDate) {
-    baseMessage.dateEdited = convertToISO8601(editedDate)
-    baseMessage.isEdited = true
-  }
-  if (status === 'Read') baseMessage.isRead = true
-  else if (status === 'Unread') baseMessage.isRead = false
+	// Conditionally add optional fields to satisfy exactOptionalPropertyTypes
+	const handle = senderName || senderID
+	if (handle) baseMessage.handle = handle
+	if (service) baseMessage.service = service
+	if (subject) baseMessage.subject = subject
+	if (readDate) baseMessage.dateRead = convertToISO8601(readDate)
+	if (deliveredDate) baseMessage.dateDelivered = convertToISO8601(deliveredDate)
+	if (editedDate) {
+		baseMessage.dateEdited = convertToISO8601(editedDate)
+		baseMessage.isEdited = true
+	}
+	if (status === 'Read') baseMessage.isRead = true
+	else if (status === 'Unread') baseMessage.isRead = false
 
-  // AC05: Preserve row metadata (source, line number) for provenance
-  const baseExportMetadata = {
-    source: 'csv' as const,
-    lineNumber,
-    csvGuid: `csv:${lineNumber}:0`,
-    ...(replyingTo && { replyingTo }),
-  }
+	// AC05: Preserve row metadata (source, line number) for provenance
+	const baseExportMetadata = {
+		source: 'csv' as const,
+		lineNumber,
+		csvGuid: `csv:${lineNumber}:0`,
+		...(replyingTo && { replyingTo }),
+	}
 
-  // Create text message
-  if (messageKind === 'text' && text) {
-    const textMessage: Message = {
-      ...baseMessage,
-      guid: `csv:${lineNumber}:0`,
-      messageKind: 'text',
-      text,
-      exportMetadata: baseExportMetadata,
-    } as Message
+	// Create text message
+	if (messageKind === 'text' && text) {
+		const textMessage: Message = {
+			...baseMessage,
+			guid: `csv:${lineNumber}:0`,
+			messageKind: 'text',
+			text,
+			exportMetadata: baseExportMetadata,
+		} as Message
 
-    messages.push(textMessage)
-  }
+		messages.push(textMessage)
+	}
 
-  // AC04: Resolve iMazing attachment paths to absolute paths when files exist
-  if (attachment && attachment.trim() !== '') {
-    const resolvedPath = resolveAttachmentPath(
-      { filename: attachment },
-      {
-        ...options,
-        messageDate: date,
-      },
-    )
+	// AC04: Resolve iMazing attachment paths to absolute paths when files exist
+	if (attachment && attachment.trim() !== '') {
+		const resolvedPath = resolveAttachmentPath(
+			{ filename: attachment },
+			{
+				...options,
+				messageDate: date,
+			},
+		)
 
-    // Only create media message if path can be resolved to absolute path (schema requirement)
-    if (resolvedPath) {
-      const mediaMessage: Message = {
-        ...baseMessage,
-        guid: `csv:${lineNumber}:0:media`,
-        messageKind: 'media',
-        media: {
-          id: `media:csv:${lineNumber}:0`,
-          filename: attachment,
-          path: resolvedPath,
-          mimeType: attachmentType || undefined,
-          mediaKind: inferMediaKind(attachmentType || ''),
-        },
-        exportMetadata: {
-          ...baseExportMetadata,
-          attachmentIndex: 0,
-        },
-      } as Message
+		// Only create media message if path can be resolved to absolute path (schema requirement)
+		if (resolvedPath) {
+			const mediaMessage: Message = {
+				...baseMessage,
+				guid: `csv:${lineNumber}:0:media`,
+				messageKind: 'media',
+				media: {
+					id: `media:csv:${lineNumber}:0`,
+					filename: attachment,
+					path: resolvedPath,
+					mimeType: attachmentType || undefined,
+					mediaKind: inferMediaKind(attachmentType || ''),
+				},
+				exportMetadata: {
+					...baseExportMetadata,
+					attachmentIndex: 0,
+				},
+			} as Message
 
-      messages.push(mediaMessage)
-    }
-  }
+			messages.push(mediaMessage)
+		}
+	}
 
-  // Create notification message if explicitly marked
-  if (messageKind === 'notification') {
-    const notificationMessage: Message = {
-      ...baseMessage,
-      guid: `csv:${lineNumber}:0`,
-      messageKind: 'notification',
-      exportMetadata: baseExportMetadata,
-    } as Message
+	// Create notification message if explicitly marked
+	if (messageKind === 'notification') {
+		const notificationMessage: Message = {
+			...baseMessage,
+			guid: `csv:${lineNumber}:0`,
+			messageKind: 'notification',
+			exportMetadata: baseExportMetadata,
+		} as Message
 
-    messages.push(notificationMessage)
-  }
+		messages.push(notificationMessage)
+	}
 
-  // Fallback: If no messages created but we have text, create text message
-  if (messages.length === 0 && text) {
-    const fallbackMessage: Message = {
-      ...baseMessage,
-      guid: `csv:${lineNumber}:0`,
-      messageKind: 'text',
-      text,
-      exportMetadata: baseExportMetadata,
-    } as Message
+	// Fallback: If no messages created but we have text, create text message
+	if (messages.length === 0 && text) {
+		const fallbackMessage: Message = {
+			...baseMessage,
+			guid: `csv:${lineNumber}:0`,
+			messageKind: 'text',
+			text,
+			exportMetadata: baseExportMetadata,
+		} as Message
 
-    messages.push(fallbackMessage)
-  }
+		messages.push(fallbackMessage)
+	}
 
-  return messages
+	return messages
 }
 
 /**
@@ -188,120 +188,120 @@ export function parseCSVRow(
  * Input format: "YYYY-MM-DD HH:MM:SS" (space-separated)
  */
 export function convertToISO8601(csvDate: string): string | null {
-  if (!csvDate || csvDate.trim() === '') {
-    return null
-  }
+	if (!csvDate || csvDate.trim() === '') {
+		return null
+	}
 
-  try {
-    // Normalize: convert space to T (CSV uses space, ISO 8601 uses T)
-    const normalized = csvDate.trim().replace(' ', 'T')
+	try {
+		// Normalize: convert space to T (CSV uses space, ISO 8601 uses T)
+		const normalized = csvDate.trim().replace(' ', 'T')
 
-    // Basic validation: should contain date separators
-    if (!normalized.includes('-') && !normalized.includes('/')) {
-      return null
-    }
+		// Basic validation: should contain date separators
+		if (!normalized.includes('-') && !normalized.includes('/')) {
+			return null
+		}
 
-    // Append Z if not present (assuming UTC)
-    let isoString = normalized
-    if (!normalized.includes('Z') && !normalized.match(/[+-]\d{2}:/)) {
-      isoString = normalized + 'Z'
-    }
+		// Append Z if not present (assuming UTC)
+		let isoString = normalized
+		if (!normalized.includes('Z') && !normalized.match(/[+-]\d{2}:/)) {
+			isoString = `${normalized}Z`
+		}
 
-    // Parse and validate
-    const date = new Date(isoString)
-    if (isNaN(date.getTime())) {
-      return null
-    }
+		// Parse and validate
+		const date = new Date(isoString)
+		if (Number.isNaN(date.getTime())) {
+			return null
+		}
 
-    // Return ISO 8601 with Z suffix
-    return date.toISOString()
-  } catch {
-    return null
-  }
+		// Return ISO 8601 with Z suffix
+		return date.toISOString()
+	} catch {
+		return null
+	}
 }
 
 type AttachmentRecord = {
-  copied_path?: string
-  filename?: string
-  senderName?: string
+	copied_path?: string
+	filename?: string
+	senderName?: string
 }
 
 /**
  * Resolve attachment path to absolute path when file exists
  */
 export function resolveAttachmentPath(
-  attachment: AttachmentRecord | null | undefined,
-  options: IngestOptions & { messageDate?: string },
+	attachment: AttachmentRecord | null | undefined,
+	options: IngestOptions & { messageDate?: string },
 ): string | null {
-  if (!attachment) return null
+	if (!attachment) return null
 
-  const { attachmentRoots, messageDate } = options
+	const { attachmentRoots, messageDate } = options
 
-  // If already absolute and exists, return it
-  if (attachment.copied_path && attachment.copied_path.startsWith('/')) {
-    if (existsSync(attachment.copied_path)) {
-      return attachment.copied_path
-    }
-  }
+	// If already absolute and exists, return it
+	if (attachment.copied_path?.startsWith('/')) {
+		if (existsSync(attachment.copied_path)) {
+			return attachment.copied_path
+		}
+	}
 
-  // Expand tilde if present
-  if (attachment.copied_path?.startsWith('~')) {
-    const expanded = attachment.copied_path.replace('~', os.homedir())
-    if (existsSync(expanded)) {
-      return expanded
-    }
-  }
+	// Expand tilde if present
+	if (attachment.copied_path?.startsWith('~')) {
+		const expanded = attachment.copied_path.replace('~', os.homedir())
+		if (existsSync(expanded)) {
+			return expanded
+		}
+	}
 
-  // Search using timestamp pattern in attachment roots
-  if (messageDate && attachmentRoots.length > 0) {
-    const dateStr = formatDateForAttachmentSearch(messageDate)
-    const filename = attachment.filename || 'unknown'
-    const senderName = attachment.senderName || '*'
+	// Search using timestamp pattern in attachment roots
+	if (messageDate && attachmentRoots.length > 0) {
+		const dateStr = formatDateForAttachmentSearch(messageDate)
+		const filename = attachment.filename || 'unknown'
+		const senderName = attachment.senderName || '*'
 
-    for (const root of attachmentRoots) {
-      // Try exact pattern: YYYY-MM-DD HH MM SS - SenderName - filename
-      const pattern = `${dateStr} - ${senderName} - ${filename}`
-      const fullPath = path.join(root, pattern)
+		for (const root of attachmentRoots) {
+			// Try exact pattern: YYYY-MM-DD HH MM SS - SenderName - filename
+			const pattern = `${dateStr} - ${senderName} - ${filename}`
+			const fullPath = path.join(root, pattern)
 
-      if (existsSync(fullPath)) {
-        return fullPath
-      }
+			if (existsSync(fullPath)) {
+				return fullPath
+			}
 
-      // Try wildcard pattern if sender name unknown
-      if (senderName === '*' && existsSync(root)) {
-        try {
-          const files = readdirSync(root).filter((f) => {
-            return f.includes(dateStr) && f.endsWith(filename)
-          })
+			// Try wildcard pattern if sender name unknown
+			if (senderName === '*' && existsSync(root)) {
+				try {
+					const files = readdirSync(root).filter((f) => {
+						return f.includes(dateStr) && f.endsWith(filename)
+					})
 
-          if (files.length > 0 && files[0]) {
-            return path.join(root, files[0])
-          }
-        } catch {
-          // Directory doesn't exist or can't be read
-        }
-      }
-    }
-  }
+					if (files.length > 0 && files[0]) {
+						return path.join(root, files[0])
+					}
+				} catch {
+					// Directory doesn't exist or can't be read
+				}
+			}
+		}
+	}
 
-  // Not found
-  return null
+	// Not found
+	return null
 }
 
 /**
  * Infer media kind from MIME type
  */
 export function inferMediaKind(
-  mimeType: string,
+	mimeType: string,
 ): 'image' | 'audio' | 'video' | 'pdf' | 'unknown' {
-  if (!mimeType) return 'unknown'
+	if (!mimeType) return 'unknown'
 
-  if (mimeType.startsWith('image/')) return 'image'
-  if (mimeType.startsWith('audio/')) return 'audio'
-  if (mimeType.startsWith('video/')) return 'video'
-  if (mimeType.includes('pdf')) return 'pdf'
+	if (mimeType.startsWith('image/')) return 'image'
+	if (mimeType.startsWith('audio/')) return 'audio'
+	if (mimeType.startsWith('video/')) return 'video'
+	if (mimeType.includes('pdf')) return 'pdf'
 
-  return 'unknown'
+	return 'unknown'
 }
 
 /**
@@ -309,64 +309,64 @@ export function inferMediaKind(
  * Converts: 2023-10-23T06:52:57.000Z → 2023-10-23 06 52 57
  */
 export function formatDateForAttachmentSearch(isoDate: string): string {
-  try {
-    const date = new Date(isoDate)
-    const year = date.getUTCFullYear()
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-    const day = String(date.getUTCDate()).padStart(2, '0')
-    const hours = String(date.getUTCHours()).padStart(2, '0')
-    const minutes = String(date.getUTCMinutes()).padStart(2, '0')
-    const seconds = String(date.getUTCSeconds()).padStart(2, '0')
+	try {
+		const date = new Date(isoDate)
+		const year = date.getUTCFullYear()
+		const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+		const day = String(date.getUTCDate()).padStart(2, '0')
+		const hours = String(date.getUTCHours()).padStart(2, '0')
+		const minutes = String(date.getUTCMinutes()).padStart(2, '0')
+		const seconds = String(date.getUTCSeconds()).padStart(2, '0')
 
-    return `${year}-${month}-${day} ${hours} ${minutes} ${seconds}`
-  } catch {
-    return ''
-  }
+		return `${year}-${month}-${day} ${hours} ${minutes} ${seconds}`
+	} catch {
+		return ''
+	}
 }
 
 /**
  * Export envelope wrapper for CSV ingestion output
  */
 export function createExportEnvelope(messages: Message[]): ExportEnvelope {
-  return {
-    schemaVersion: '2.0.0',
-    source: 'csv',
-    createdAt: new Date().toISOString(),
-    messages,
-  }
+	return {
+		schemaVersion: '2.0.0',
+		source: 'csv',
+		createdAt: new Date().toISOString(),
+		messages,
+	}
 }
 
 type ValidationError = {
-  index: number
-  message: Message
-  issues: unknown[]
+	index: number
+	message: Message
+	issues: unknown[]
 }
 
 /**
  * Validate all messages pass schema validation
  */
 export function validateMessages(messages: Message[]): {
-  valid: boolean
-  errors: ValidationError[]
+	valid: boolean
+	errors: ValidationError[]
 } {
-  const errors: ValidationError[] = []
+	const errors: ValidationError[] = []
 
-  for (let i = 0; i < messages.length; i++) {
-    const message = messages[i]
-    if (!message) continue
+	for (let i = 0; i < messages.length; i++) {
+		const message = messages[i]
+		if (!message) continue
 
-    const result = MessageSchema.safeParse(message)
-    if (!result.success) {
-      errors.push({
-        index: i,
-        message,
-        issues: result.error.issues,
-      })
-    }
-  }
+		const result = MessageSchema.safeParse(message)
+		if (!result.success) {
+			errors.push({
+				index: i,
+				message,
+				issues: result.error.issues,
+			})
+		}
+	}
 
-  return {
-    valid: errors.length === 0,
-    errors,
-  }
+	return {
+		valid: errors.length === 0,
+		errors,
+	}
 }

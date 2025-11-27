@@ -12,34 +12,34 @@ import { vi } from 'vitest'
 // ============================================================================
 
 export type MockImageAnalysisResult = {
-  visionSummary: string
-  shortDescription: string
-  provider: 'gemini'
-  model: string
-  version: string
-  createdAt: string
+	visionSummary: string
+	shortDescription: string
+	provider: 'gemini'
+	model: string
+	version: string
+	createdAt: string
 }
 
 export type MockTranscriptionResult = {
-  fullTranscription: string
-  shortDescription: string
-  speakers?: string[]
-  timestamps?: string[]
-  provider: 'gemini'
-  model: string
+	fullTranscription: string
+	shortDescription: string
+	speakers?: string[]
+	timestamps?: string[]
+	provider: 'gemini'
+	model: string
 }
 
 export type MockLinkContextResult = {
-  title: string
-  summary: string
-  url: string
-  provider: 'firecrawl' | 'youtube' | 'spotify' | 'twitter' | 'instagram'
+	title: string
+	summary: string
+	url: string
+	provider: 'firecrawl' | 'youtube' | 'spotify' | 'twitter' | 'instagram'
 }
 
 export type MockPdfSummaryResult = {
-  summary: string
-  pageCount: number
-  provider: 'gemini'
+	summary: string
+	pageCount: number
+	provider: 'gemini'
 }
 
 // ============================================================================
@@ -57,17 +57,17 @@ export type MockPdfSummaryResult = {
  * })
  */
 export function createMockGeminiVision() {
-  return vi.fn(async (imagePath: string): Promise<MockImageAnalysisResult> => {
-    const filename = imagePath.split('/').pop() || 'image.jpg'
-    return {
-      visionSummary: `Mock detailed analysis of ${filename}`,
-      shortDescription: `Mock caption for ${filename}`,
-      provider: 'gemini',
-      model: 'gemini-1.5-pro',
-      version: '2025-10-17',
-      createdAt: new Date().toISOString(),
-    }
-  })
+	return vi.fn(async (imagePath: string): Promise<MockImageAnalysisResult> => {
+		const filename = imagePath.split('/').pop() || 'image.jpg'
+		return {
+			visionSummary: `Mock detailed analysis of ${filename}`,
+			shortDescription: `Mock caption for ${filename}`,
+			provider: 'gemini',
+			model: 'gemini-1.5-pro',
+			version: '2025-10-17',
+			createdAt: new Date().toISOString(),
+		}
+	})
 }
 
 /**
@@ -81,17 +81,17 @@ export function createMockGeminiVision() {
  * })
  */
 export function createMockGeminiAudio() {
-  return vi.fn(async (audioPath: string): Promise<MockTranscriptionResult> => {
-    const filename = audioPath.split('/').pop() || 'audio.m4a'
-    return {
-      fullTranscription: `Mock transcription for ${filename}`,
-      shortDescription: `Mock audio summary for ${filename}`,
-      speakers: ['Speaker 1', 'Speaker 2'],
-      timestamps: ['00:00', '00:15', '00:30'],
-      provider: 'gemini',
-      model: 'gemini-1.5-pro',
-    }
-  })
+	return vi.fn(async (audioPath: string): Promise<MockTranscriptionResult> => {
+		const filename = audioPath.split('/').pop() || 'audio.m4a'
+		return {
+			fullTranscription: `Mock transcription for ${filename}`,
+			shortDescription: `Mock audio summary for ${filename}`,
+			speakers: ['Speaker 1', 'Speaker 2'],
+			timestamps: ['00:00', '00:15', '00:30'],
+			provider: 'gemini',
+			model: 'gemini-1.5-pro',
+		}
+	})
 }
 
 /**
@@ -105,14 +105,14 @@ export function createMockGeminiAudio() {
  * })
  */
 export function createMockGeminiPdf() {
-  return vi.fn(async (pdfPath: string): Promise<MockPdfSummaryResult> => {
-    const filename = pdfPath.split('/').pop() || 'document.pdf'
-    return {
-      summary: `Mock PDF summary for ${filename}`,
-      pageCount: 10,
-      provider: 'gemini',
-    }
-  })
+	return vi.fn(async (pdfPath: string): Promise<MockPdfSummaryResult> => {
+		const filename = pdfPath.split('/').pop() || 'document.pdf'
+		return {
+			summary: `Mock PDF summary for ${filename}`,
+			pageCount: 10,
+			provider: 'gemini',
+		}
+	})
 }
 
 /**
@@ -126,14 +126,14 @@ export function createMockGeminiPdf() {
  * })
  */
 export function createMockFirecrawl() {
-  return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
-    return {
-      title: `Mock title for ${url}`,
-      summary: `Mock summary extracted from ${url}`,
-      url,
-      provider: 'firecrawl',
-    }
-  })
+	return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
+		return {
+			title: `Mock title for ${url}`,
+			summary: `Mock summary extracted from ${url}`,
+			url,
+			provider: 'firecrawl',
+		}
+	})
 }
 
 /**
@@ -147,14 +147,14 @@ export function createMockFirecrawl() {
  * })
  */
 export function createMockYouTube() {
-  return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
-    return {
-      title: 'Mock YouTube Video Title',
-      summary: 'Mock Channel: Test Channel | 1.2M views',
-      url,
-      provider: 'youtube',
-    }
-  })
+	return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
+		return {
+			title: 'Mock YouTube Video Title',
+			summary: 'Mock Channel: Test Channel | 1.2M views',
+			url,
+			provider: 'youtube',
+		}
+	})
 }
 
 /**
@@ -168,14 +168,14 @@ export function createMockYouTube() {
  * })
  */
 export function createMockSpotify() {
-  return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
-    return {
-      title: 'Mock Track Name',
-      summary: 'Mock Artist: Test Artist | Album: Test Album',
-      url,
-      provider: 'spotify',
-    }
-  })
+	return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
+		return {
+			title: 'Mock Track Name',
+			summary: 'Mock Artist: Test Artist | Album: Test Album',
+			url,
+			provider: 'spotify',
+		}
+	})
 }
 
 /**
@@ -185,14 +185,14 @@ export function createMockSpotify() {
  * const mockTwitter = createMockTwitter()
  */
 export function createMockTwitter() {
-  return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
-    return {
-      title: 'Tweet by @testuser',
-      summary: 'Mock tweet content goes here...',
-      url,
-      provider: 'twitter',
-    }
-  })
+	return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
+		return {
+			title: 'Tweet by @testuser',
+			summary: 'Mock tweet content goes here...',
+			url,
+			provider: 'twitter',
+		}
+	})
 }
 
 /**
@@ -202,14 +202,14 @@ export function createMockTwitter() {
  * const mockInstagram = createMockInstagram()
  */
 export function createMockInstagram() {
-  return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
-    return {
-      title: 'Post by @testuser',
-      summary: 'Mock Instagram caption text...',
-      url,
-      provider: 'instagram',
-    }
-  })
+	return vi.fn(async (url: string): Promise<MockLinkContextResult> => {
+		return {
+			title: 'Post by @testuser',
+			summary: 'Mock Instagram caption text...',
+			url,
+			provider: 'instagram',
+		}
+	})
 }
 
 // ============================================================================
@@ -224,16 +224,16 @@ export function createMockInstagram() {
  * // Use mocks.geminiVision, mocks.firecrawl, etc. in your tests
  */
 export function createMockProviderSuite() {
-  return {
-    geminiVision: createMockGeminiVision(),
-    geminiAudio: createMockGeminiAudio(),
-    geminiPdf: createMockGeminiPdf(),
-    firecrawl: createMockFirecrawl(),
-    youtube: createMockYouTube(),
-    spotify: createMockSpotify(),
-    twitter: createMockTwitter(),
-    instagram: createMockInstagram(),
-  }
+	return {
+		geminiVision: createMockGeminiVision(),
+		geminiAudio: createMockGeminiAudio(),
+		geminiPdf: createMockGeminiPdf(),
+		firecrawl: createMockFirecrawl(),
+		youtube: createMockYouTube(),
+		spotify: createMockSpotify(),
+		twitter: createMockTwitter(),
+		instagram: createMockInstagram(),
+	}
 }
 
 /**
@@ -244,12 +244,12 @@ export function createMockProviderSuite() {
  * setupMockFailures(mocks, 'Rate limited')
  */
 export function setupMockFailures(
-  mocks: ReturnType<typeof createMockProviderSuite>,
-  errorMessage: string = 'Mock API failure',
+	mocks: ReturnType<typeof createMockProviderSuite>,
+	errorMessage = 'Mock API failure',
 ) {
-  Object.values(mocks).forEach((mock) => {
-    mock.mockRejectedValue(new Error(errorMessage))
-  })
+	Object.values(mocks).forEach((mock) => {
+		mock.mockRejectedValue(new Error(errorMessage))
+	})
 }
 
 /**
@@ -260,9 +260,9 @@ export function setupMockFailures(
  * resetAllMocks(mocks)
  */
 export function resetAllMocks(
-  mocks: ReturnType<typeof createMockProviderSuite>,
+	mocks: ReturnType<typeof createMockProviderSuite>,
 ) {
-  Object.values(mocks).forEach((mock) => {
-    mock.mockClear()
-  })
+	Object.values(mocks).forEach((mock) => {
+		mock.mockClear()
+	})
 }
