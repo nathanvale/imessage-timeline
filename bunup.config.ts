@@ -28,12 +28,12 @@ export default defineConfig([
 	},
 	{
 		name: 'cli',
-		entry: './src/cli.ts',
+		entry: './src/cli/index.ts',
 		outDir: './dist',
 		format: 'esm',
 		dts: false, // CLI doesn't need declarations
 		external,
 		splitting: false, // Bundle internal modules into single file
-		// Shebang is already in src/cli.ts
+		// Shebang is in src/cli/index.ts
 	},
 ])

@@ -155,7 +155,7 @@ program.configureOutput({
 // Custom error handler for better error messages
 program.exitOverride((err: CommanderError) => {
 	// Allow help and version to exit cleanly
-	if (err.code === 'commander.help') {
+	if (err.code === 'commander.help' || err.code === 'commander.helpDisplayed') {
 		process.exit(0)
 	}
 	if (err.code === 'commander.version') {

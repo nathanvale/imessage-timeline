@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import * as humanUtils from '#utils/human'
 import {
 	createPipelineProgressTracker,
 	PipelineProgressTracker,
@@ -158,7 +159,7 @@ describe('PipelineProgressTracker', () => {
 
 	describe('AC05: Final summary display', () => {
 		it('should show final summary with statistics', () => {
-			const consoleSpy = vi.spyOn(console, 'info')
+			const humanInfoSpy = vi.spyOn(humanUtils, 'humanInfo')
 
 			tracker.updateStats({
 				totalMessages: 1000,
@@ -173,15 +174,15 @@ describe('PipelineProgressTracker', () => {
 
 			tracker.showFinalSummary()
 
-			// Should call console.info multiple times for the summary
-			expect(consoleSpy).toHaveBeenCalled()
+			// Should call humanInfo multiple times for the summary
+			expect(humanInfoSpy).toHaveBeenCalled()
 
-			consoleSpy.mockRestore()
+			humanInfoSpy.mockRestore()
 		})
 
 		it('should show summary even in quiet mode', () => {
 			const quietTracker = new PipelineProgressTracker({ quiet: true })
-			const consoleSpy = vi.spyOn(console, 'info')
+			const humanInfoSpy = vi.spyOn(humanUtils, 'humanInfo')
 
 			quietTracker.updateStats({
 				totalMessages: 500,
@@ -192,14 +193,14 @@ describe('PipelineProgressTracker', () => {
 			quietTracker.showFinalSummary()
 
 			// Summary should still be shown in quiet mode
-			expect(consoleSpy).toHaveBeenCalled()
+			expect(humanInfoSpy).toHaveBeenCalled()
 
-			consoleSpy.mockRestore()
+			humanInfoSpy.mockRestore()
 			quietTracker.stop()
 		})
 
 		it('should omit zero statistics from summary', () => {
-			const consoleSpy = vi.spyOn(console, 'info')
+			const humanInfoSpy = vi.spyOn(humanUtils, 'humanInfo')
 
 			// Only set some stats
 			tracker.updateStats({
@@ -210,13 +211,13 @@ describe('PipelineProgressTracker', () => {
 			tracker.showFinalSummary()
 
 			// Should not show enrichment stats if they're all zero
-			expect(consoleSpy).toHaveBeenCalled()
+			expect(humanInfoSpy).toHaveBeenCalled()
 
-			consoleSpy.mockRestore()
+			humanInfoSpy.mockRestore()
 		})
 
 		it('should display enrichment stats when available', () => {
-			const consoleSpy = vi.spyOn(console, 'info')
+			const humanInfoSpy = vi.spyOn(humanUtils, 'humanInfo')
 
 			tracker.updateStats({
 				enrichedImages: 50,
@@ -225,9 +226,9 @@ describe('PipelineProgressTracker', () => {
 
 			tracker.showFinalSummary()
 
-			expect(consoleSpy).toHaveBeenCalled()
+			expect(humanInfoSpy).toHaveBeenCalled()
 
-			consoleSpy.mockRestore()
+			humanInfoSpy.mockRestore()
 		})
 	})
 

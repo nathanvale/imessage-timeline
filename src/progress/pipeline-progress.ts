@@ -1,3 +1,4 @@
+import { humanInfo } from '#utils/human'
 import { ProgressManager } from './progress-manager'
 
 /**
@@ -204,15 +205,15 @@ export class PipelineProgressTracker {
 		const durationSeconds = (duration / 1000).toFixed(2)
 
 		// Always show summary, even in quiet mode
-		console.info('\n')
-		console.info('═'.repeat(60))
-		console.info('✓ Pipeline Execution Summary')
-		console.info('═'.repeat(60))
+		humanInfo('\n')
+		humanInfo('═'.repeat(60))
+		humanInfo('✓ Pipeline Execution Summary')
+		humanInfo('═'.repeat(60))
 
-		console.info('\n📊 Processing Statistics:')
-		console.info(`  Total Messages:        ${this.stats.totalMessages}`)
-		console.info(`  Ingested:              ${this.stats.ingestedMessages}`)
-		console.info(`  Normalized:            ${this.stats.normalizedMessages}`)
+		humanInfo('\n📊 Processing Statistics:')
+		humanInfo(`  Total Messages:        ${this.stats.totalMessages}`)
+		humanInfo(`  Ingested:              ${this.stats.ingestedMessages}`)
+		humanInfo(`  Normalized:            ${this.stats.normalizedMessages}`)
 
 		if (
 			this.stats.enrichedImages +
@@ -221,24 +222,24 @@ export class PipelineProgressTracker {
 				this.stats.enrichedLinks >
 			0
 		) {
-			console.info('\n🔍 Enriched Media:')
+			humanInfo('\n🔍 Enriched Media:')
 			if (this.stats.enrichedImages > 0)
-				console.info(`  Images:                ${this.stats.enrichedImages}`)
+				humanInfo(`  Images:                ${this.stats.enrichedImages}`)
 			if (this.stats.enrichedAudio > 0)
-				console.info(`  Audio:                 ${this.stats.enrichedAudio}`)
+				humanInfo(`  Audio:                 ${this.stats.enrichedAudio}`)
 			if (this.stats.enrichedPDFs > 0)
-				console.info(`  PDFs:                  ${this.stats.enrichedPDFs}`)
+				humanInfo(`  PDFs:                  ${this.stats.enrichedPDFs}`)
 			if (this.stats.enrichedLinks > 0)
-				console.info(`  Links:                 ${this.stats.enrichedLinks}`)
+				humanInfo(`  Links:                 ${this.stats.enrichedLinks}`)
 		}
 
 		if (this.stats.renderedDays > 0) {
-			console.info(`\n📝 Rendered:             ${this.stats.renderedDays} days`)
+			humanInfo(`\n📝 Rendered:             ${this.stats.renderedDays} days`)
 		}
 
-		console.info(`\n⏱️  Duration:             ${durationSeconds}s`)
-		console.info('═'.repeat(60))
-		console.info('')
+		humanInfo(`\n⏱️  Duration:             ${durationSeconds}s`)
+		humanInfo('═'.repeat(60))
+		humanInfo('')
 	}
 
 	/**
