@@ -9,6 +9,7 @@
  * - AC05: Cache loaded config to avoid repeated file reads
  */
 
+import { randomUUID } from 'node:crypto'
 import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -33,8 +34,8 @@ describe('Config Loader', () => {
 	const _originalCwd = process.cwd()
 
 	beforeEach(async () => {
-		// Create temp directory for test files
-		testDir = join(tmpdir(), `imessage-config-test-${Date.now()}`)
+		// Create temp directory for test files with UUID for uniqueness in parallel runs
+		testDir = join(tmpdir(), `imessage-config-test-${randomUUID()}`)
 		await mkdir(testDir, { recursive: true })
 
 		// Clear cache before each test

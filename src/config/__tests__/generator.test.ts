@@ -4,10 +4,13 @@
  * Tests CONFIG--T03: Add Config Generation Command
  */
 
-import { readFile, unlink } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
+import { mkdir, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 import yaml from 'js-yaml'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
 	configFileExists,
@@ -17,19 +20,25 @@ import {
 } from '../generator.js'
 
 describe('Config Generator (CONFIG--T03)', () => {
-	// Test file paths
-	const testYamlPath = './test-config.yaml'
-	const testJsonPath = './test-config.json'
+	// Test file paths - use temp directory with UUID for isolation in parallel runs
+	let testDir: string
+	let testYamlPath: string
+	let testJsonPath: string
+
+	beforeEach(async () => {
+		testDir = join(tmpdir(), `imessage-generator-test-${randomUUID()}`)
+		await mkdir(testDir, { recursive: true })
+		testYamlPath = join(testDir, 'test-config.yaml')
+		testJsonPath = join(testDir, 'test-config.json')
+	})
 
 	// Cleanup after each test
 	afterEach(async () => {
-		// Remove test files
-		for (const path of [testYamlPath, testJsonPath]) {
-			try {
-				await unlink(path)
-			} catch {
-				// File might not exist, ignore
-			}
+		// Remove entire test directory
+		try {
+			await rm(testDir, { recursive: true, force: true })
+		} catch {
+			// Directory might not exist, ignore
 		}
 	})
 
