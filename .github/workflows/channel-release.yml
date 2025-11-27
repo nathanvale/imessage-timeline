@@ -35,15 +35,15 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Standard CI Env
         uses: ./.github/actions/standard-ci-env
-      - name: Setup pnpm toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
         with:
           registry-url: 'https://registry.npmjs.org'
-      - run: pnpm install --frozen-lockfile
+      - run: bun install --frozen-lockfile
       - name: Code quality (safe fixes)
-        run: pnpm quality-check:ci
+        run: bun run quality-check:ci
       - name: Build
-        run: pnpm build
+        run: bun run build
       - name: Configure Git
         run: |
           git config user.name 'github-actions[bot]'
@@ -59,7 +59,7 @@ jobs:
       - name: Version (prerelease continuation)
         if: ${{ inputs.intent == 'version' }}
         run: |
-          pnpm version:pre
+          bun run version:pre
           git add .
           git commit -m "chore(prerelease): version bump on ${{ inputs.channel }} channel" || echo 'No changes to commit'
           git push --follow-tags || echo 'Nothing new to push'
@@ -69,11 +69,11 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm publish:pre
+          bun run publish:pre
       - name: Canary snapshot publish
         if: ${{ inputs.intent == 'snapshot' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm release:snapshot:canary
+          bun run release:snapshot:canary

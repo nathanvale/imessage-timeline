@@ -49,5 +49,5 @@ git config --global core.hooksPath /dev/null || true
 
 annotate notice "Publishing alpha snapshot via Changesets (version snapshot + npm publish)."
 
-pnpm changeset version --snapshot alpha
-pnpm changeset publish --tag alpha
+bunx changeset version --snapshot alpha
+bunx changeset publish --tag alpha

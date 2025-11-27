@@ -1,29 +1,29 @@
 {
-  "$schema": "../src/config/schema.ts",
-  "attachmentRoots": ["~/Library/Messages/Attachments"],
-  "enrichment": {
-    "checkpointInterval": 100,
-    "enableAudioTranscription": true,
-    "enableLinkEnrichment": true,
-    "enableVisionAnalysis": true,
-    "forceRefresh": false,
-    "imageCacheDir": "./.cache/images"
-  },
-  "firecrawl": {
-    "apiKey": "${FIRECRAWL_API_KEY}",
-    "enabled": true
-  },
-  "gemini": {
-    "apiKey": "${GEMINI_API_KEY}",
-    "maxRetries": 3,
-    "model": "gemini-1.5-pro",
-    "rateLimitDelay": 1000
-  },
-  "render": {
-    "groupByTimeOfDay": true,
-    "maxNestingDepth": 10,
-    "renderRepliesAsNested": true,
-    "renderTapbacksAsEmoji": true
-  },
-  "version": "1.0"
+	"$schema": "../src/config/schema.ts",
+	"attachmentRoots": ["~/Library/Messages/Attachments"],
+	"enrichment": {
+		"checkpointInterval": 100,
+		"enableAudioTranscription": true,
+		"enableLinkEnrichment": true,
+		"enableVisionAnalysis": true,
+		"forceRefresh": false,
+		"imageCacheDir": "./.cache/images"
+	},
+	"firecrawl": {
+		"apiKey": "${FIRECRAWL_API_KEY}",
+		"enabled": true
+	},
+	"gemini": {
+		"apiKey": "${GEMINI_API_KEY}",
+		"maxRetries": 3,
+		"model": "gemini-1.5-pro",
+		"rateLimitDelay": 1000
+	},
+	"render": {
+		"groupByTimeOfDay": true,
+		"maxNestingDepth": 10,
+		"renderRepliesAsNested": true,
+		"renderTapbacksAsEmoji": true
+	},
+	"version": "1.0"
 }

@@ -1,29 +1,23 @@
 {
-  "compilerOptions": {
-    "noEmit": true,
-    "paths": {
-      "#enrich/*": ["./src/enrich/*"],
-      "#ingest/*": ["./src/ingest/*"],
-      "#normalize/*": ["./src/normalize/*"],
-      "#render/*": ["./src/render/*"],
-      "#schema/*": ["./src/schema/*"],
-      "#utils/*": ["./src/utils/*"]
-    }
-  },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/__tests__/**",
-    "__tests__/**"
-  ],
-  "extends": "./tsconfig.base.json",
-  "include": [
-    "src/**/*.ts",
-    "scripts/**/*.ts",
-    "vitest.config.ts",
-    "website/**/*.ts",
-    "website/**/*.tsx"
-  ]
+	"compilerOptions": {
+		"paths": {
+			"#enrich/*": ["./src/enrich/*"],
+			"#ingest/*": ["./src/ingest/*"],
+			"#normalize/*": ["./src/normalize/*"],
+			"#render/*": ["./src/render/*"],
+			"#schema/*": ["./src/schema/*"],
+			"#utils/*": ["./src/utils/*"]
+		}
+	},
+	"exclude": [
+		"node_modules",
+		"dist",
+		"**/*.test.ts",
+		"**/*.spec.ts",
+		"**/__tests__/**",
+		"__tests__/**",
+		"website/**"
+	],
+	"extends": "./tsconfig.base.json",
+	"include": ["src/**/*.ts", "scripts/**/*.ts"]
 }

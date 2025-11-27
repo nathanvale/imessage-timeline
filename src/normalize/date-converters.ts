@@ -14,12 +14,12 @@ const APPLE_EPOCH_SECONDS = 978_307_200
  * @returns ISO 8601 UTC string with Z suffix (e.g., "2001-01-01T00:00:00.000Z")
  */
 export function convertAppleEpochToUTC(appleEpochSeconds: number): string {
-  // Convert Apple epoch seconds to Unix epoch milliseconds
-  const unixMs = (appleEpochSeconds + APPLE_EPOCH_SECONDS) * 1000
+	// Convert Apple epoch seconds to Unix epoch milliseconds
+	const unixMs = (appleEpochSeconds + APPLE_EPOCH_SECONDS) * 1000
 
-  // Create date and convert to ISO 8601 UTC
-  const date = new Date(unixMs)
-  return date.toISOString()
+	// Create date and convert to ISO 8601 UTC
+	const date = new Date(unixMs)
+	return date.toISOString()
 }
 
 /**
@@ -29,16 +29,16 @@ export function convertAppleEpochToUTC(appleEpochSeconds: number): string {
  * @returns Normalized ISO 8601 UTC string with Z suffix
  */
 export function normalizeCSVDate(csvDate: string): string {
-  // Parse the CSV date string
-  const date = new Date(csvDate)
+	// Parse the CSV date string
+	const date = new Date(csvDate)
 
-  // Check if parse was successful
-  if (isNaN(date.getTime())) {
-    throw new Error(`Invalid CSV date format: ${csvDate}`)
-  }
+	// Check if parse was successful
+	if (Number.isNaN(date.getTime())) {
+		throw new Error(`Invalid CSV date format: ${csvDate}`)
+	}
 
-  // Return ISO 8601 UTC string with Z suffix
-  return date.toISOString()
+	// Return ISO 8601 UTC string with Z suffix
+	return date.toISOString()
 }
 
 /**
@@ -48,76 +48,76 @@ export function normalizeCSVDate(csvDate: string): string {
  * @returns Object with valid flag and optional error message
  */
 export function validateDateFormat(dateString: string): {
-  valid: boolean
-  error?: string
+	valid: boolean
+	error?: string
 } {
-  // Check if empty or whitespace
-  if (!dateString || typeof dateString !== 'string' || !dateString.trim()) {
-    return { valid: false, error: 'Date string is empty or whitespace' }
-  }
+	// Check if empty or whitespace
+	if (!dateString || typeof dateString !== 'string' || !dateString.trim()) {
+		return { valid: false, error: 'Date string is empty or whitespace' }
+	}
 
-  // Check for Z suffix
-  if (!dateString.endsWith('Z')) {
-    return { valid: false, error: 'Date must end with Z suffix (UTC)' }
-  }
+	// Check for Z suffix
+	if (!dateString.endsWith('Z')) {
+		return { valid: false, error: 'Date must end with Z suffix (UTC)' }
+	}
 
-  // Check for timezone offset (should not be present)
-  if (dateString.includes('+') || dateString.match(/-\d{2}:\d{2}$/)) {
-    return { valid: false, error: 'Date must be UTC only (no timezone offset)' }
-  }
+	// Check for timezone offset (should not be present)
+	if (dateString.includes('+') || dateString.match(/-\d{2}:\d{2}$/)) {
+		return { valid: false, error: 'Date must be UTC only (no timezone offset)' }
+	}
 
-  // ISO 8601 requires T separator, not space
-  if (dateString.includes(' ')) {
-    return {
-      valid: false,
-      error: 'Date must use T separator (ISO 8601), not space',
-    }
-  }
+	// ISO 8601 requires T separator, not space
+	if (dateString.includes(' ')) {
+		return {
+			valid: false,
+			error: 'Date must use T separator (ISO 8601), not space',
+		}
+	}
 
-  // Strict ISO 8601 format check: YYYY-MM-DDTHH:mm:ss.sssZ
-  const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/
-  if (!iso8601Regex.test(dateString)) {
-    return {
-      valid: false,
-      error: 'Date must match ISO 8601 format (YYYY-MM-DDTHH:mm:ss[.sss]Z)',
-    }
-  }
+	// Strict ISO 8601 format check: YYYY-MM-DDTHH:mm:ss.sssZ
+	const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/
+	if (!iso8601Regex.test(dateString)) {
+		return {
+			valid: false,
+			error: 'Date must match ISO 8601 format (YYYY-MM-DDTHH:mm:ss[.sss]Z)',
+		}
+	}
 
-  // Attempt to parse
-  const date = new Date(dateString)
+	// Attempt to parse
+	const date = new Date(dateString)
 
-  if (isNaN(date.getTime())) {
-    return { valid: false, error: 'Invalid ISO 8601 date format' }
-  }
+	if (Number.isNaN(date.getTime())) {
+		return { valid: false, error: 'Invalid ISO 8601 date format' }
+	}
 
-  // Validate the date is actually valid (e.g., Feb 29 in non-leap year)
-  // Re-stringify and compare to ensure components match
-  const isoString = date.toISOString()
+	// Validate the date is actually valid (e.g., Feb 29 in non-leap year)
+	// Re-stringify and compare to ensure components match
+	const isoString = date.toISOString()
 
-  // Extract components from original and reformed
-  const originalParts = dateString.match(
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
-  )
-  const reformedParts = isoString.match(
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
-  )
+	// Extract components from original and reformed
+	const originalParts = dateString.match(
+		/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
+	)
+	const reformedParts = isoString.match(
+		/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
+	)
 
-  if (!originalParts || !reformedParts) {
-    return { valid: false, error: 'Failed to parse date components' }
-  }
+	if (!originalParts || !reformedParts) {
+		return { valid: false, error: 'Failed to parse date components' }
+	}
 
-  // Check year, month, day, hour, minute, second match
-  // If they don't match, it means the date was invalid (like Feb 30)
-  for (let i = 1; i <= 6; i++) {
-    if (originalParts[i] !== reformedParts[i]) {
-      return {
-        valid: false,
-        error: `Invalid date values: component mismatch at index ${i}`,
-      }
-    }
-  }
+	// Check year, month, day, hour, minute, second match
+	// If they don't match, it means the date was invalid (like Feb 30)
+	for (let i = 1; i <= 6; i++) {
+		if (originalParts[i] !== reformedParts[i]) {
+			return {
+				valid: false,
+				error: `Invalid date values: component mismatch at index ${i}`,
+			}
+		}
+	}
 
-  return { valid: true }
+	return { valid: true }
 }
 
 /**
@@ -128,17 +128,17 @@ export function validateDateFormat(dateString: string): {
  * @returns true if drift detected (timestamps differ significantly)
  */
 export function detectTimezoneDrift(
-  original: string,
-  converted: string,
+	original: string,
+	converted: string,
 ): boolean {
-  const origTime = new Date(original).getTime()
-  const convTime = new Date(converted).getTime()
+	const origTime = new Date(original).getTime()
+	const convTime = new Date(converted).getTime()
 
-  // Allow 1 second tolerance for rounding/processing differences
-  const toleranceMs = 1000
-  const diffMs = Math.abs(origTime - convTime)
+	// Allow 1 second tolerance for rounding/processing differences
+	const toleranceMs = 1000
+	const diffMs = Math.abs(origTime - convTime)
 
-  return diffMs > toleranceMs
+	return diffMs > toleranceMs
 }
 
 /**
@@ -148,65 +148,65 @@ export function detectTimezoneDrift(
  * @returns Validation result with drift detection
  */
 export function roundTripDateValidation(dateString: string): {
-  valid: boolean
-  driftDetected: boolean
-  input: string
-  normalized: string
-  error?: string
+	valid: boolean
+	driftDetected: boolean
+	input: string
+	normalized: string
+	error?: string
 } {
-  try {
-    // Step 1: Validate original format
-    const formatValidation = validateDateFormat(dateString)
-    if (!formatValidation.valid) {
-      const result: {
-        valid: boolean
-        driftDetected: boolean
-        input: string
-        normalized: string
-        error?: string
-      } = {
-        valid: false,
-        driftDetected: false,
-        input: dateString,
-        normalized: '',
-      }
-      if (formatValidation.error) {
-        result.error = formatValidation.error
-      }
-      return result
-    }
+	try {
+		// Step 1: Validate original format
+		const formatValidation = validateDateFormat(dateString)
+		if (!formatValidation.valid) {
+			const result: {
+				valid: boolean
+				driftDetected: boolean
+				input: string
+				normalized: string
+				error?: string
+			} = {
+				valid: false,
+				driftDetected: false,
+				input: dateString,
+				normalized: '',
+			}
+			if (formatValidation.error) {
+				result.error = formatValidation.error
+			}
+			return result
+		}
 
-    // Step 2: Normalize (re-parse to ensure consistent formatting)
-    const normalized = normalizeCSVDate(dateString)
+		// Step 2: Normalize (re-parse to ensure consistent formatting)
+		const normalized = normalizeCSVDate(dateString)
 
-    // Step 3: Validate normalized format
-    const normalizedValidation = validateDateFormat(normalized)
-    if (!normalizedValidation.valid) {
-      return {
-        valid: false,
-        driftDetected: false,
-        input: dateString,
-        normalized,
-        error: `Normalized date failed validation: ${normalizedValidation.error}`,
-      }
-    }
+		// Step 3: Validate normalized format
+		const normalizedValidation = validateDateFormat(normalized)
+		if (!normalizedValidation.valid) {
+			return {
+				valid: false,
+				driftDetected: false,
+				input: dateString,
+				normalized,
+				error: `Normalized date failed validation: ${normalizedValidation.error}`,
+			}
+		}
 
-    // Step 4: Detect drift
-    const driftDetected = detectTimezoneDrift(dateString, normalized)
+		// Step 4: Detect drift
+		const driftDetected = detectTimezoneDrift(dateString, normalized)
 
-    return {
-      valid: true,
-      driftDetected,
-      input: dateString,
-      normalized,
-    }
-  } catch (error) {
-    return {
-      valid: false,
-      driftDetected: false,
-      input: dateString,
-      normalized: '',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }
-  }
+		return {
+			valid: true,
+			driftDetected,
+			input: dateString,
+			normalized,
+		}
+	} catch (error) {
+		return {
+			valid: false,
+			driftDetected: false,
+			input: dateString,
+			normalized: '',
+			error: error instanceof Error ? error.message : 'Unknown error',
+		}
+	}
 }

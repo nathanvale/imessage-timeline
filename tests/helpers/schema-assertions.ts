@@ -9,12 +9,12 @@ import { expect } from 'vitest'
 import { ZodError } from 'zod'
 
 import {
-  MessageSchema,
-  type Message,
-  type TextMessage,
-  type MediaMessage,
-  type TapbackMessage,
-  type NotificationMessage,
+	type MediaMessage,
+	type Message,
+	MessageSchema,
+	type NotificationMessage,
+	type TapbackMessage,
+	type TextMessage,
 } from '../../src/schema/message'
 
 // ============================================================================
@@ -34,30 +34,30 @@ import {
  * }
  */
 export function validateMessage(message: unknown): {
-  success: boolean
-  data?: Message
-  errors?: string[]
+	success: boolean
+	data?: Message
+	errors?: string[]
 } {
-  try {
-    const validated = MessageSchema.parse(message)
-    return {
-      success: true,
-      data: validated,
-    }
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return {
-        success: false,
-        errors: error.errors.map(
-          (err) => `${err.path.join('.')}: ${err.message}`,
-        ),
-      }
-    }
-    return {
-      success: false,
-      errors: ['Unknown validation error'],
-    }
-  }
+	try {
+		const validated = MessageSchema.parse(message)
+		return {
+			success: true,
+			data: validated,
+		}
+	} catch (error) {
+		if (error instanceof ZodError) {
+			return {
+				success: false,
+				errors: error.errors.map(
+					(err) => `${err.path.join('.')}: ${err.message}`,
+				),
+			}
+		}
+		return {
+			success: false,
+			errors: ['Unknown validation error'],
+		}
+	}
 }
 
 /**
@@ -72,15 +72,15 @@ export function validateMessage(message: unknown): {
  * console.log(`${failed.length} messages failed validation`)
  */
 export function validateMessages(messages: unknown[]): Array<{
-  index: number
-  success: boolean
-  data?: Message
-  errors?: string[]
+	index: number
+	success: boolean
+	data?: Message
+	errors?: string[]
 }> {
-  return messages.map((msg, index) => ({
-    index,
-    ...validateMessage(msg),
-  }))
+	return messages.map((msg, index) => ({
+		index,
+		...validateMessage(msg),
+	}))
 }
 
 // ============================================================================
@@ -98,14 +98,14 @@ export function validateMessages(messages: unknown[]): Array<{
  * // Test passes, msg is now typed as Message
  */
 export function assertValidMessage(
-  message: unknown,
+	message: unknown,
 ): asserts message is Message {
-  const result = validateMessage(message)
-  if (!result.success) {
-    expect.fail(
-      `Message validation failed:\n  - ${result.errors?.join('\n  - ')}`,
-    )
-  }
+	const result = validateMessage(message)
+	if (!result.success) {
+		expect.fail(
+			`Message validation failed:\n  - ${result.errors?.join('\n  - ')}`,
+		)
+	}
 }
 
 /**
@@ -119,19 +119,19 @@ export function assertValidMessage(
  * // All messages are now typed as Message[]
  */
 export function assertValidMessages(
-  messages: unknown[],
+	messages: unknown[],
 ): asserts messages is Message[] {
-  const results = validateMessages(messages)
-  const failed = results.filter((r) => !r.success)
+	const results = validateMessages(messages)
+	const failed = results.filter((r) => !r.success)
 
-  if (failed.length > 0) {
-    const errorReport = failed
-      .map((r) => `  Message ${r.index}:\n    - ${r.errors?.join('\n    - ')}`)
-      .join('\n')
-    expect.fail(
-      `${failed.length} message(s) failed validation:\n${errorReport}`,
-    )
-  }
+	if (failed.length > 0) {
+		const errorReport = failed
+			.map((r) => `  Message ${r.index}:\n    - ${r.errors?.join('\n    - ')}`)
+			.join('\n')
+		expect.fail(
+			`${failed.length} message(s) failed validation:\n${errorReport}`,
+		)
+	}
 }
 
 /**
@@ -145,14 +145,14 @@ export function assertValidMessages(
  * expectInvalidMessage(badMsg, /ISO 8601/) // Expects date format error
  */
 export function expectInvalidMessage(message: unknown, expectedError?: RegExp) {
-  const result = validateMessage(message)
+	const result = validateMessage(message)
 
-  expect(result.success).toBe(false)
+	expect(result.success).toBe(false)
 
-  if (expectedError && result.errors) {
-    const allErrors = result.errors.join(' ')
-    expect(allErrors).toMatch(expectedError)
-  }
+	if (expectedError && result.errors) {
+		const allErrors = result.errors.join(' ')
+		expect(allErrors).toMatch(expectedError)
+	}
 }
 
 // ============================================================================
@@ -170,9 +170,9 @@ export function expectInvalidMessage(message: unknown, expectedError?: RegExp) {
  * console.log(msg.text) // TypeScript knows msg.text exists
  */
 export function assertTextMessage(
-  message: Message,
+	message: Message,
 ): asserts message is TextMessage {
-  expect(message.messageKind).toBe('text')
+	expect(message.messageKind).toBe('text')
 }
 
 /**
@@ -186,10 +186,10 @@ export function assertTextMessage(
  * console.log(msg.media.filename) // TypeScript knows msg.media exists
  */
 export function assertMediaMessage(
-  message: Message,
+	message: Message,
 ): asserts message is MediaMessage {
-  expect(message.messageKind).toBe('media')
-  expect(message.media).toBeDefined()
+	expect(message.messageKind).toBe('media')
+	expect(message.media).toBeDefined()
 }
 
 /**
@@ -203,10 +203,10 @@ export function assertMediaMessage(
  * console.log(msg.tapback.tapbackKind) // TypeScript knows msg.tapback exists
  */
 export function assertTapbackMessage(
-  message: Message,
+	message: Message,
 ): asserts message is TapbackMessage {
-  expect(message.messageKind).toBe('tapback')
-  expect(message.tapback).toBeDefined()
+	expect(message.messageKind).toBe('tapback')
+	expect(message.tapback).toBeDefined()
 }
 
 /**
@@ -220,9 +220,9 @@ export function assertTapbackMessage(
  * console.log(msg.notificationText) // TypeScript knows field exists
  */
 export function assertNotificationMessage(
-  message: Message,
+	message: Message,
 ): asserts message is NotificationMessage {
-  expect(message.messageKind).toBe('notification')
+	expect(message.messageKind).toBe('notification')
 }
 
 // ============================================================================
@@ -238,18 +238,15 @@ export function assertNotificationMessage(
  * @example
  * assertValidISO8601(msg.date, 'date')
  */
-export function assertValidISO8601(
-  dateString: string,
-  fieldName: string = 'date',
-) {
-  expect(dateString, `${fieldName} should be defined`).toBeDefined()
-  expect(dateString, `${fieldName} should match ISO 8601 format`).toMatch(
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
-  )
-  const parsed = new Date(dateString)
-  expect(parsed.toString(), `${fieldName} should be valid date`).not.toBe(
-    'Invalid Date',
-  )
+export function assertValidISO8601(dateString: string, fieldName = 'date') {
+	expect(dateString, `${fieldName} should be defined`).toBeDefined()
+	expect(dateString, `${fieldName} should match ISO 8601 format`).toMatch(
+		/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+	)
+	const parsed = new Date(dateString)
+	expect(parsed.toString(), `${fieldName} should be valid date`).not.toBe(
+		'Invalid Date',
+	)
 }
 
 /**
@@ -263,14 +260,14 @@ export function assertValidISO8601(
  * assertValidGuid(msg.guid, 'csv:') // Expects CSV source
  */
 export function assertValidGuid(guid: string, expectedPrefix?: string) {
-  expect(guid, 'GUID should be defined').toBeDefined()
-  expect(guid.length, 'GUID should not be empty').toBeGreaterThan(0)
+	expect(guid, 'GUID should be defined').toBeDefined()
+	expect(guid.length, 'GUID should not be empty').toBeGreaterThan(0)
 
-  if (expectedPrefix) {
-    expect(guid, `GUID should start with ${expectedPrefix}`).toMatch(
-      new RegExp(`^${expectedPrefix}`),
-    )
-  }
+	if (expectedPrefix) {
+		expect(guid, `GUID should start with ${expectedPrefix}`).toMatch(
+			new RegExp(`^${expectedPrefix}`),
+		)
+	}
 }
 
 /**
@@ -282,8 +279,8 @@ export function assertValidGuid(guid: string, expectedPrefix?: string) {
  * assertAbsolutePath(msg.media.path)
  */
 export function assertAbsolutePath(path: string) {
-  expect(path, 'Path should be defined').toBeDefined()
-  expect(path, 'Path should be absolute').toMatch(/^\//)
+	expect(path, 'Path should be defined').toBeDefined()
+	expect(path, 'Path should be absolute').toMatch(/^\//)
 }
 
 /**
@@ -296,14 +293,14 @@ export function assertAbsolutePath(path: string) {
  * assertHasEnrichment(msg.media.enrichment, 'image_analysis')
  */
 export function assertHasEnrichment(
-  enrichments: Array<Record<string, unknown>> | undefined,
-  kind: string,
+	enrichments: Array<Record<string, unknown>> | undefined,
+	kind: string,
 ) {
-  expect(enrichments, 'Enrichment array should exist').toBeDefined()
-  expect(Array.isArray(enrichments), 'Enrichment should be array').toBe(true)
+	expect(enrichments, 'Enrichment array should exist').toBeDefined()
+	expect(Array.isArray(enrichments), 'Enrichment should be array').toBe(true)
 
-  const hasKind = enrichments?.some((e) => e.kind === kind)
-  expect(hasKind, `Should have enrichment of kind: ${kind}`).toBe(true)
+	const hasKind = enrichments?.some((e) => e.kind === kind)
+	expect(hasKind, `Should have enrichment of kind: ${kind}`).toBe(true)
 }
 
 // ============================================================================
@@ -322,29 +319,29 @@ export function assertHasEnrichment(
  * console.log(`Breakdown: ${stats.byKind.text} text, ${stats.byKind.media} media`)
  */
 export function getValidationStats(messages: unknown[]) {
-  const results = validateMessages(messages)
-  const valid = results.filter((r) => r.success)
-  const invalid = results.filter((r) => !r.success)
+	const results = validateMessages(messages)
+	const valid = results.filter((r) => r.success)
+	const invalid = results.filter((r) => !r.success)
 
-  const byKind = valid.reduce(
-    (acc, r) => {
-      const kind = r.data?.messageKind || 'unknown'
-      acc[kind] = (acc[kind] || 0) + 1
-      return acc
-    },
-    {} as Record<string, number>,
-  )
+	const byKind = valid.reduce(
+		(acc, r) => {
+			const kind = r.data?.messageKind || 'unknown'
+			acc[kind] = (acc[kind] || 0) + 1
+			return acc
+		},
+		{} as Record<string, number>,
+	)
 
-  return {
-    totalCount: messages.length,
-    validCount: valid.length,
-    invalidCount: invalid.length,
-    byKind,
-    invalidMessages: invalid.map((r) => ({
-      index: r.index,
-      errors: r.errors,
-    })),
-  }
+	return {
+		totalCount: messages.length,
+		validCount: valid.length,
+		invalidCount: invalid.length,
+		byKind,
+		invalidMessages: invalid.map((r) => ({
+			index: r.index,
+			errors: r.errors,
+		})),
+	}
 }
 
 /**
@@ -357,16 +354,16 @@ export function getValidationStats(messages: unknown[]) {
  * assertValidationRate(messages, 0.95) // Expects 95%+ valid
  */
 export function assertValidationRate(
-  messages: unknown[],
-  minSuccessRate: number,
+	messages: unknown[],
+	minSuccessRate: number,
 ) {
-  const stats = getValidationStats(messages)
-  const actualRate = stats.validCount / stats.totalCount
+	const stats = getValidationStats(messages)
+	const actualRate = stats.validCount / stats.totalCount
 
-  expect(
-    actualRate,
-    `Validation rate ${(actualRate * 100).toFixed(1)}% is below minimum ${(minSuccessRate * 100).toFixed(1)}%\n` +
-      `  Valid: ${stats.validCount}/${stats.totalCount}\n` +
-      `  Errors in messages: ${stats.invalidMessages.map((m) => m.index).join(', ')}`,
-  ).toBeGreaterThanOrEqual(minSuccessRate)
+	expect(
+		actualRate,
+		`Validation rate ${(actualRate * 100).toFixed(1)}% is below minimum ${(minSuccessRate * 100).toFixed(1)}%\n` +
+			`  Valid: ${stats.validCount}/${stats.totalCount}\n` +
+			`  Errors in messages: ${stats.invalidMessages.map((m) => m.index).join(', ')}`,
+	).toBeGreaterThanOrEqual(minSuccessRate)
 }

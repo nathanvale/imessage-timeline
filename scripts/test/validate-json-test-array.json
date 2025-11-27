@@ -1,30 +1,30 @@
 [
-  {
-    "date": "2025-10-17T10:00:00.000Z",
-    "guid": "msg-001",
-    "isFromMe": true,
-    "messageKind": "text",
-    "text": "Plain array test - message 1"
-  },
-  {
-    "date": "2025-10-17T10:05:00.000Z",
-    "guid": "msg-002",
-    "isFromMe": false,
-    "messageKind": "text",
-    "text": "Plain array test - message 2"
-  },
-  {
-    "date": "2025-10-17T10:10:00.000Z",
-    "guid": "msg-003",
-    "isFromMe": true,
-    "media": {
-      "filename": "document.pdf",
-      "id": "media-001",
-      "mediaKind": "pdf",
-      "mimeType": "application/pdf",
-      "path": "/Users/test/documents/document.pdf",
-      "size": 2048000
-    },
-    "messageKind": "media"
-  }
+	{
+		"date": "2025-10-17T10:00:00.000Z",
+		"guid": "msg-001",
+		"isFromMe": true,
+		"messageKind": "text",
+		"text": "Plain array test - message 1"
+	},
+	{
+		"date": "2025-10-17T10:05:00.000Z",
+		"guid": "msg-002",
+		"isFromMe": false,
+		"messageKind": "text",
+		"text": "Plain array test - message 2"
+	},
+	{
+		"date": "2025-10-17T10:10:00.000Z",
+		"guid": "msg-003",
+		"isFromMe": true,
+		"media": {
+			"filename": "document.pdf",
+			"id": "media-001",
+			"mediaKind": "pdf",
+			"mimeType": "application/pdf",
+			"path": "/Users/test/documents/document.pdf",
+			"size": 2048000
+		},
+		"messageKind": "media"
+	}
 ]

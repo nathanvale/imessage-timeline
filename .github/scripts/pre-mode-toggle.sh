@@ -16,9 +16,9 @@ fi
 
 git checkout -b "$BRANCH"
 if [[ "$ACTION" == "enter" ]]; then
-  pnpm changeset pre enter "$CHANNEL"
+  bunx changeset pre enter "$CHANNEL"
 else
-  pnpm changeset pre exit
+  bunx changeset pre exit
 fi
 
 git add .

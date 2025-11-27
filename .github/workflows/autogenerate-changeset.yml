@@ -24,10 +24,10 @@ jobs:
         id: detect
         shell: bash
         run: ./.github/scripts/changeset-detect-existing.sh .changeset
-      - name: Setup pnpm toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
       - name: Install deps (minimal)
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
       - name: Generate changeset if missing
         if: steps.detect.outputs.found == '0'
         shell: bash

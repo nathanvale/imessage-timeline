@@ -32,10 +32,10 @@ jobs:
           fetch-depth: 1
       - name: Standard CI Env
         uses: ./.github/actions/standard-ci-env
-      - name: Setup pnpm toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Configure Git
         run: |
           git config user.name 'github-actions[bot]'

@@ -28,10 +28,10 @@ jobs:
           fetch-depth: 2
       - name: Standard env
         uses: ./.github/actions/standard-ci-env
-      - name: Setup pnpm toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Lint commit messages
         uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
         with:

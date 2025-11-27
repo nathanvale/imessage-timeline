@@ -18,45 +18,45 @@
  * - saveCheckpoint: Write checkpoint atomically
  */
 
-import crypto from 'crypto'
-import { writeFile, readFile, access } from 'fs/promises'
-import path from 'path'
+import crypto from 'node:crypto'
+import { access, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export type FailedItem = {
-  index: number
-  guid: string
-  kind: string
-  error: string
+	index: number
+	guid: string
+	kind: string
+	error: string
 }
 
 export type CheckpointStats = {
-  processedCount: number
-  failedCount: number
-  enrichmentsByKind: Record<string, number>
+	processedCount: number
+	failedCount: number
+	enrichmentsByKind: Record<string, number>
 }
 
 export type EnrichCheckpoint = {
-  version: string
-  configHash: string
-  lastProcessedIndex: number
-  totalProcessed: number
-  totalFailed: number
-  stats: CheckpointStats
-  failedItems: FailedItem[]
-  createdAt: string
+	version: string
+	configHash: string
+	lastProcessedIndex: number
+	totalProcessed: number
+	totalFailed: number
+	stats: CheckpointStats
+	failedItems: FailedItem[]
+	createdAt: string
 }
 
 export type CheckpointInput = {
-  lastProcessedIndex: number
-  totalProcessed: number
-  totalFailed: number
-  stats: CheckpointStats
-  failedItems: FailedItem[]
-  configHash: string
+	lastProcessedIndex: number
+	totalProcessed: number
+	totalFailed: number
+	stats: CheckpointStats
+	failedItems: FailedItem[]
+	configHash: string
 }
 
 // ============================================================================
@@ -71,11 +71,11 @@ export type CheckpointInput = {
  * @returns true if checkpoint should be written
  */
 export function shouldWriteCheckpoint(
-  itemIndex: number,
-  checkpointInterval: number = 100,
+	itemIndex: number,
+	checkpointInterval = 100,
 ): boolean {
-  // Write checkpoint at multiples of interval (100, 200, 300, etc.)
-  return itemIndex > 0 && itemIndex % checkpointInterval === 0
+	// Write checkpoint at multiples of interval (100, 200, 300, etc.)
+	return itemIndex > 0 && itemIndex % checkpointInterval === 0
 }
 
 // ============================================================================
@@ -89,16 +89,16 @@ export function shouldWriteCheckpoint(
  * @returns EnrichCheckpoint with all required fields
  */
 export function createCheckpoint(input: CheckpointInput): EnrichCheckpoint {
-  return {
-    version: '1.0',
-    configHash: input.configHash,
-    lastProcessedIndex: input.lastProcessedIndex,
-    totalProcessed: input.totalProcessed,
-    totalFailed: input.totalFailed,
-    stats: input.stats,
-    failedItems: input.failedItems,
-    createdAt: new Date().toISOString(),
-  }
+	return {
+		version: '1.0',
+		configHash: input.configHash,
+		lastProcessedIndex: input.lastProcessedIndex,
+		totalProcessed: input.totalProcessed,
+		totalFailed: input.totalFailed,
+		stats: input.stats,
+		failedItems: input.failedItems,
+		createdAt: new Date().toISOString(),
+	}
 }
 
 // ============================================================================
@@ -113,10 +113,10 @@ export function createCheckpoint(input: CheckpointInput): EnrichCheckpoint {
  * @returns Path to checkpoint file
  */
 export function getCheckpointPath(
-  checkpointDir: string,
-  configHash: string,
+	checkpointDir: string,
+	configHash: string,
 ): string {
-  return path.join(checkpointDir, `checkpoint-${configHash}.json`)
+	return path.join(checkpointDir, `checkpoint-${configHash}.json`)
 }
 
 /**
@@ -126,29 +126,29 @@ export function getCheckpointPath(
  * @param checkpointPath - Path to save checkpoint
  */
 export async function saveCheckpoint(
-  checkpoint: EnrichCheckpoint,
-  checkpointPath: string,
+	checkpoint: EnrichCheckpoint,
+	checkpointPath: string,
 ): Promise<void> {
-  const tempPath = `${checkpointPath}.tmp`
+	const tempPath = `${checkpointPath}.tmp`
 
-  try {
-    // Write to temp file
-    await writeFile(tempPath, JSON.stringify(checkpoint, null, 2), 'utf-8')
+	try {
+		// Write to temp file
+		await writeFile(tempPath, JSON.stringify(checkpoint, null, 2), 'utf-8')
 
-    // Atomic rename (replaces original if exists)
-    // In Node.js, fs.rename is atomic on most filesystems
-    const fs = await import('fs/promises')
-    await fs.rename(tempPath, checkpointPath)
-  } catch (error) {
-    // Clean up temp file on error
-    try {
-      const fs = await import('fs/promises')
-      await fs.unlink(tempPath)
-    } catch {
-      // Ignore cleanup errors
-    }
-    throw error
-  }
+		// Atomic rename (replaces original if exists)
+		// In Node.js, fs.rename is atomic on most filesystems
+		const fs = await import('node:fs/promises')
+		await fs.rename(tempPath, checkpointPath)
+	} catch (error) {
+		// Clean up temp file on error
+		try {
+			const fs = await import('node:fs/promises')
+			await fs.unlink(tempPath)
+		} catch {
+			// Ignore cleanup errors
+		}
+		throw error
+	}
 }
 
 /**
@@ -158,16 +158,16 @@ export async function saveCheckpoint(
  * @returns Loaded checkpoint or null if not found
  */
 export async function loadCheckpoint(
-  checkpointPath: string,
+	checkpointPath: string,
 ): Promise<EnrichCheckpoint | null> {
-  try {
-    await access(checkpointPath)
-    const content = await readFile(checkpointPath, 'utf-8')
-    return JSON.parse(content) as EnrichCheckpoint
-  } catch {
-    // File doesn't exist or is invalid
-    return null
-  }
+	try {
+		await access(checkpointPath)
+		const content = await readFile(checkpointPath, 'utf-8')
+		return JSON.parse(content) as EnrichCheckpoint
+	} catch {
+		// File doesn't exist or is invalid
+		return null
+	}
 }
 
 // ============================================================================
@@ -184,8 +184,8 @@ export async function loadCheckpoint(
  * @returns Resume index (within ≤1 item of last checkpoint)
  */
 export function getResumeIndex(checkpoint: EnrichCheckpoint): number {
-  // Resume at next item after last processed
-  return checkpoint.lastProcessedIndex + 1
+	// Resume at next item after last processed
+	return checkpoint.lastProcessedIndex + 1
 }
 
 // ============================================================================
@@ -199,8 +199,8 @@ export function getResumeIndex(checkpoint: EnrichCheckpoint): number {
  * @returns SHA-256 hash of config
  */
 export function computeConfigHash(config: Record<string, unknown>): string {
-  const configStr = JSON.stringify(config)
-  return crypto.createHash('sha256').update(configStr).digest('hex')
+	const configStr = JSON.stringify(config)
+	return crypto.createHash('sha256').update(configStr).digest('hex')
 }
 
 /**
@@ -211,10 +211,10 @@ export function computeConfigHash(config: Record<string, unknown>): string {
  * @returns true if hashes match (config unchanged)
  */
 export function verifyConfigHash(
-  checkpointHash: string,
-  currentHash: string,
+	checkpointHash: string,
+	currentHash: string,
 ): boolean {
-  return checkpointHash === currentHash
+	return checkpointHash === currentHash
 }
 
 // ============================================================================
@@ -222,10 +222,10 @@ export function verifyConfigHash(
 // ============================================================================
 
 export type CheckpointState = {
-  isResuming: boolean
-  lastCheckpointIndex: number
-  configHash: string
-  failedItemsInCheckpoint: FailedItem[]
+	isResuming: boolean
+	lastCheckpointIndex: number
+	configHash: string
+	failedItemsInCheckpoint: FailedItem[]
 }
 
 /**
@@ -236,35 +236,33 @@ export type CheckpointState = {
  * @returns Checkpoint state or error
  */
 export function initializeCheckpointState(
-  checkpoint: EnrichCheckpoint | null,
-  currentConfigHash: string,
+	checkpoint: EnrichCheckpoint | null,
+	currentConfigHash: string,
 ): CheckpointState | Error {
-  if (!checkpoint) {
-    // No checkpoint, starting fresh
-    return {
-      isResuming: false,
-      lastCheckpointIndex: -1,
-      configHash: currentConfigHash,
-      failedItemsInCheckpoint: [],
-    }
-  }
+	if (!checkpoint) {
+		// No checkpoint, starting fresh
+		return {
+			isResuming: false,
+			lastCheckpointIndex: -1,
+			configHash: currentConfigHash,
+			failedItemsInCheckpoint: [],
+		}
+	}
 
-  // Verify config matches (AC05)
-  if (!verifyConfigHash(checkpoint.configHash, currentConfigHash)) {
-    return new Error(
-      `Config mismatch: checkpoint was created with config ${checkpoint.configHash.substring(0, 8)}, ` +
-        `but current config is ${currentConfigHash.substring(0, 8)}. ` +
-        `Cannot resume with different configuration.`,
-    )
-  }
+	// Verify config matches (AC05)
+	if (!verifyConfigHash(checkpoint.configHash, currentConfigHash)) {
+		return new Error(
+			`Config mismatch: checkpoint was created with config ${checkpoint.configHash.substring(0, 8)}, but current config is ${currentConfigHash.substring(0, 8)}. Cannot resume with different configuration.`,
+		)
+	}
 
-  // Initialize resume state
-  return {
-    isResuming: true,
-    lastCheckpointIndex: getResumeIndex(checkpoint) - 1,
-    configHash: checkpoint.configHash,
-    failedItemsInCheckpoint: checkpoint.failedItems,
-  }
+	// Initialize resume state
+	return {
+		isResuming: true,
+		lastCheckpointIndex: getResumeIndex(checkpoint) - 1,
+		configHash: checkpoint.configHash,
+		failedItemsInCheckpoint: checkpoint.failedItems,
+	}
 }
 
 /**
@@ -279,19 +277,19 @@ export function initializeCheckpointState(
  * @returns Checkpoint ready to save
  */
 export function prepareCheckpoint(
-  lastProcessedIndex: number,
-  totalProcessed: number,
-  totalFailed: number,
-  batchStats: CheckpointStats,
-  failedItems: FailedItem[],
-  configHash: string,
+	lastProcessedIndex: number,
+	totalProcessed: number,
+	totalFailed: number,
+	batchStats: CheckpointStats,
+	failedItems: FailedItem[],
+	configHash: string,
 ): EnrichCheckpoint {
-  return createCheckpoint({
-    lastProcessedIndex,
-    totalProcessed,
-    totalFailed,
-    stats: batchStats,
-    failedItems,
-    configHash,
-  })
+	return createCheckpoint({
+		lastProcessedIndex,
+		totalProcessed,
+		totalFailed,
+		stats: batchStats,
+		failedItems,
+		configHash,
+	})
 }

@@ -92,7 +92,6 @@ circular reference prevention, deterministic sorting with SHA-256 hashing
 
 | File                                                                                                                      | Purpose                  | Lines | Tests |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ----- | ----- |
-| [`tests/vitest/vitest-setup.ts`](../../../imessage-timeline/tests/vitest/vitest-setup.ts)                                 | Global test setup        | ~20   | N/A   |
 | [`tests/helpers/mock-providers.ts`](../../../imessage-timeline/tests/helpers/mock-providers.ts)                           | AI service mocks         | ~250  | N/A   |
 | [`tests/helpers/fixture-loaders.ts`](../../../imessage-timeline/tests/helpers/fixture-loaders.ts)                         | Test data factories      | ~280  | N/A   |
 | [`tests/helpers/schema-assertions.ts`](../../../imessage-timeline/tests/helpers/schema-assertions.ts)                     | Validation helpers       | ~300  | N/A   |
@@ -108,19 +107,19 @@ fluent builder API, comprehensive assertions, 33 dedicated tests
 
 ### Configuration Files
 
-| File                                                              | Purpose                    |
-| ----------------------------------------------------------------- | -------------------------- |
-| [`vitest.config.ts`](../../../imessage-timeline/vitest.config.ts) | Test runner configuration  |
-| [`tsconfig.json`](../../../imessage-timeline/tsconfig.json)       | TypeScript compiler config |
-| [`package.json`](../../../imessage-timeline/package.json)         | Dependencies + scripts     |
+| File                                                                    | Purpose                    |
+| ----------------------------------------------------------------------- | -------------------------- |
+| [`bunup.config.ts`](../../../imessage-timeline/bunup.config.ts)         | Build configuration        |
+| [`tsconfig.json`](../../../imessage-timeline/tsconfig.json)             | TypeScript compiler config |
+| [`package.json`](../../../imessage-timeline/package.json)               | Dependencies + scripts     |
 
-**Test Scripts Added**:
+**Test Scripts**:
 
-- `pnpm test` - Run all tests
-- `pnpm test:coverage` - Generate coverage reports (70% threshold)
-- `pnpm test:ci` - CI mode with JUnit XML output
-- `pnpm lint` - ESLint validation
-- `pnpm build` - TypeScript compilation
+- `bun test` - Run all tests (Bun native test runner)
+- `bun test --coverage` - Generate coverage reports
+- `bun run test:ci` - CI mode
+- `bun run check` - Biome linting + formatting
+- `bun run build` - bunup compilation
 
 ---
 

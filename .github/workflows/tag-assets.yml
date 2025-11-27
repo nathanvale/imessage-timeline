@@ -23,12 +23,12 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Standard CI Env
         uses: ./.github/actions/standard-ci-env
-      - name: Setup pnpm toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Build
-        run: pnpm build
+        run: bun run build
       - name: Generate SBOM
         uses: anchore/sbom-action@8e94d75ddd33f69f691467e42275782e4bfefe84 # v0.20.9
         with:

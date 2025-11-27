@@ -45,7 +45,7 @@ echo "::group::Configure npm auth"
 echo "Wrote npm auth token to ~/.npmrc"
 echo "::endgroup::"
 
-annotate notice "NPM_TOKEN detected; attempting publish via 'pnpm release'."
+annotate notice "NPM_TOKEN detected; attempting publish via 'bun run release'."
 
 # Run the project's publish script (configured to call `changeset publish`)
-pnpm release
+bun run release

@@ -1,14 +1,14 @@
 {
-  "$schema": "https://unpkg.com/@changesets/config/schema.json",
-  "access": "public",
-  "baseBranch": "main",
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "nathanvale/imessage-timeline" }
-  ],
-  "commit": false,
-  "fixed": [],
-  "ignore": [],
-  "linked": [],
-  "updateInternalDependencies": "patch"
+	"$schema": "https://unpkg.com/@changesets/config/schema.json",
+	"access": "public",
+	"baseBranch": "main",
+	"changelog": [
+		"@changesets/changelog-github",
+		{ "repo": "nathanvale/imessage-timeline" }
+	],
+	"commit": false,
+	"fixed": [],
+	"ignore": [],
+	"linked": [],
+	"updateInternalDependencies": "patch"
 }
