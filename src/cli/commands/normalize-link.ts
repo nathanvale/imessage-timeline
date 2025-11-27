@@ -2,7 +2,6 @@
  * Normalize Link Command
  *
  * Deduplicate and link messages from multiple sources.
- * CLI-T03-AC01: Validate merge mode
  */
 
 import type { Command } from 'commander'
@@ -18,7 +17,7 @@ export async function executeNormalizeLink(
 	options: NormalizeLinkOptions,
 	globalOptions: GlobalOptions,
 ): Promise<void> {
-	const { input, output, mergeMode } = options
+	const { input, output } = options
 	const { verbose, quiet } = globalOptions
 
 	applyLogLevel(verbose, quiet)
@@ -34,19 +33,9 @@ export async function executeNormalizeLink(
 		}
 	}
 
-	// CLI-T03-AC01: Validate merge mode
-	if (!['exact', 'content', 'all'].includes(mergeMode)) {
-		humanError(`❌ Invalid merge mode: ${mergeMode}`)
-		humanError(
-			'Valid modes: exact (GUID only), content (text matching), all (both)',
-		)
-		process.exit(1)
-	}
-
 	if (verbose) {
 		cliLogger.info('Start normalize-link', {
 			files: inputFiles.length,
-			mergeMode,
 		})
 	}
 
@@ -179,11 +168,6 @@ export function registerNormalizeLinkCommand(
 			'-o, --output <path>',
 			'output JSON file path',
 			'./messages.normalized.json',
-		)
-		.option(
-			'-m, --merge-mode <mode>',
-			'merge mode: exact|content|all (default: all)',
-			'all',
 		)
 		.action(async (options: NormalizeLinkOptions) => {
 			try {

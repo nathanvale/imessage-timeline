@@ -56,7 +56,6 @@ export type IngestDBOptions = {
 export type NormalizeLinkOptions = {
 	input: Array<string> | string
 	output: string
-	mergeMode: string
 }
 
 export type EnrichAIOptions = {

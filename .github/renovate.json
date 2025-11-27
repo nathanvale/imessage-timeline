@@ -2,7 +2,7 @@
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"dependencyDashboard": true,
 	"enabled": true,
-	"enabledManagers": ["npm", "pnpm"],
+	"enabledManagers": ["npm", "bun"],
 	"extends": [
 		"config:recommended",
 		":semanticCommits",
@@ -40,20 +40,11 @@
 		{
 			"addLabels": ["lint"],
 			"commitMessagePrefix": "chore(lint): ",
-			"groupName": "eslint toolchain",
-			"matchPackagePatterns": ["^eslint$", "^@eslint/", "^typescript-eslint"]
-		},
-		{
-			"addLabels": ["test"],
-			"commitMessagePrefix": "chore(test): ",
-			"groupName": "vitest & coverage",
-			"matchPackagePatterns": ["^vitest$", "^@vitest/"]
+			"groupName": "biome toolchain",
+			"matchPackagePatterns": ["^@biomejs/"]
 		}
 	],
 	"platformAutomerge": false,
-	"pnpm": {
-		"enabled": true
-	},
 	"prConcurrentLimit": 5,
 	"prCreation": "not-pending",
 	"rangeStrategy": "bump",

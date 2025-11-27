@@ -268,7 +268,7 @@ describe('Enrichment Idempotency - Integration Scenarios', () => {
 			expect(deduped).toHaveLength(3) // image_analysis, link_context, transcription
 
 			const imageAnalysis = deduped.find((e) => e.kind === 'image_analysis')
-			expect(imageAnalysis?.versionSummary).not.toBe('Old analysis')
+			expect(imageAnalysis?.visionSummary).not.toBe('Old analysis')
 			expect(imageAnalysis?.version).toBe('2.0') // Should have newer
 
 			const transcription = deduped.find((e) => e.kind === 'transcription')
