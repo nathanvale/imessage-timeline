@@ -25,7 +25,8 @@ findings.
 
 ### Available Research Tools
 
-**Always Check First:** Look for MCP tools with names starting with `mcp__` as they provide enhanced capabilities.
+**Always Check First:** Look for MCP tools with names starting with `mcp__` as
+they provide enhanced capabilities.
 
 1. **Standard Web Tools** (always available):
    - `WebFetch` - Fetch and analyze specific URLs
@@ -34,23 +35,34 @@ findings.
 2. **MCP Enhanced Research Tools** (check availability with /mcp or tool list):
 
    **Context7 MCP** - Library Documentation Expert:
-   - `mcp__context7__resolve-library-id` - Find the exact library ID for any npm package or framework
-   - `mcp__context7__get-library-docs` - Instant access to complete library documentation
-   - Perfect for: API reference, checking latest versions, understanding function signatures
-   - Example: Research React Router v7 loaders, SQLite WAL mode, Whisper API parameters
+   - `mcp__context7__resolve-library-id` - Find the exact library ID for any npm
+     package or framework
+   - `mcp__context7__get-library-docs` - Instant access to complete library
+     documentation
+   - Perfect for: API reference, checking latest versions, understanding
+     function signatures
+   - Example: Research React Router v7 loaders, SQLite WAL mode, Whisper API
+     parameters
 
    **Tavily MCP** - Enhanced Structured Search:
-   - `mcp__tavily-mcp__search` - More powerful than basic web search with structured extraction
+   - `mcp__tavily-mcp__search` - More powerful than basic web search with
+     structured extraction
    - Returns clean, relevant content without ads or clutter
-   - Excellent for: Finding specific technical answers, research papers, benchmarks
+   - Excellent for: Finding specific technical answers, research papers,
+     benchmarks
    - Example: "SQLite performance with 1 million rows", "ADHD app UX patterns"
 
    **Firecrawl MCP** - Deep Web Scraping & Research:
-   - `mcp__mcp-server-firecrawl__firecrawl_scrape` - Extract clean content from any URL
-   - `mcp__mcp-server-firecrawl__firecrawl_search` - Search with automatic content extraction
-   - `mcp__mcp-server-firecrawl__firecrawl_map` - Discover all URLs on a documentation site
-   - Perfect for: Scraping entire documentation sites, extracting GitHub discussions, analyzing competitor features
-   - Example: Map all Obsidian plugin docs, extract all Gmail API error codes, scrape ADHD research sites
+   - `mcp__mcp-server-firecrawl__firecrawl_scrape` - Extract clean content from
+     any URL
+   - `mcp__mcp-server-firecrawl__firecrawl_search` - Search with automatic
+     content extraction
+   - `mcp__mcp-server-firecrawl__firecrawl_map` - Discover all URLs on a
+     documentation site
+   - Perfect for: Scraping entire documentation sites, extracting GitHub
+     discussions, analyzing competitor features
+   - Example: Map all Obsidian plugin docs, extract all Gmail API error codes,
+     scrape ADHD research sites
 
 3. **Parallel Research Coordination**:
    - Use `Task` tool to spawn multiple general-purpose agents

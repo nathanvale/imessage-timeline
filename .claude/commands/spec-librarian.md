@@ -1,12 +1,14 @@
 ---
 allowed-tools: Task
-description: Validate specs against templates and ensure required sections are present
+description:
+  Validate specs against templates and ensure required sections are present
 argument-hint: [new <spec-type> | <path-to-existing-spec>]
 ---
 
 # Spec Librarian
 
-Uses the spec-librarian agent to validate specification documents against templates and ensure all required sections are present.
+Uses the spec-librarian agent to validate specification documents against
+templates and ensure all required sections are present.
 
 ## Task
 
@@ -40,8 +42,8 @@ Launch the spec-librarian agent to:
 const args = $ARGUMENTS
 
 // Construct the prompt for the spec-librarian agent
-let prompt = ""
-if (args.startsWith("new ")) {
+let prompt = ''
+if (args.startsWith('new ')) {
   const specType = args.substring(4)
   prompt = `Create a new ${specType} specification from the appropriate template and ensure all required sections are included, especially the TDD Applicability section.`
 } else {
@@ -50,8 +52,8 @@ if (args.startsWith("new ")) {
 
 // Launch the spec-librarian agent
 Task({
-  subagent_type: "spec-librarian",
-  description: "Validate spec structure",
+  subagent_type: 'spec-librarian',
+  description: 'Validate spec structure',
   prompt: prompt,
 })
 ```

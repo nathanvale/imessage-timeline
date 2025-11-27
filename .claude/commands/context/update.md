@@ -4,7 +4,9 @@ allowed-tools: Bash, Read, Write, LS
 
 # Update Context
 
-This command updates the project context documentation in `.claude/context/` to reflect the current state of the project. Run this at the end of each development session to keep context accurate.
+This command updates the project context documentation in `.claude/context/` to
+reflect the current state of the project. Run this at the end of each
+development session to keep context accurate.
 
 ## Required Rules
 
@@ -14,8 +16,8 @@ This command updates the project context documentation in `.claude/context/` to 
 
 ## Preflight Checklist
 
-Before proceeding, complete these validation steps.
-Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+Before proceeding, complete these validation steps. Do not bother the user with
+preflight checks progress ("I'm not going to ..."). Just do them and move on.
 
 ### 1. Context Validation
 
@@ -38,14 +40,16 @@ Gather information about what has changed:
 
 **File Modifications:**
 
-- Check context file ages: `find .claude/context -name "*.md" -type f -exec ls -lt {} + | head -5`
+- Check context file ages:
+  `find .claude/context -name "*.md" -type f -exec ls -lt {} + | head -5`
 - Note which context files are oldest and may need updates
 
 **Dependency Changes:**
 
 - Node.js: `git diff HEAD~5..HEAD package.json 2>/dev/null`
 - Python: `git diff HEAD~5..HEAD requirements.txt pyproject.toml 2>/dev/null`
-- Java: `git diff HEAD~5..HEAD pom.xml build.gradle build.gradle.kts 2>/dev/null`
+- Java:
+  `git diff HEAD~5..HEAD pom.xml build.gradle build.gradle.kts 2>/dev/null`
 - C#/.NET: `git diff HEAD~5..HEAD *.sln *.csproj 2>/dev/null`
 - Ruby: `git diff HEAD~5..HEAD Gemfile Gemfile.lock 2>/dev/null`
 - Rust: `git diff HEAD~5..HEAD Cargo.toml Cargo.lock 2>/dev/null`
@@ -54,7 +58,8 @@ Gather information about what has changed:
 - Dart/Flutter: `git diff HEAD~5..HEAD pubspec.yaml pubspec.lock 2>/dev/null`
 - Swift: `git diff HEAD~5..HEAD Package.swift Package.resolved 2>/dev/null`
 - C/C++: `git diff HEAD~5..HEAD CMakeLists.txt 2>/dev/null`
-- Check if new dependencies were added or versions changed across any build system
+- Check if new dependencies were added or versions changed across any build
+  system
 
 ### 3. Get Current DateTime
 
@@ -241,7 +246,10 @@ Use these commands to detect changes:
 - Branch info: `git branch --show-current`
 - Uncommitted changes: `git diff --stat`
 - New untracked files: `git ls-files --others --exclude-standard | head -10`
-- Dependency changes: Check package.json, requirements.txt, pyproject.toml, composer.json, Gemfile, Cargo.toml, go.mod, pom.xml, build.gradle, build.gradle.kts, _.sln, _.csproj, Package.swift, pubspec.yaml, CMakeLists.txt, etc.
+- Dependency changes: Check package.json, requirements.txt, pyproject.toml,
+  composer.json, Gemfile, Cargo.toml, go.mod, pom.xml, build.gradle,
+  build.gradle.kts, _.sln, _.csproj, Package.swift, pubspec.yaml,
+  CMakeLists.txt, etc.
 
 ## Important Notes
 

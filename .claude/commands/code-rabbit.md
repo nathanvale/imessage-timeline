@@ -49,8 +49,8 @@ Launch parallel sub-agents using Task tool:
 
 ```yaml
 Task:
-  description: "CodeRabbit fixes for {filename}"
-  subagent_type: "general-purpose"
+  description: 'CodeRabbit fixes for {filename}'
+  subagent_type: 'general-purpose'
   prompt: |
     Review and apply CodeRabbit suggestions for {filename}.
 

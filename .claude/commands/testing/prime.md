@@ -4,31 +4,40 @@ allowed-tools: Bash, Read, Write, LS
 
 # Prime Testing Environment
 
-This command prepares the testing environment by detecting the test framework, validating dependencies, and configuring the test-runner agent for optimal test execution.
+This command prepares the testing environment by detecting the test framework,
+validating dependencies, and configuring the test-runner agent for optimal test
+execution.
 
 ## Preflight Checklist
 
-Before proceeding, complete these validation steps.
-Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+Before proceeding, complete these validation steps. Do not bother the user with
+preflight checks progress ("I'm not going to ..."). Just do them and move on.
 
 ### 1. Test Framework Detection
 
 **JavaScript/Node.js:**
 
-- Check package.json for test scripts: `grep -E '"test"|"spec"|"jest"|"mocha"' package.json 2>/dev/null`
-- Look for test config files: `ls -la jest.config.* mocha.opts .mocharc.* 2>/dev/null`
-- Check for test directories: `find . -type d \( -name "test" -o -name "tests" -o -name "__tests__" -o -name "spec" \) -maxdepth 3 2>/dev/null`
+- Check package.json for test scripts:
+  `grep -E '"test"|"spec"|"jest"|"mocha"' package.json 2>/dev/null`
+- Look for test config files:
+  `ls -la jest.config.* mocha.opts .mocharc.* 2>/dev/null`
+- Check for test directories:
+  `find . -type d \( -name "test" -o -name "tests" -o -name "__tests__" -o -name "spec" \) -maxdepth 3 2>/dev/null`
 
 **Python:**
 
-- Check for pytest: `find . -name "pytest.ini" -o -name "conftest.py" -o -name "setup.cfg" 2>/dev/null | head -5`
-- Check for unittest: `find . -path "*/test*.py" -o -path "*/test_*.py" 2>/dev/null | head -5`
-- Check requirements: `grep -E "pytest|unittest|nose" requirements.txt 2>/dev/null`
+- Check for pytest:
+  `find . -name "pytest.ini" -o -name "conftest.py" -o -name "setup.cfg" 2>/dev/null | head -5`
+- Check for unittest:
+  `find . -path "*/test*.py" -o -path "*/test_*.py" 2>/dev/null | head -5`
+- Check requirements:
+  `grep -E "pytest|unittest|nose" requirements.txt 2>/dev/null`
 
 **Rust:**
 
 - Check for Cargo tests: `grep -E '\[dev-dependencies\]' Cargo.toml 2>/dev/null`
-- Look for test modules: `find . -name "*.rs" -exec grep -l "#\[cfg(test)\]" {} \; 2>/dev/null | head -5`
+- Look for test modules:
+  `find . -name "*.rs" -exec grep -l "#\[cfg(test)\]" {} \; 2>/dev/null | head -5`
 
 **Go:**
 
@@ -37,50 +46,69 @@ Do not bother the user with preflight checks progress ("I'm not going to ..."). 
 
 **PHP:**
 
-- Check for PHPUnit: `find . -name "phpunit.xml" -o -name "phpunit.xml.dist" -o -name "composer.json" -exec grep -l "phpunit" {} \; 2>/dev/null`
-- Check for Pest: `find . -name "composer.json" -exec grep -l "pestphp/pest" {} \; 2>/dev/null`
-- Look for test directories: `find . -type d \( -name "tests" -o -name "test" \) -maxdepth 3 2>/dev/null`
+- Check for PHPUnit:
+  `find . -name "phpunit.xml" -o -name "phpunit.xml.dist" -o -name "composer.json" -exec grep -l "phpunit" {} \; 2>/dev/null`
+- Check for Pest:
+  `find . -name "composer.json" -exec grep -l "pestphp/pest" {} \; 2>/dev/null`
+- Look for test directories:
+  `find . -type d \( -name "tests" -o -name "test" \) -maxdepth 3 2>/dev/null`
 
 **C#/.NET:**
 
-- Check for MSTest/NUnit/xUnit: `find . -name "*.csproj" -exec grep -l -E "Microsoft\.NET\.Test|NUnit|xunit" {} \; 2>/dev/null`
-- Check for test projects: `find . -name "*.csproj" -exec grep -l "<IsTestProject>true</IsTestProject>" {} \; 2>/dev/null`
+- Check for MSTest/NUnit/xUnit:
+  `find . -name "*.csproj" -exec grep -l -E "Microsoft\.NET\.Test|NUnit|xunit" {} \; 2>/dev/null`
+- Check for test projects:
+  `find . -name "*.csproj" -exec grep -l "<IsTestProject>true</IsTestProject>" {} \; 2>/dev/null`
 - Look for solution files: `find . -name "*.sln" 2>/dev/null`
 
 **Java:**
 
-- Check for JUnit (Maven): `find . -name "pom.xml" -exec grep -l "junit" {} \; 2>/dev/null`
-- Check for JUnit (Gradle): `find . -name "build.gradle" -o -name "build.gradle.kts" -exec grep -l -E "junit|testImplementation" {} \; 2>/dev/null`
-- Look for test directories: `find . -path "*/src/test/java" -type d 2>/dev/null`
+- Check for JUnit (Maven):
+  `find . -name "pom.xml" -exec grep -l "junit" {} \; 2>/dev/null`
+- Check for JUnit (Gradle):
+  `find . -name "build.gradle" -o -name "build.gradle.kts" -exec grep -l -E "junit|testImplementation" {} \; 2>/dev/null`
+- Look for test directories:
+  `find . -path "*/src/test/java" -type d 2>/dev/null`
 
 **Kotlin:**
 
-- Check for Kotlin tests: `find . -name "build.gradle.kts" -exec grep -l -E "kotlin.*test|spek" {} \; 2>/dev/null`
-- Look for Kotlin test files: `find . -name "*Test.kt" -o -name "*Spec.kt" 2>/dev/null | head -5`
+- Check for Kotlin tests:
+  `find . -name "build.gradle.kts" -exec grep -l -E "kotlin.*test|spek" {} \; 2>/dev/null`
+- Look for Kotlin test files:
+  `find . -name "*Test.kt" -o -name "*Spec.kt" 2>/dev/null | head -5`
 
 **Swift:**
 
-- Check for XCTest: `find . -name "Package.swift" -exec grep -l "XCTest" {} \; 2>/dev/null`
-- Check for Xcode test targets: `find . -name "*.xcodeproj" -o -name "*.xcworkspace" 2>/dev/null`
-- Look for test files: `find . -name "*Test.swift" -o -name "*Tests.swift" 2>/dev/null | head -5`
+- Check for XCTest:
+  `find . -name "Package.swift" -exec grep -l "XCTest" {} \; 2>/dev/null`
+- Check for Xcode test targets:
+  `find . -name "*.xcodeproj" -o -name "*.xcworkspace" 2>/dev/null`
+- Look for test files:
+  `find . -name "*Test.swift" -o -name "*Tests.swift" 2>/dev/null | head -5`
 
 **Dart/Flutter:**
 
-- Check for Flutter tests: `test -f pubspec.yaml && grep -q "flutter_test" pubspec.yaml && echo "Flutter test found"`
+- Check for Flutter tests:
+  `test -f pubspec.yaml && grep -q "flutter_test" pubspec.yaml && echo "Flutter test found"`
 - Look for test files: `find . -name "*_test.dart" 2>/dev/null | head -5`
 - Check for test directory: `test -d test && echo "Test directory found"`
 
 **C/C++:**
 
-- Check for GoogleTest: `find . -name "CMakeLists.txt" -exec grep -l -E "gtest|GTest" {} \; 2>/dev/null`
-- Check for Catch2: `find . -name "CMakeLists.txt" -exec grep -l "Catch2" {} \; 2>/dev/null`
-- Look for test files: `find . -name "*test.cpp" -o -name "*test.c" -o -name "test_*.cpp" 2>/dev/null | head -5`
+- Check for GoogleTest:
+  `find . -name "CMakeLists.txt" -exec grep -l -E "gtest|GTest" {} \; 2>/dev/null`
+- Check for Catch2:
+  `find . -name "CMakeLists.txt" -exec grep -l "Catch2" {} \; 2>/dev/null`
+- Look for test files:
+  `find . -name "*test.cpp" -o -name "*test.c" -o -name "test_*.cpp" 2>/dev/null | head -5`
 
 **Ruby:**
 
 - Check for RSpec: `find . -name ".rspec" -o -name "spec_helper.rb" 2>/dev/null`
-- Check for Minitest: `find . -name "Gemfile" -exec grep -l "minitest" {} \; 2>/dev/null`
-- Look for test files: `find . -name "*_spec.rb" -o -name "*_test.rb" 2>/dev/null | head -5`
+- Check for Minitest:
+  `find . -name "Gemfile" -exec grep -l "minitest" {} \; 2>/dev/null`
+- Look for test files:
+  `find . -name "*_spec.rb" -o -name "*_test.rb" 2>/dev/null | head -5`
 
 ### 2. Test Environment Validation
 
@@ -105,12 +133,15 @@ If no test framework detected:
 
 **For detected framework:**
 
-- Node.js: Run `npm list --depth=0 2>/dev/null | grep -E "jest|mocha|chai|jasmine"`
+- Node.js: Run
+  `npm list --depth=0 2>/dev/null | grep -E "jest|mocha|chai|jasmine"`
 - Python: Run `pip list 2>/dev/null | grep -E "pytest|unittest|nose"`
 - PHP: Run `composer show 2>/dev/null | grep -E "phpunit|pestphp"`
 - Java (Maven): Run `mvn dependency:list 2>/dev/null | grep -E "junit|testng"`
-- Java (Gradle): Run `./gradlew dependencies --configuration testImplementation 2>/dev/null | grep -E "junit|testng"`
-- C#/.NET: Run `dotnet list package 2>/dev/null | grep -E "Microsoft.NET.Test|NUnit|xunit"`
+- Java (Gradle): Run
+  `./gradlew dependencies --configuration testImplementation 2>/dev/null | grep -E "junit|testng"`
+- C#/.NET: Run
+  `dotnet list package 2>/dev/null | grep -E "Microsoft.NET.Test|NUnit|xunit"`
 - Ruby: Run `bundle list 2>/dev/null | grep -E "rspec|minitest"`
 - Dart/Flutter: Run `flutter pub deps 2>/dev/null | grep flutter_test`
 - Verify test dependencies are installed

@@ -1,24 +1,32 @@
 ---
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
-description: Project manager for iMessage pipeline task state - update status, complete ACs, track progress
-argument-hint: "[action] [task-id] [optional: AC-id or notes]"
+description:
+  Project manager for iMessage pipeline task state - update status, complete
+  ACs, track progress
+argument-hint: '[action] [task-id] [optional: AC-id or notes]'
 ---
 
 # Project Manager: iMessage Pipeline Task Tracker
 
-Systematic task state management for the iMessage pipeline implementation. Acts as a project manager to update task status, complete acceptance criteria, track progress, and generate status reports.
+Systematic task state management for the iMessage pipeline implementation. Acts
+as a project manager to update task status, complete acceptance criteria, track
+progress, and generate status reports.
 
 ## Task
 
-Manage the task state in `docs/imessage-pipeline-task-state.json` with systematic updates, validation, and reporting capabilities.
+Manage the task state in `docs/imessage-pipeline-task-state.json` with
+systematic updates, validation, and reporting capabilities.
 
 ## Supported Actions
 
 ### 1. `status` - Show current project status
+
 ```bash
 /pm status
 ```
+
 Shows:
+
 - Overall progress (% tasks complete)
 - Current in-progress tasks
 - Next available tasks (dependencies satisfied)
@@ -26,12 +34,15 @@ Shows:
 - Risk breakdown (HIGH/MEDIUM/LOW)
 
 ### 2. `start [task-id]` - Start a task
+
 ```bash
 /pm start SCHEMA--T01
 ```
+
 - **FIRST: Load all documentation into context** (if not already present)
   - `docs/imessage-pipeline-tech-spec.md` - Full specification
-  - `docs/imessage-pipeline-refactor-report.md` - Architecture and design decisions
+  - `docs/imessage-pipeline-refactor-report.md` - Architecture and design
+    decisions
   - `docs/imessage-pipeline-tasks.md` - Task checklist and details
   - `docs/imessage-pipeline-task-state.json` - Current state
   - Any related guides/ADRs mentioned in the task
@@ -42,17 +53,21 @@ Shows:
 - Provides context-specific guidance based on task type
 
 ### 3. `complete-ac [task-id] [ac-id]` - Complete an acceptance criterion
+
 ```bash
 /pm complete-ac SCHEMA--T01 SCHEMA-T01-AC01
 ```
+
 - Moves AC from acs_remaining to acs_completed
 - Updates task notes with completion details
 - Shows remaining ACs
 
 ### 4. `finish [task-id] [notes]` - Complete a task
+
 ```bash
 /pm finish SCHEMA--T01 "Completed schema with full Zod validation"
 ```
+
 - Validates all ACs are completed
 - Updates status to "completed"
 - Sets completed_at timestamp
@@ -60,10 +75,13 @@ Shows:
 - Shows newly unlocked tasks
 
 ### 5. `report` - Generate progress report
+
 ```bash
 /pm report
 ```
+
 Generates markdown report with:
+
 - Epic-level progress
 - Milestone tracking
 - Burndown estimate
@@ -71,19 +89,25 @@ Generates markdown report with:
 - Recent completions
 
 ### 6. `next` - Show next recommended task
+
 ```bash
 /pm next
 ```
+
 Shows the next highest-priority task based on:
+
 - Dependencies satisfied
 - Epic ordering (E1 → E2 → E3 → E4 → E5 → E6)
 - Risk level (complete LOW first to build momentum)
 
 ### 7. `validate` - Validate task state consistency
+
 ```bash
 /pm validate
 ```
+
 Checks:
+
 - All dependencies exist
 - No circular dependencies
 - Started tasks have started_at timestamp
@@ -91,11 +115,13 @@ Checks:
 - JSON structure is valid
 
 ### 8. `add-note [task-id] [note]` - Add notes to a task
+
 ```bash
 /pm add-note SCHEMA--T01 "Found issue with HEIC handling, adding workaround"
 ```
 
 ### 9. `list [filter]` - List tasks with filters
+
 ```bash
 /pm list HIGH           # Show only HIGH risk tasks
 /pm list E2             # Show only E2 (Normalize-Link) tasks
@@ -108,7 +134,8 @@ Checks:
 
 ### ⚠️ CRITICAL: Documentation Loading Protocol
 
-**BEFORE any action (especially `start`), you MUST load ALL documentation into context:**
+**BEFORE any action (especially `start`), you MUST load ALL documentation into
+context:**
 
 1. **Check Context** - Verify if these files are already loaded:
    - `docs/imessage-pipeline-tech-spec.md`
@@ -167,16 +194,19 @@ Checks:
 ## Validation Rules
 
 ### Starting a Task
+
 - Status must be "pending"
 - All dependencies must be "completed"
 - No other task in same epic can be "in_progress" (sequential by default)
 
 ### Completing an AC
+
 - Task must be "in_progress"
 - AC must exist in acs_remaining
 - AC ID must match expected format
 
 ### Finishing a Task
+
 - Task must be "in_progress"
 - All ACs must be in acs_completed (acs_remaining must be empty)
 - Notes must be provided
@@ -184,6 +214,7 @@ Checks:
 ## Output Format
 
 ### Status Report
+
 ```
 📊 iMessage Pipeline Implementation Status
 
@@ -214,6 +245,7 @@ Estimated Days Remaining: 73 of 79
 ```
 
 ### Task Start Confirmation
+
 ```
 ✅ Started SCHEMA--T01: Create unified Message schema with Zod validation
 
@@ -236,6 +268,7 @@ Estimated: 3 days
 ```
 
 ### AC Completion Confirmation
+
 ```
 ✅ Completed SCHEMA-T01-AC01 for SCHEMA--T01
 
@@ -250,6 +283,7 @@ Remaining:
 ```
 
 ### Task Completion Confirmation
+
 ```
 🎉 Completed SCHEMA--T01: Create unified Message schema with Zod validation
 
@@ -273,6 +307,7 @@ All 6 acceptance criteria satisfied ✓
 ## Error Handling
 
 ### Dependency Not Met
+
 ```
 ❌ Cannot start NORMALIZE--T03
 
@@ -285,6 +320,7 @@ Complete these tasks first:
 ```
 
 ### AC Not Found
+
 ```
 ❌ AC not found: SCHEMA-T01-AC99
 
@@ -298,6 +334,7 @@ Valid ACs for SCHEMA--T01:
 ```
 
 ### Task Not Ready to Finish
+
 ```
 ❌ Cannot finish SCHEMA--T01
 
@@ -312,7 +349,9 @@ Complete all ACs before finishing task.
 ## Implementation Notes
 
 The command should:
-1. **Load all documentation FIRST** - Before any task start, verify all docs are in context
+
+1. **Load all documentation FIRST** - Before any task start, verify all docs are
+   in context
 2. **Always validate** before making changes
 3. **Write atomically** (temp file + rename for crash safety)
 4. **Keep JSON and MD in sync** (update both files)
@@ -324,6 +363,7 @@ The command should:
 ### Documentation Loading Requirements
 
 **The agent MUST:**
+
 - Check if documentation is in context before starting ANY task
 - Use Read tool to load missing documentation files
 - Never assume documentation context is present
@@ -370,6 +410,7 @@ The command should:
 ## Integration with Git
 
 After significant updates (task completion, milestone reached):
+
 ```bash
 # Commit your progress
 git add docs/imessage-pipeline-task-state.json
@@ -389,6 +430,6 @@ git push
 
 ---
 
-**Task State File**: `docs/imessage-pipeline-task-state.json`
-**Checklist File**: `docs/imessage-pipeline-tasks.md`
-**Spec Source**: `docs/imessage-pipeline-tech-spec.md`
+**Task State File**: `docs/imessage-pipeline-task-state.json` **Checklist
+File**: `docs/imessage-pipeline-tasks.md` **Spec Source**:
+`docs/imessage-pipeline-tech-spec.md`

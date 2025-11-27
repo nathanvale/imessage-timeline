@@ -107,7 +107,8 @@ pkill -f "dotnet.*test|cargo.*test|go.*test|swift.*test|flutter.*test" 2>/dev/nu
 
 ## Error Handling
 
-- Test command fails → "❌ Test execution failed: {error}. Check test framework is installed."
+- Test command fails → "❌ Test execution failed: {error}. Check test framework
+  is installed."
 - Timeout → Kill process and report: "❌ Tests timed out after {time}s"
 - No tests found → "❌ No tests found matching: $ARGUMENTS"
 
