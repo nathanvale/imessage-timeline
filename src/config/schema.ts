@@ -59,7 +59,7 @@ const RenderConfigSchema = z.object({
  * - CONFIG-T01-AC03: Environment variable interpolation via ${ENV_VAR}
  * - CONFIG-T01-AC05: Validation errors with field paths
  */
-export const ConfigSchema = z.object({
+const configSchema = z.object({
 	version: z.string().default('1.0'),
 	attachmentRoots: z
 		.array(z.string().min(1, 'Attachment root path cannot be empty'))
@@ -86,7 +86,12 @@ export const ConfigSchema = z.object({
 /**
  * TypeScript type inferred from the config schema
  */
-export type Config = z.infer<typeof ConfigSchema>
+export type Config = z.infer<typeof configSchema>
+
+/**
+ * Exported config schema with explicit type annotation for DTS generation
+ */
+export const ConfigSchema: typeof configSchema = configSchema
 
 /**
  * CONFIG-T01-AC05: Validate config with detailed error messages
