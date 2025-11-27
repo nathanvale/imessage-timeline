@@ -54,7 +54,7 @@ Changesets are markdown files with frontmatter:
 
 ```markdown
 ---
-"imessage-timeline": minor
+'imessage-timeline': minor
 ---
 
 Add JSON export format for timeline rendering

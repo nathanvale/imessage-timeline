@@ -1,31 +1,29 @@
 {
   "$schema": "../src/config/schema.ts",
-  "version": "1.0",
-  "attachmentRoots": [
-    "~/Library/Messages/Attachments"
-  ],
-  "gemini": {
-    "apiKey": "${GEMINI_API_KEY}",
-    "model": "gemini-1.5-pro",
-    "rateLimitDelay": 1000,
-    "maxRetries": 3
+  "attachmentRoots": ["~/Library/Messages/Attachments"],
+  "enrichment": {
+    "checkpointInterval": 100,
+    "enableAudioTranscription": true,
+    "enableLinkEnrichment": true,
+    "enableVisionAnalysis": true,
+    "forceRefresh": false,
+    "imageCacheDir": "./.cache/images"
   },
   "firecrawl": {
     "apiKey": "${FIRECRAWL_API_KEY}",
     "enabled": true
   },
-  "enrichment": {
-    "enableVisionAnalysis": true,
-    "enableAudioTranscription": true,
-    "enableLinkEnrichment": true,
-    "imageCacheDir": "./.cache/images",
-    "checkpointInterval": 100,
-    "forceRefresh": false
+  "gemini": {
+    "apiKey": "${GEMINI_API_KEY}",
+    "maxRetries": 3,
+    "model": "gemini-1.5-pro",
+    "rateLimitDelay": 1000
   },
   "render": {
     "groupByTimeOfDay": true,
+    "maxNestingDepth": 10,
     "renderRepliesAsNested": true,
-    "renderTapbacksAsEmoji": true,
-    "maxNestingDepth": 10
-  }
+    "renderTapbacksAsEmoji": true
+  },
+  "version": "1.0"
 }

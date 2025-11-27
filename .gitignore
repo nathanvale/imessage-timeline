@@ -42,3 +42,9 @@ test-results/
 #Obsidian vault
 .vault/
 .valut-id
+
+# Docusaurus
+website/.docusaurus/
+website/.cache-loader/
+website/build/
+website/node_modules/

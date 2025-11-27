@@ -1,32 +1,32 @@
 {
-  "schemaVersion": "1.0.0",
-  "source": "db",
   "createdAt": "2025-10-17T12:00:00.000Z",
   "messages": [
     {
+      "date": "2025-10-17T10:00:00",
       "guid": "msg-001",
       "isFromMe": true,
-      "date": "2025-10-17T10:00:00",
       "messageKind": "text",
       "text": "Missing Z suffix on date - should fail validation"
     },
     {
+      "date": "2025-10-17T10:05:00.000Z",
       "guid": "msg-002",
       "isFromMe": false,
-      "date": "2025-10-17T10:05:00.000Z",
-      "messageKind": "media",
       "media": {
-        "id": "media-001",
         "filename": "photo.jpg",
-        "path": "relative/path/to/photo.jpg",
-        "mediaKind": "image"
-      }
+        "id": "media-001",
+        "mediaKind": "image",
+        "path": "relative/path/to/photo.jpg"
+      },
+      "messageKind": "media"
     },
     {
+      "date": "2025-10-17T10:10:00.000Z",
       "guid": "msg-003",
       "isFromMe": true,
-      "date": "2025-10-17T10:10:00.000Z",
       "messageKind": "tapback"
     }
-  ]
+  ],
+  "schemaVersion": "1.0.0",
+  "source": "db"
 }

@@ -1,56 +1,56 @@
 {
-  "schemaVersion": "1.0.0",
-  "source": "db",
   "createdAt": "2025-10-17T12:00:00.000Z",
   "messages": [
     {
+      "date": "2025-10-17T10:00:00.000Z",
       "guid": "msg-001",
       "isFromMe": true,
-      "date": "2025-10-17T10:00:00.000Z",
       "messageKind": "text",
       "text": "Hello, this is a test text message"
     },
     {
+      "date": "2025-10-17T10:05:00.000Z",
       "guid": "msg-002",
       "isFromMe": false,
-      "date": "2025-10-17T10:05:00.000Z",
       "messageKind": "text",
       "text": "Reply to the test message"
     },
     {
+      "date": "2025-10-17T10:10:00.000Z",
       "guid": "msg-003",
       "isFromMe": true,
-      "date": "2025-10-17T10:10:00.000Z",
-      "messageKind": "media",
       "media": {
-        "id": "media-001",
         "filename": "photo.jpg",
-        "path": "/Users/test/photos/photo.jpg",
-        "size": 1024000,
+        "id": "media-001",
+        "mediaKind": "image",
         "mimeType": "image/jpeg",
-        "mediaKind": "image"
-      }
+        "path": "/Users/test/photos/photo.jpg",
+        "size": 1024000
+      },
+      "messageKind": "media"
     },
     {
+      "date": "2025-10-17T10:15:00.000Z",
       "guid": "msg-004",
       "isFromMe": false,
-      "date": "2025-10-17T10:15:00.000Z",
       "messageKind": "tapback",
       "tapback": {
-        "type": "loved",
         "action": "added",
-        "targetMessageGuid": "msg-003"
+        "targetMessageGuid": "msg-003",
+        "type": "loved"
       }
     },
     {
+      "date": "2025-10-17T10:20:00.000Z",
       "guid": "msg-005",
       "isFromMe": true,
-      "date": "2025-10-17T10:20:00.000Z",
       "messageKind": "notification",
       "text": "You named the conversation 'Test Chat'"
     }
   ],
   "meta": {
     "testPurpose": "Valid schema test"
-  }
+  },
+  "schemaVersion": "1.0.0",
+  "source": "db"
 }
