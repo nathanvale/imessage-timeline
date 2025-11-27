@@ -10,7 +10,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
+import type { Message } from '#schema/message'
 import {
 	createHugeDataset,
 	createLargeDataset,
@@ -26,8 +26,6 @@ import {
 	validateMarkdownStructure,
 	verifyDeterminism,
 } from '../index'
-
-import type { Message } from '#schema/message'
 
 describe('RENDER--T04: Determinism Test Suite', () => {
 	// ============================================================================

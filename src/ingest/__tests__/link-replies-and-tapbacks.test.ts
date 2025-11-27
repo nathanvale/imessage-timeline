@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-
+import type { Message } from '#lib/schema/message'
 import {
 	detectAmbiguousLinks,
 	linkRepliesToParents,
 	linkTapbacksToParents,
 } from '../link-replies-and-tapbacks'
-
-import type { Message } from '#lib/schema/message'
 
 /**
  * Test suite for reply and tapback linking (NORMALIZE--T03)
@@ -19,10 +17,10 @@ import type { Message } from '#lib/schema/message'
  */
 
 describe('linkRepliesToParents', () => {
-	let messages: Message[]
+	let _messages: Message[]
 
 	beforeEach(() => {
-		messages = []
+		_messages = []
 	})
 
 	describe('AC01 — DB association linking (primary method)', () => {
@@ -417,7 +415,7 @@ describe('linkRepliesToParents', () => {
 				date: '2025-10-17T10:00:10.000Z',
 			})
 
-			const { linked, ambiguousLinks } = linkRepliesToParents([msg1, msg2, replyMsg], {
+			const { linked: _linked, ambiguousLinks } = linkRepliesToParents([msg1, msg2, replyMsg], {
 				trackAmbiguous: true,
 			}) as any
 

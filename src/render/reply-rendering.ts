@@ -112,7 +112,7 @@ export function calculateIndentationLevel(
  * Returns prefix for blockquote (>, > >, > > >, etc.)
  */
 export function formatReplyWithIndentation(
-	message: Message,
+	_message: Message,
 	level: number,
 ): string {
 	const indent = ' '.repeat(level * 2)

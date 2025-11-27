@@ -1,15 +1,11 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-
+import { describe, expect, it } from 'vitest'
+import type { Message } from '#schema/message'
 import {
-	type GroupedMessages,
-	type TimeOfDayGroup,
 	classifyTimeOfDay,
 	generateAnchorId,
 	groupMessagesByDateAndTimeOfDay,
 	sortByTimestamp,
 } from '../grouping'
-
-import type { Message } from '#schema/message'
 
 describe('RENDER--T01: Grouping and Anchor Generation', () => {
 	describe('AC01: Group messages by date (YYYY-MM-DD)', () => {
@@ -370,7 +366,7 @@ describe('RENDER--T01: Grouping and Anchor Generation', () => {
 			const messages: Message[] = Array.from({ length: 100 }, (_, i) => {
 				// Create 100 messages all on 2025-10-17, with 2-minute spacing
 				const ms = 1696 + i * 2 * 60 * 1000 // Start at some minute, add 2 mins per msg
-				const date = new Date(ms * 1000).toISOString()
+				const _date = new Date(ms * 1000).toISOString()
 				return {
 					guid: `msg-${i}`,
 					messageKind: 'text' as const,

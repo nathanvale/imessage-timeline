@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-	PipelineProgressTracker,
-	type PipelineStats,
 	createPipelineProgressTracker,
+	PipelineProgressTracker,
 	withSpinner,
 } from '../pipeline-progress'
 

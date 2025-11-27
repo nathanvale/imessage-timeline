@@ -1,12 +1,10 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 
 import { parse } from 'csv-parse/sync'
-
-import { MessageSchema } from '../schema/message.js'
-
 import type { ExportEnvelope, Message } from '../schema/message.js'
+import { MessageSchema } from '../schema/message.js'
 
 export type IngestOptions = {
 	attachmentRoots: string[]

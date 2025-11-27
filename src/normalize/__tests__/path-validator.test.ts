@@ -3,15 +3,8 @@ import * as os from 'node:os'
 import * as path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-
-import {
-	PathValidationStats,
-	isAbsolutePath,
-	searchAttachmentInRoots,
-	validateAndEnforcePaths,
-} from '../path-validator'
-
 import type { Message } from '../../schema/message'
+import { isAbsolutePath, searchAttachmentInRoots, validateAndEnforcePaths } from '../path-validator'
 
 describe('path-validator', () => {
 	let tempDir: string

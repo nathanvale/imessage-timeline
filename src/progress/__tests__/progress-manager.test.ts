@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { ProgressManager, createProgressManager, withProgress } from '../progress-manager.ts'
+import { createProgressManager, ProgressManager, withProgress } from '../progress-manager.ts'
 
 describe('ProgressManager', () => {
 	describe('AC01: Installation and basic setup', () => {
@@ -65,7 +65,7 @@ describe('ProgressManager', () => {
 
 		it('should truncate current item descriptions', () => {
 			const manager = new ProgressManager()
-			const bar = manager.createBar('Task', 100)
+			const _bar = manager.createBar('Task', 100)
 
 			manager.updateCurrent('Task', `Processing ${'x'.repeat(100)}`)
 			expect(manager.getProgress('Task')).toBe(0)
@@ -75,7 +75,7 @@ describe('ProgressManager', () => {
 
 		it('should format progress bar with all elements', () => {
 			const manager = new ProgressManager()
-			const bar = manager.createBar('Ingest CSV', 1000)
+			const _bar = manager.createBar('Ingest CSV', 1000)
 
 			// Progress should be trackable
 			manager.increment('Ingest CSV')
@@ -252,7 +252,7 @@ describe('ProgressManager', () => {
 		})
 
 		it('should setup signal handlers on initialization', () => {
-			const manager = new ProgressManager()
+			const _manager = new ProgressManager()
 
 			// Verify that signal handlers were registered
 			expect(processOnSpy).toHaveBeenCalledWith('SIGINT', expect.any(Function))

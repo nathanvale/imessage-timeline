@@ -4,21 +4,17 @@
  * Tests CONFIG--T03: Add Config Generation Command
  */
 
-import { constants } from 'node:fs'
-import { access, readFile, unlink } from 'node:fs/promises'
+import { readFile, unlink } from 'node:fs/promises'
 
 import yaml from 'js-yaml'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 import {
 	configFileExists,
 	generateConfigContent,
 	generateConfigFile,
 	getDefaultConfigPath,
-	validateGeneratedConfig,
 } from '../generator.js'
-
-import type { ConfigFormat } from '../schema.js'
 
 describe('Config Generator (CONFIG--T03)', () => {
 	// Test file paths

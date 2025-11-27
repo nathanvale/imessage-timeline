@@ -8,7 +8,6 @@ import { allValidMessages } from '../../../__tests__/fixtures/valid-messages'
 import {
 	collectValidationErrors,
 	formatValidationErrors,
-	getSnakeCaseFields,
 	hasSnakeCaseFields,
 	validateNormalizedMessages,
 } from '../validate-normalized'

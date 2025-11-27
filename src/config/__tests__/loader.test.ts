@@ -13,7 +13,7 @@ import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
 	clearConfigCache,
@@ -30,7 +30,7 @@ import type { Config } from '../schema'
 describe('Config Loader', () => {
 	let testDir: string
 	const originalEnv = process.env
-	const originalCwd = process.cwd()
+	const _originalCwd = process.cwd()
 
 	beforeEach(async () => {
 		// Create temp directory for test files

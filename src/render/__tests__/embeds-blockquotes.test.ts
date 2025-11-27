@@ -9,8 +9,8 @@
  * - AC05: PDF summary blockquotes
  */
 
-import { beforeEach, describe, expect, it } from 'vitest'
-
+import { describe, expect, it } from 'vitest'
+import type { MediaEnrichment, Message } from '#schema/message'
 import {
 	getEmbedPath,
 	getLinkContexts,
@@ -26,8 +26,6 @@ import {
 	renderTranscriptionBlockquote,
 	shouldRenderEmbed,
 } from '../embeds-blockquotes'
-
-import type { MediaEnrichment, Message } from '#schema/message'
 
 describe('RENDER--T03: Embeds and Blockquotes', () => {
 	// ============================================================================

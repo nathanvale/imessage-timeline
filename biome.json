@@ -1,7 +1,17 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"organizeImports": {
-		"enabled": true
+	"$schema": "https://biomejs.dev/schemas/2.3.7/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
 	},
 	"linter": {
 		"enabled": true,
@@ -39,16 +49,27 @@
 	},
 	"overrides": [
 		{
-			"include": ["*.test.*", "**/__tests__/**/*", "**/fixtures/**/*"],
+			"includes": ["**/config/generator.ts"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noTemplateCurlyInString": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.test.*", "**/__tests__/**/*", "**/fixtures/**/*"],
 			"formatter": {
 				"lineWidth": 100
 			},
 			"linter": {
 				"rules": {
 					"suspicious": {
-						"noExplicitAny": "off"
+						"noExplicitAny": "off",
+						"noTemplateCurlyInString": "off"
 					},
-					"style": {
+					"complexity": {
 						"noCommaOperator": "off"
 					}
 				}
@@ -56,6 +77,13 @@
 		}
 	],
 	"files": {
-		"ignore": ["node_modules", "dist", "coverage", ".claude", "website", "*.md"]
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/dist",
+			"!**/coverage",
+			"!**/.claude",
+			"!**/website"
+		]
 	}
 }

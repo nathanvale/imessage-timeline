@@ -12,19 +12,18 @@
  * - ENRICH--T05: Enrichment idempotency
  */
 
-export * from './image-analysis'
 export * from './audio-transcription'
-export * from './pdf-video-handling'
-export * from './link-enrichment'
 export * from './idempotency'
+export * from './image-analysis'
+export * from './link-enrichment'
+export * from './pdf-video-handling'
 
+import type { MediaEnrichment, Message } from '#schema/message'
 import {
 	addEnrichmentIdempotent,
 	deduplicateEnrichmentByKind,
 	shouldSkipEnrichment,
 } from './idempotency'
-
-import type { MediaEnrichment, Message } from '#schema/message'
 
 type EnrichmentConfig = {
 	enableVisionAnalysis?: boolean

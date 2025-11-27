@@ -1,6 +1,5 @@
-import { messageBuilder } from '../test-data-builders'
-
 import type { Message } from '../../../src/schema/message'
+import { messageBuilder } from '../test-data-builders'
 
 // Simple zero-pad helper (avoid relying on String.prototype.padStart typing)
 function zeroPad(num: number, width: number): string {

@@ -26,7 +26,7 @@ type MockImageAnalysisResult = {
 	previewPath?: string
 }
 
-type MockTranscriptionResult = {
+type _MockTranscriptionResult = {
 	text: string
 	speakers: string[]
 	duration: number
@@ -83,7 +83,7 @@ describe('AC01: Mock Providers (No Real API Calls)', () => {
 		})
 
 		// Mock YouTube metadata extraction
-		mockYouTube = vi.fn(async (url: string): Promise<MockLinkContextResult> => {
+		mockYouTube = vi.fn(async (_url: string): Promise<MockLinkContextResult> => {
 			return {
 				title: 'Mock YouTube Video Title',
 				summary: 'Mock YouTube channel: Test Channel',
@@ -92,7 +92,7 @@ describe('AC01: Mock Providers (No Real API Calls)', () => {
 		})
 
 		// Mock Spotify metadata extraction
-		mockSpotify = vi.fn(async (url: string): Promise<MockLinkContextResult> => {
+		mockSpotify = vi.fn(async (_url: string): Promise<MockLinkContextResult> => {
 			return {
 				title: 'Mock Track Name',
 				summary: 'Mock Artist: Test Artist',
@@ -354,7 +354,7 @@ describe('AC03: Checkpoint Resume - State Restoration', () => {
 	})
 
 	it('should verify no data loss on resume', () => {
-		const totalItems = 500
+		const _totalItems = 500
 		checkpoint = {
 			lastProcessedIndex: 250,
 			totalProcessed: 251,
@@ -638,7 +638,7 @@ describe('AC05: Integration Tests with Real File Fixtures', () => {
 		let apiCallCount = 0
 
 		// Mock all API functions
-		const apis = {
+		const _apis = {
 			gemini: vi.fn(() => (apiCallCount++, Promise.resolve({}))),
 			firecrawl: vi.fn(() => (apiCallCount++, Promise.resolve({}))),
 			youtube: vi.fn(() => (apiCallCount++, Promise.resolve({}))),

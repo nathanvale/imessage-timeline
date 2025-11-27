@@ -19,13 +19,11 @@
  * - logDeltaSummary: Human-readable delta report
  */
 
-import { detectNewMessages, loadIncrementalState } from './incremental-state'
-
 import type { Message } from '#schema/message'
-import type { IncrementalState } from './incremental-state'
-
 import { humanInfo } from '#utils/human'
 import { createLogger } from '#utils/logger'
+import type { IncrementalState } from './incremental-state'
+import { detectNewMessages, loadIncrementalState } from './incremental-state'
 
 // ============================================================================
 // Types (AC01-AC05)

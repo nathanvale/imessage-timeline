@@ -2,10 +2,9 @@
 // Zod validation layer for normalized messages
 // Spec §4.3, §9: Schema validation with comprehensive error reporting
 
-import { MessageSchema } from '../schema/message'
-
 import type { ZodIssue } from 'zod'
 import type { Message } from '../schema/message'
+import { MessageSchema } from '../schema/message'
 
 export type ValidationError = {
 	index: number
@@ -86,7 +85,7 @@ export function validateNormalizedMessages(messages: unknown[]): Message[] {
  * @returns Formatted error message string
  */
 export function formatValidationErrors(
-	messageIndex: number,
+	_messageIndex: number,
 	zodErrors: ZodIssue[],
 ): string {
 	if (!Array.isArray(zodErrors) || zodErrors.length === 0) {

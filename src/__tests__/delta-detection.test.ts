@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
+import type { Message } from '../schema/message'
 import { MessageSchema } from '../schema/message'
 import {
 	detectDelta,
@@ -10,10 +10,8 @@ import {
 	getDeltaStats,
 	logDeltaSummary,
 } from '../utils/delta-detection'
-import { createIncrementalState } from '../utils/incremental-state'
-
-import type { Message } from '../schema/message'
 import type { IncrementalState } from '../utils/incremental-state'
+import { createIncrementalState } from '../utils/incremental-state'
 
 // ============================================================================
 // Test Fixtures

@@ -1,11 +1,6 @@
-import { readFileSync } from 'node:fs'
-import * as path from 'node:path'
-
-import { beforeAll, describe, expect, it } from 'vitest'
-
-import { convertToISO8601, ingestCSV, parseCSVRow, validateMessages } from '../ingest-csv'
-
+import { describe, expect, it } from 'vitest'
 import type { CSVRow } from '../ingest-csv'
+import { convertToISO8601, parseCSVRow, validateMessages } from '../ingest-csv'
 
 describe('ingest-csv', () => {
 	describe('parseCSVRow - iMazing CSV format', () => {

@@ -2,7 +2,7 @@
 // NORMALIZE--T08: Comprehensive normalize-link test suite
 // Integration tests for split, linking, dedup, dates, and paths with >70% coverage
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { validateNormalizedMessages } from '../../normalize/validate-normalized'
 

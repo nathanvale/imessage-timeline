@@ -1,13 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { enrichLinkContext, enrichLinksContext } from '../link-enrichment'
-
 import type { Message } from '#schema/message'
+import { enrichLinkContext } from '../link-enrichment'
 
 // Mock Firecrawl
 vi.mock('@mendable/firecrawl-js', () => {
 	return {
-		FirecrawlApp: vi.fn(function (apiKey: string) {
+		FirecrawlApp: vi.fn(function (_apiKey: string) {
 			this.scrapeUrl = vi.fn().mockResolvedValue({
 				success: true,
 				data: {
@@ -339,7 +337,7 @@ describe('Link Enrichment (ENRICH--T04)', () => {
 
 	describe('AC05: Never crash on link enrichment failure', () => {
 		it('should NOT crash when Firecrawl fails', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'text',
 				isFromMe: false,
@@ -638,7 +636,7 @@ describe('Link Enrichment (ENRICH--T04)', () => {
 
 	describe('Integration: Full link enrichment flow', () => {
 		it('should enrich text message with link', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'text',
 				isFromMe: false,

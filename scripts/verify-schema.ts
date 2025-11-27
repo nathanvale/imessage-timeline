@@ -1,13 +1,13 @@
 #!/usr/bin/env node
+
 /**
  * Quick verification script for the message schema
  * Ensures all schemas instantiate without errors
  */
 /* eslint-disable no-console */
 
-import { MessageSchema } from '../src/schema/message'
-
 import type { Message } from '../src/schema/message'
+import { MessageSchema } from '../src/schema/message'
 
 console.log('✅ All schemas loaded successfully!')
 console.log('Available schemas:')

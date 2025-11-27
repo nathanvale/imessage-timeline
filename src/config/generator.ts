@@ -9,10 +9,8 @@ import { constants } from 'node:fs'
 import { access, writeFile } from 'node:fs/promises'
 
 import yaml from 'js-yaml'
-
-import { type Config as _Config, validateConfig } from './schema.js'
-
 import type { ConfigFormat } from './schema.js'
+import { validateConfig } from './schema.js'
 
 /**
  * CONFIG-T03-AC03: Config template with inline documentation

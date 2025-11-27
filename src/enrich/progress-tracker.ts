@@ -1,6 +1,5 @@
-import { ProgressManager } from '../progress/progress-manager'
-
 import type { SingleBar } from 'cli-progress'
+import { ProgressManager } from '../progress/progress-manager'
 
 /**
  * Types of enrichment operations tracked

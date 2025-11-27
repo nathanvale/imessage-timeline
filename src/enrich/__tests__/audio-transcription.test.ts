@@ -1,16 +1,11 @@
-import fs from 'node:fs'
-import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { analyzeAudio, transcribeAudio } from '../audio-transcription'
-
 import type { MediaMeta, Message } from '#schema/message'
+import { analyzeAudio, transcribeAudio } from '../audio-transcription'
 
 // Mock Gemini API
 vi.mock('@google/generative-ai', () => {
 	return {
-		GoogleGenerativeAI: vi.fn(function (apiKey: string) {
+		GoogleGenerativeAI: vi.fn(function (_apiKey: string) {
 			this.getGenerativeModel = vi.fn().mockReturnValue({
 				generateContent: vi.fn().mockResolvedValue({
 					response: {
@@ -45,7 +40,7 @@ vi.mock('node:fs/promises', () => ({
 
 describe('Audio Transcription (ENRICH--T02)', () => {
 	const testTempDir = '/tmp/enrich-test'
-	const testCacheDir = `${testTempDir}/audio-cache`
+	const _testCacheDir = `${testTempDir}/audio-cache`
 	const testAudioPath = `${testTempDir}/test-audio.m4a`
 
 	beforeEach(() => {
@@ -305,7 +300,7 @@ Short Description: A brief summary of the audio content.`
 
 	describe('AC05: Handle long audio files (>10min) with streaming/chunking', () => {
 		it('should handle audio files under 10 minutes normally', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,
@@ -429,7 +424,7 @@ Short Description: [1-2 sentences]`
 
 	describe('Integration: Full audio transcription flow', () => {
 		it('should transcribe a complete audio media message', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,
@@ -505,7 +500,7 @@ Short Description: [1-2 sentences]`
 
 	describe('Error handling & resilience', () => {
 		it('should NOT crash pipeline on Gemini API error', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,

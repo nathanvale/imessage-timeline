@@ -5,7 +5,7 @@
  * Verifies all helper functions work correctly
  */
 
-import { beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import {
 	createMediaMessageFixture,
@@ -14,7 +14,6 @@ import {
 	createTapbackFixture,
 	fixtureExists,
 	getFixturePath,
-	loadFixture,
 } from '../fixture-loaders'
 import {
 	createMockFirecrawl,

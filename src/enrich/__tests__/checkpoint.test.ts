@@ -9,21 +9,18 @@
  * - AC05: Verify config consistency (hash comparison) before resuming, fail if mismatch
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
+import { beforeEach, describe, expect, it } from 'vitest'
+import type { Message } from '#schema/message'
 import {
 	computeConfigHash,
 	createCheckpoint,
 	getCheckpointPath,
 	getResumeIndex,
 	initializeCheckpointState,
-	loadCheckpoint,
 	prepareCheckpoint,
 	shouldWriteCheckpoint,
 	verifyConfigHash,
 } from '../checkpoint'
-
-import type { Message } from '#schema/message'
 
 describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
 	let testCheckpointDir: string
@@ -79,8 +76,8 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
 
 	describe('AC02: Checkpoint structure with stats and failed items', () => {
 		it('should create checkpoint with all required fields', () => {
-			const config = { checkpointInterval: 100 }
-			const messages: Message[] = [
+			const _config = { checkpointInterval: 100 }
+			const _messages: Message[] = [
 				{
 					guid: 'msg-1',
 					messageKind: 'text',
@@ -362,7 +359,7 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
 		})
 
 		it('should track cumulative stats across multiple checkpoints', () => {
-			const checkpoint1 = createCheckpoint({
+			const _checkpoint1 = createCheckpoint({
 				lastProcessedIndex: 99,
 				totalProcessed: 100,
 				totalFailed: 2,
@@ -523,7 +520,7 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
 		})
 
 		it('should set current timestamp on prepared checkpoint', () => {
-			const before = new Date().getTime()
+			const before = Date.now()
 			const checkpoint = prepareCheckpoint(
 				99,
 				100,
@@ -532,7 +529,7 @@ describe('Checkpoint and Resume Logic (ENRICH--T06)', () => {
 				[],
 				'hash',
 			)
-			const after = new Date().getTime()
+			const after = Date.now()
 
 			const checkpointTime = new Date(checkpoint.createdAt).getTime()
 			expect(checkpointTime).toBeGreaterThanOrEqual(before)

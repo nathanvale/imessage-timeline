@@ -1,15 +1,11 @@
-import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { analyzePdfOrVideo, analyzePdfsOrVideos } from '../pdf-video-handling'
-
 import type { MediaMeta, Message } from '#schema/message'
+import { analyzePdfOrVideo } from '../pdf-video-handling'
 
 // Mock Gemini API
 vi.mock('@google/generative-ai', () => {
 	return {
-		GoogleGenerativeAI: vi.fn(function (apiKey: string) {
+		GoogleGenerativeAI: vi.fn(function (_apiKey: string) {
 			this.getGenerativeModel = vi.fn().mockReturnValue({
 				generateContent: vi.fn().mockResolvedValue({
 					response: {
@@ -382,7 +378,7 @@ Keep it to 2-3 sentences.`
 
 	describe('Integration: Full PDF/Video handling flow', () => {
 		it('should handle a complete PDF media message', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,
@@ -404,7 +400,7 @@ Keep it to 2-3 sentences.`
 		})
 
 		it('should handle a complete video media message', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,
@@ -480,7 +476,7 @@ Keep it to 2-3 sentences.`
 
 	describe('Error handling & resilience', () => {
 		it('should NOT crash pipeline on Gemini API error', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,

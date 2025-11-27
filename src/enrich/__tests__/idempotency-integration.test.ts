@@ -11,14 +11,12 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest'
-
+import type { MediaEnrichment, Message } from '#schema/message'
 import {
 	addEnrichmentIdempotent,
 	deduplicateEnrichmentByKind,
 	shouldSkipEnrichment,
 } from '../idempotency'
-
-import type { MediaEnrichment, Message } from '#schema/message'
 
 describe('Enrichment Idempotency - Integration Scenarios', () => {
 	let mediaMessage: Message

@@ -5,7 +5,6 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-	APPLE_EPOCH_SECONDS,
 	csvUtcTimestamps,
 	dstEdgeCases,
 	invalidDateInputs,

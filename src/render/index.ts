@@ -10,12 +10,10 @@
  */
 
 import { createHash } from 'node:crypto'
-
+import type { Message } from '#schema/message'
 import { renderAllEnrichments } from './embeds-blockquotes.js'
 import { getDatesSorted, groupMessagesByDateAndTimeOfDay } from './grouping.js'
 import { formatReplyThread } from './reply-rendering.js'
-
-import type { Message } from '#schema/message'
 
 /**
  * Deterministic UTC-time formatter (HH:mm:ss, 00-23 hour range)

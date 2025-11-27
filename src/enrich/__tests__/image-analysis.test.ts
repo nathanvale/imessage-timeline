@@ -1,16 +1,13 @@
-import fs from 'node:fs'
 import path from 'node:path'
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { analyzeImage, convertToJpgPreview } from '../image-analysis'
-
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MediaMeta, Message } from '#schema/message'
+import { analyzeImage, convertToJpgPreview } from '../image-analysis'
 
 // Mock Gemini API
 vi.mock('@google/generative-ai', () => {
 	return {
-		GoogleGenerativeAI: vi.fn(function (apiKey: string) {
+		GoogleGenerativeAI: vi.fn(function (_apiKey: string) {
 			this.getGenerativeModel = vi.fn().mockReturnValue({
 				generateContent: vi.fn().mockResolvedValue({
 					response: {
@@ -45,7 +42,7 @@ vi.mock('node:fs/promises', () => ({
 describe('Image Analysis (ENRICH--T01)', () => {
 	const testTempDir = '/tmp/enrich-test'
 	const testCacheDir = `${testTempDir}/image-cache`
-	const testMediaPath = `${testTempDir}/test-image.jpg`
+	const _testMediaPath = `${testTempDir}/test-image.jpg`
 
 	beforeEach(() => {
 		vi.clearAllMocks()
@@ -89,7 +86,7 @@ describe('Image Analysis (ENRICH--T01)', () => {
 	describe('AC03: Preview caching - generate once, skip if exists', () => {
 		it('should cache preview by filename and skip if exists', async () => {
 			const { access } = await import('node:fs/promises')
-			const previewPath = path.join(testCacheDir, 'preview-test-image.jpg')
+			const _previewPath = path.join(testCacheDir, 'preview-test-image.jpg')
 
 			// First call should check if preview exists
 			// If it exists, should skip generation
@@ -291,7 +288,7 @@ shortDescription: Outdoor brunch photo`,
 
 	describe('Integration: Full image analysis flow', () => {
 		it('should analyze a complete media message and add enrichment', async () => {
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,
@@ -353,7 +350,7 @@ shortDescription: Outdoor brunch photo`,
 	describe('Error handling & resilience', () => {
 		it('should NOT crash pipeline on Gemini API error', async () => {
 			// analyzeImage should catch errors and return original message
-			const message: Message = {
+			const _message: Message = {
 				guid: 'msg-1',
 				messageKind: 'media',
 				isFromMe: false,

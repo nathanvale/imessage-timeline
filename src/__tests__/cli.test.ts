@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import {
 	type Config,
-	type Message,
-	type RateLimitConfig,
 	createRateLimiter,
 	ingestCSV,
 	loadConfig,
+	type Message,
+	type RateLimitConfig,
 } from '../index.js'
 
 describe('library surface', () => {

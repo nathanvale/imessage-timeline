@@ -5,11 +5,9 @@
 
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-
-import { ExportEnvelopeSchema, MessageSchema } from '../src/schema/message'
-
 import type { ZodError } from 'zod'
 import type { ExportEnvelope, Message } from '../src/schema/message'
+import { ExportEnvelopeSchema, MessageSchema } from '../src/schema/message'
 
 // ============================================================================
 // Type Definitions

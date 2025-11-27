@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
+	createEnrichmentProgressManager,
 	type EnrichmentProgressConfig,
 	EnrichmentProgressManager,
-	createEnrichmentProgressManager,
 } from '../progress-tracker'
 
 describe('EnrichmentProgressManager', () => {
@@ -165,7 +165,7 @@ describe('EnrichmentProgressManager', () => {
 		it('should calculate ETA from operation durations', () => {
 			// Simulate operations with known duration
 			for (let i = 0; i < 5; i++) {
-				const start = Date.now()
+				const _start = Date.now()
 				manager.startOperation('image', `photo${i}.jpg`)
 				manager.completeOperation('image')
 
@@ -193,7 +193,7 @@ describe('EnrichmentProgressManager', () => {
 			manager.completeOperation('image')
 
 			const progress1 = manager.getProgress()
-			const avg1 = progress1.averageDuration
+			const _avg1 = progress1.averageDuration
 
 			// Do more operations
 			for (let i = 1; i < 5; i++) {

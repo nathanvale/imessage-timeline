@@ -11,9 +11,9 @@
  * TDD approach: Red-Green-Refactor with Wallaby
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import { RateLimiter, createRateLimiter, is5xx, isRetryableStatus } from '../rate-limiting'
+import { createRateLimiter } from '../rate-limiting'
 
 // ============================================================================
 // AC01: Configurable Rate Limit Delays

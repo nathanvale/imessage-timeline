@@ -1,17 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-
-import {
-	type ContentMatch,
-	type MergeResult,
-	type MergeStats,
-	applyDbAuthoritiveness,
-	dedupAndMerge,
-	detectContentEquivalence,
-	findExactMatch,
-	verifyNoDataLoss,
-} from '../dedup-merge'
-
 import type { Message } from '#lib/schema/message'
+import { dedupAndMerge } from '../dedup-merge'
 
 /**
  * Test suite for CSV/DB deduplication and merge (NORMALIZE--T04)

@@ -1,8 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-
+import { describe, expect, it } from 'vitest'
+import type { Message } from '#schema/message'
 import {
-	type ReplyContext,
-	type TapbackContext,
 	buildReplyTree,
 	calculateIndentationLevel,
 	findRepliesForMessage,
@@ -13,8 +11,6 @@ import {
 	renderReplyAsBlockquote,
 	renderTapbackAsEmoji,
 } from '../reply-rendering'
-
-import type { Message } from '#schema/message'
 
 describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
 	const createTestMessage = (
@@ -49,7 +45,7 @@ describe('RENDER--T02: Nested Reply and Tapback Rendering', () => {
 		})
 
 		it('should render single-level reply as blockquote', () => {
-			const parentMsg: Message = {
+			const _parentMsg: Message = {
 				guid: 'parent',
 				messageKind: 'text',
 				isFromMe: false,

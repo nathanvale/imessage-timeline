@@ -38,11 +38,12 @@ import path from 'node:path'
 
 import pino, { type Logger as PinoLogger } from 'pino'
 
+import pkgJson from '../../package.json' with { type: 'json' }
+
 let sequenceCounter = 0
 let cachedVersion: string | undefined
 let currentCorrelationId: string | undefined
 const correlationStore = new AsyncLocalStorage<string>()
-import pkgJson from '../../package.json' assert { type: 'json' }
 function loadVersion(): string {
 	if (cachedVersion) return cachedVersion!
 	const version = (pkgJson as { version?: string }).version || '0.0.0'

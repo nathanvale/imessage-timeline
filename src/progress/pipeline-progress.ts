@@ -69,7 +69,7 @@ export class PipelineProgressTracker {
 	public updateIngestProgress(
 		source: 'csv' | 'db',
 		current: number,
-		total: number,
+		_total: number,
 		currentItem?: string,
 	): void {
 		if (this.quiet) return
@@ -102,7 +102,7 @@ export class PipelineProgressTracker {
 	public updateNormalizeProgress(
 		operation: 'linking' | 'dedup',
 		current: number,
-		total: number,
+		_total: number,
 		currentItem?: string,
 	): void {
 		if (this.quiet) return
@@ -133,7 +133,7 @@ export class PipelineProgressTracker {
 	 */
 	public updateRenderProgress(
 		current: number,
-		total: number,
+		_total: number,
 		filename?: string,
 	): void {
 		if (this.quiet) return

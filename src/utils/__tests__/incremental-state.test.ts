@@ -5,10 +5,8 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-	IncrementalState,
 	createIncrementalState,
 	detectNewMessages,
-	isStateOutdated,
 	loadIncrementalState,
 	saveIncrementalState,
 	updateStateWithEnrichedGuids,
@@ -26,7 +24,7 @@ describe('IncrementalState', () => {
 	afterEach(async () => {
 		try {
 			await fs.rm(tempDir, { recursive: true, force: true })
-		} catch (e) {
+		} catch (_e) {
 			// ignore cleanup errors
 		}
 	})

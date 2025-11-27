@@ -12,10 +12,6 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { Command, type CommanderError } from 'commander'
-
-import type { DBMessage } from './ingest/ingest-db.js'
-import type { Message } from './schema/message.js'
-
 import {
 	humanError,
 	humanInfo,
@@ -23,6 +19,8 @@ import {
 	setHumanLoggingEnabled,
 } from '#utils/human'
 import { createLogger, setCorrelationId, setLogLevel } from '#utils/logger'
+import type { DBMessage } from './ingest/ingest-db.js'
+import type { Message } from './schema/message.js'
 
 // Get package.json for version
 const __filename = fileURLToPath(import.meta.url)

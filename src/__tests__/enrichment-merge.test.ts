@@ -1,18 +1,15 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { ExportEnvelope, Message } from '../schema/message'
 import { MessageSchema } from '../schema/message'
 import {
 	backupEnrichedJson,
-	createEnrichmentMergeResult,
 	loadExistingEnriched,
 	mergeEnrichments,
 	updateMergeStatistics,
 } from '../utils/enrichment-merge'
-
-import type { ExportEnvelope, Message } from '../schema/message'
 
 // ============================================================================
 // Test Fixtures

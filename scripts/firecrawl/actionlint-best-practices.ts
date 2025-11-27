@@ -8,8 +8,7 @@
 	It intentionally avoids copying long passages from upstream docs.
 */
 
-import { writeFileSync } from 'node:fs'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 
 // Prefer descriptive types
