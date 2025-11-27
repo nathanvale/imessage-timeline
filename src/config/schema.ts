@@ -52,6 +52,39 @@ const RenderConfigSchema = z.object({
 })
 
 /**
+ * TypeScript type for the full configuration
+ * Explicitly defined for DTS generation compatibility
+ */
+export type Config = {
+	version: string
+	attachmentRoots: string[]
+	gemini: {
+		apiKey: string
+		model: string
+		rateLimitDelay: number
+		maxRetries: number
+	}
+	firecrawl?: {
+		apiKey?: string
+		enabled: boolean
+	}
+	enrichment: {
+		enableVisionAnalysis: boolean
+		enableAudioTranscription: boolean
+		enableLinkEnrichment: boolean
+		imageCacheDir: string
+		checkpointInterval: number
+		forceRefresh: boolean
+	}
+	render: {
+		groupByTimeOfDay: boolean
+		renderRepliesAsNested: boolean
+		renderTapbacksAsEmoji: boolean
+		maxNestingDepth: number
+	}
+}
+
+/**
  * CONFIG-T01-AC01: Main configuration schema
  *
  * Supports:
@@ -59,7 +92,7 @@ const RenderConfigSchema = z.object({
  * - CONFIG-T01-AC03: Environment variable interpolation via ${ENV_VAR}
  * - CONFIG-T01-AC05: Validation errors with field paths
  */
-const configSchema = z.object({
+export const ConfigSchema: z.ZodType<Config, z.ZodTypeDef, unknown> = z.object({
 	version: z.string().default('1.0'),
 	attachmentRoots: z
 		.array(z.string().min(1, 'Attachment root path cannot be empty'))
@@ -82,16 +115,6 @@ const configSchema = z.object({
 		maxNestingDepth: 10,
 	}),
 })
-
-/**
- * TypeScript type inferred from the config schema
- */
-export type Config = z.infer<typeof configSchema>
-
-/**
- * Exported config schema with explicit type annotation for DTS generation
- */
-export const ConfigSchema: typeof configSchema = configSchema
 
 /**
  * CONFIG-T01-AC05: Validate config with detailed error messages
