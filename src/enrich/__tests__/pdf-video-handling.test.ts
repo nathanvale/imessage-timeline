@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MediaMeta, Message } from '#schema/message'
 import { analyzePdfOrVideo } from '../pdf-video-handling'
 
@@ -42,6 +42,10 @@ describe('PDF and Video Handling (ENRICH--T03)', () => {
 
 	afterEach(() => {
 		vi.clearAllMocks()
+	})
+
+	afterAll(() => {
+		vi.restoreAllMocks()
 	})
 
 	describe('AC01: PDF summarization via Gemini with page limit', () => {

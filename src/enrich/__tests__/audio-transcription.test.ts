@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MediaMeta, Message } from '#schema/message'
 import { analyzeAudio, transcribeAudio } from '../audio-transcription'
 
@@ -50,6 +50,10 @@ describe('Audio Transcription (ENRICH--T02)', () => {
 
 	afterEach(() => {
 		vi.clearAllMocks()
+	})
+
+	afterAll(() => {
+		vi.restoreAllMocks()
 	})
 
 	describe('AC01: Structured prompt for transcription requesting timestamps and speakers', () => {

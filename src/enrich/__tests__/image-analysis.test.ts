@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MediaMeta, Message } from '#schema/message'
 import { analyzeImage, convertToJpgPreview } from '../image-analysis'
 
@@ -48,6 +48,14 @@ describe('Image Analysis (ENRICH--T01)', () => {
 		vi.clearAllMocks()
 		// Reset all mocks before each test
 		vi.resetAllMocks()
+	})
+
+	afterEach(() => {
+		vi.clearAllMocks()
+	})
+
+	afterAll(() => {
+		vi.restoreAllMocks()
 	})
 
 	describe('AC01: HEIC conversion with ≥90% quality', () => {
