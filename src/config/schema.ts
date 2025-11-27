@@ -8,11 +8,44 @@
 import { z } from 'zod'
 
 /**
+ * Internal type definitions for config schemas
+ */
+type GeminiConfig = {
+	apiKey: string
+	model: string
+	rateLimitDelay: number
+	maxRetries: number
+}
+
+type FirecrawlConfig =
+	| {
+			apiKey?: string
+			enabled: boolean
+	  }
+	| undefined
+
+type EnrichmentConfig = {
+	enableVisionAnalysis: boolean
+	enableAudioTranscription: boolean
+	enableLinkEnrichment: boolean
+	imageCacheDir: string
+	checkpointInterval: number
+	forceRefresh: boolean
+}
+
+type RenderConfig = {
+	groupByTimeOfDay: boolean
+	renderRepliesAsNested: boolean
+	renderTapbacksAsEmoji: boolean
+	maxNestingDepth: number
+}
+
+/**
  * CONFIG-T01-AC01: Config schema with Zod validation
  *
  * Gemini API configuration for AI-powered enrichment
  */
-const GeminiConfigSchema = z.object({
+const GeminiConfigSchema: z.ZodType<GeminiConfig> = z.object({
 	apiKey: z.string().min(1, 'Gemini API key is required'),
 	model: z.string().default('gemini-1.5-pro'),
 	rateLimitDelay: z.number().min(0).default(1000),
@@ -22,7 +55,7 @@ const GeminiConfigSchema = z.object({
 /**
  * Firecrawl API configuration for link enrichment (optional)
  */
-const FirecrawlConfigSchema = z
+const FirecrawlConfigSchema: z.ZodType<FirecrawlConfig> = z
 	.object({
 		apiKey: z.string().optional(),
 		enabled: z.boolean().default(true),
@@ -32,7 +65,7 @@ const FirecrawlConfigSchema = z
 /**
  * Enrichment pipeline configuration
  */
-const EnrichmentConfigSchema = z.object({
+const EnrichmentConfigSchema: z.ZodType<EnrichmentConfig> = z.object({
 	enableVisionAnalysis: z.boolean().default(true),
 	enableAudioTranscription: z.boolean().default(true),
 	enableLinkEnrichment: z.boolean().default(true),
@@ -44,12 +77,24 @@ const EnrichmentConfigSchema = z.object({
 /**
  * Markdown rendering configuration
  */
-const RenderConfigSchema = z.object({
+const RenderConfigSchema: z.ZodType<RenderConfig> = z.object({
 	groupByTimeOfDay: z.boolean().default(true),
 	renderRepliesAsNested: z.boolean().default(true),
 	renderTapbacksAsEmoji: z.boolean().default(true),
 	maxNestingDepth: z.number().min(1).max(100).default(10),
 })
+
+/**
+ * TypeScript type for the full config
+ */
+export type Config = {
+	version: string
+	attachmentRoots: string[]
+	gemini: GeminiConfig
+	firecrawl?: FirecrawlConfig
+	enrichment: EnrichmentConfig
+	render: RenderConfig
+}
 
 /**
  * CONFIG-T01-AC01: Main configuration schema
@@ -59,7 +104,7 @@ const RenderConfigSchema = z.object({
  * - CONFIG-T01-AC03: Environment variable interpolation via ${ENV_VAR}
  * - CONFIG-T01-AC05: Validation errors with field paths
  */
-export const ConfigSchema = z.object({
+export const ConfigSchema: z.ZodType<Config> = z.object({
 	version: z.string().default('1.0'),
 	attachmentRoots: z
 		.array(z.string().min(1, 'Attachment root path cannot be empty'))
@@ -82,11 +127,6 @@ export const ConfigSchema = z.object({
 		maxNestingDepth: 10,
 	}),
 })
-
-/**
- * TypeScript type inferred from Zod schema
- */
-export type Config = z.infer<typeof ConfigSchema>
 
 /**
  * CONFIG-T01-AC05: Validate config with detailed error messages

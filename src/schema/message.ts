@@ -176,7 +176,7 @@ export type ExportEnvelope = {
 // ============================================================================
 
 // Media Enrichment Schema
-export const MediaEnrichmentSchema = z
+export const MediaEnrichmentSchema: z.ZodType<MediaEnrichment> = z
 	.object({
 		kind: z.enum([
 			'image',
@@ -247,7 +247,7 @@ export const MediaEnrichmentSchema = z
 	})
 
 // Media Provenance Schema
-export const MediaProvenanceSchema = z
+export const MediaProvenanceSchema: z.ZodType<MediaProvenance> = z
 	.object({
 		source: z.enum(['csv', 'db', 'merged']),
 		lastSeen: z.string().datetime(),
@@ -272,7 +272,7 @@ export const MediaProvenanceSchema = z
 	})
 
 // Media Meta Schema
-export const MediaMetaSchema = z
+export const MediaMetaSchema: z.ZodType<MediaMeta> = z
 	.object({
 		id: z.string(),
 		filename: z.string(),
@@ -298,7 +298,7 @@ export const MediaMetaSchema = z
 	})
 
 // Reply Info Schema
-export const ReplyInfoSchema = z
+export const ReplyInfoSchema: z.ZodType<ReplyInfo> = z
 	.object({
 		sender: z.string().optional(),
 		date: z.string().datetime().optional(),
@@ -326,7 +326,7 @@ export const ReplyInfoSchema = z
 	})
 
 // Tapback Info Schema
-export const TapbackInfoSchema = z.object({
+export const TapbackInfoSchema: z.ZodType<TapbackInfo> = z.object({
 	type: z.enum([
 		'loved',
 		'liked',
@@ -345,7 +345,7 @@ export const TapbackInfoSchema = z.object({
 })
 
 // Message Core Schema (without refinements to allow extending)
-export const MessageCoreSchema = z.object({
+export const MessageCoreSchema: z.ZodType<MessageCore> = z.object({
 	guid: z.string(),
 	rowid: z.number().optional(),
 	chatId: z.string().nullable().optional(),
@@ -375,7 +375,7 @@ export const MessageCoreSchema = z.object({
 })
 
 // Message Schema with discriminated union and cross-field invariants
-export const MessageSchema = z
+export const MessageSchema: z.ZodType<Message> = z
 	.object({
 		// Core fields from MessageCoreSchema
 		guid: z.string(),
@@ -497,7 +497,7 @@ export const MessageSchema = z
 	})
 
 // Export Envelope Schema
-export const ExportEnvelopeSchema = z
+export const ExportEnvelopeSchema: z.ZodType<ExportEnvelope> = z
 	.object({
 		schemaVersion: z.string(),
 		source: z.enum(['csv', 'db', 'merged']),
