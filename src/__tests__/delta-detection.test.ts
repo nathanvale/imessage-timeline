@@ -10,6 +10,7 @@ import {
 	getDeltaStats,
 	logDeltaSummary,
 } from '../utils/delta-detection'
+import { setHumanLoggingEnabled } from '../utils/human'
 import type { IncrementalState } from '../utils/incremental-state'
 import { createIncrementalState } from '../utils/incremental-state'
 
@@ -238,6 +239,8 @@ describe('logDeltaSummary', () => {
 	let logSpy: ReturnType<typeof vi.spyOn>
 
 	beforeEach(() => {
+		// Ensure human logging is enabled (may be disabled by other tests)
+		setHumanLoggingEnabled(true)
 		logSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
 	})
 
