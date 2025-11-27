@@ -30,19 +30,19 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Standard env
         uses: ./.github/actions/standard-ci-env
-      - name: Setup pnpm toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Build
-        run: pnpm build
+        run: bun run build
       - name: Publint (package structure lint)
-        run: pnpm check:publint
+        run: bun run check:publint
       - name: Types validation (are-the-types-wrong)
         continue-on-error: true
-        run: pnpm check:types
+        run: bun run check:types
       - name: Dry pack & artifact
-        run: pnpm pack:dry
+        run: bun run pack:dry
       - name: Upload packed artifact
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:

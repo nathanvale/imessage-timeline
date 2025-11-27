@@ -1,1 +1,4 @@
 * text=auto eol=lf
+
+# Bun lockfile - text-based format, enable diff
+bun.lock text diff

@@ -128,6 +128,7 @@
 		"pre:enter:beta": "changeset pre enter beta",
 		"pre:enter:next": "changeset pre enter next",
 		"pre:enter:rc": "changeset pre enter rc",
+		"quality-check:ci": "biome check . && bun run typecheck",
 		"pre:exit": "changeset pre exit",
 		"prepare": "husky",
 		"publish:pre": "changeset publish --provenance",
