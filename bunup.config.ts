@@ -29,7 +29,7 @@ export default defineConfig([
 	{
 		name: 'cli',
 		entry: './src/cli/index.ts',
-		outDir: './dist',
+		outDir: './dist/bin',
 		format: 'esm',
 		dts: false, // CLI doesn't need declarations
 		external,

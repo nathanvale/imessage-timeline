@@ -30,8 +30,8 @@ import type { GlobalOptions } from './types.js'
 // Get package.json for version
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-// Path is relative to the bundled output location (dist/index.js)
-const packageJsonPath = resolve(__dirname, '../package.json')
+// Path is relative to the bundled output location (dist/bin/index.js)
+const packageJsonPath = resolve(__dirname, '../../package.json')
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
 
 // Create CLI logger
