@@ -3,6 +3,6 @@
 	"initialVersions": {
 		"imessage-timeline": "0.0.1"
 	},
-	"mode": "pre",
+	"mode": "exit",
 	"tag": "next"
 }
