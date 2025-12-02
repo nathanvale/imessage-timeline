@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-imessage-pipeline-tasks" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">iMessage Pipeline Implementation Tasks | iMessage Timeline</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://nathanvale.github.io/imessage-timeline/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://nathanvale.github.io/imessage-timeline/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://nathanvale.github.io/imessage-timeline/docs/imessage-pipeline-tasks"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="iMessage Pipeline Implementation Tasks | iMessage Timeline"><meta data-rh="true" name="description" content="Comprehensive task breakdown from imessage-pipeline-tech-spec.md"><meta data-rh="true" property="og:description" content="Comprehensive task breakdown from imessage-pipeline-tech-spec.md"><link data-rh="true" rel="icon" href="/imessage-timeline/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://nathanvale.github.io/imessage-timeline/docs/imessage-pipeline-tasks"><link data-rh="true" rel="alternate" href="https://nathanvale.github.io/imessage-timeline/docs/imessage-pipeline-tasks" hreflang="en"><link data-rh="true" rel="alternate" href="https://nathanvale.github.io/imessage-timeline/docs/imessage-pipeline-tasks" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iMessage Pipeline Implementation Tasks","item":"https://nathanvale.github.io/imessage-timeline/docs/imessage-pipeline-tasks"}]}</script><link rel="alternate" type="application/rss+xml" href="/imessage-timeline/blog/rss.xml" title="iMessage Timeline RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/imessage-timeline/blog/atom.xml" title="iMessage Timeline Atom Feed"><link rel="stylesheet" href="/imessage-timeline/assets/css/styles.38614e9a.css">
+<script src="/imessage-timeline/assets/js/runtime~main.da1a3075.js" defer="defer"></script>
+<script src="/imessage-timeline/assets/js/main.aab6d5fc.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/imessage-timeline/img/logo.svg"><div role="region" aria-label="Skip to main content"><a class="skipToContent_RfLI" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/imessage-timeline/"><div class="navbar__logo"><img src="/imessage-timeline/img/logo.svg" alt="iMessage Timeline Logo" class="themedComponent_dXTd themedComponent--light_iTBJ"><img src="/imessage-timeline/img/logo.svg" alt="iMessage Timeline Logo" class="themedComponent_dXTd themedComponent--dark_hPpa"></div><b class="navbar__title text--truncate">iMessage Timeline</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/imessage-timeline/docs/intro">Documentation</a><a class="navbar__item navbar__link" href="/imessage-timeline/blog">Blog</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/nathanvale/imessage-timeline" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_h_1J"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_CCJv colorModeToggle_zjfh"><button class="clean-btn toggleButton_ghGq toggleButtonDisabled_YNiD" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_V3Nl lightToggleIcon_ZJcu"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_V3Nl darkToggleIcon_XA2Y"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_V3Nl systemToggleIcon_olV9"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_GVyH"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_dlcL"><div class="docsWrapper_JyLI"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sZOX" type="button"></button><div class="docRoot_utHZ"><aside class="theme-doc-sidebar-container docSidebarContainer_evXk"><div class="sidebarViewport_Gbc4"><div class="sidebar_hMr3"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_whOC"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/intro"><span title="Introduction" class="linkLabel_ZnI_">Introduction</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/cli-usage"><span title="CLI" class="linkLabel_ZnI_">CLI</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/MONOREPO_RECOMMENDATIONS"><span title="Monorepo &amp; Documentation Strategy Recommendations" class="linkLabel_ZnI_">Monorepo &amp; Documentation Strategy Recommendations</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/actionlint-best-practices"><span title="actionlint best practices" class="linkLabel_ZnI_">actionlint best practices</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/actionlint-quickstart"><span title="actionlint quickstart" class="linkLabel_ZnI_">actionlint quickstart</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/automated-release-workflow"><span title="Automated Release Workflow" class="linkLabel_ZnI_">Automated Release Workflow</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/branch-protection-policy"><span title="Branch Protection Policy (proposed)" class="linkLabel_ZnI_">Branch Protection Policy (proposed)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/bun-hybrid-implementation-checklist"><span title="Bun Hybrid Implementation Checklist" class="linkLabel_ZnI_">Bun Hybrid Implementation Checklist</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/bun-script-best-practices"><span title="Bun script best practices (CLI-focused)" class="linkLabel_ZnI_">Bun script best practices (CLI-focused)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/bun-single-repo-best-practices"><span title="bun-single-repo-best-practices" class="linkLabel_ZnI_">bun-single-repo-best-practices</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/ci-pnpm-caching"><span title="CI pnpm Caching Strategy" class="linkLabel_ZnI_">CI pnpm Caching Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/ci-workflow-standards"><span title="CI workflow standards" class="linkLabel_ZnI_">CI workflow standards</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/config-best-practices-review"><span title="config-best-practices-review" class="linkLabel_ZnI_">config-best-practices-review</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/dependency-maintenance"><span title="dependency-maintenance" class="linkLabel_ZnI_">dependency-maintenance</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_pXRd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/imessage-timeline/docs/diagrams/pre-mode-workflow-simple"><span title="diagrams" class="categoryLinkLabel_hinY">diagrams</span></a></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/dual-mode-distribution-best-practices"><span title="Dual-Mode Distribution Best Practices" class="linkLabel_ZnI_">Dual-Mode Distribution Best Practices</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/emergency-rollback-procedure"><span title="Emergency Rollback Procedure" class="linkLabel_ZnI_">Emergency Rollback Procedure</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/imessage-pipeline-enhancements-spec"><span title="iMessage Pipeline Enhancements Specification" class="linkLabel_ZnI_">iMessage Pipeline Enhancements Specification</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/imessage-pipeline-implementation-summary"><span title="iMessage Pipeline Implementation Summary" class="linkLabel_ZnI_">iMessage Pipeline Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/imessage-pipeline-refactor-report"><span title="iMessage pipeline refactor report" class="linkLabel_ZnI_">iMessage pipeline refactor report</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/imessage-timeline/docs/imessage-pipeline-tasks"><span title="iMessage Pipeline Implementation Tasks" class="linkLabel_ZnI_">iMessage Pipeline Implementation Tasks</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/imessage-pipeline-tech-spec"><span title="iMessage pipeline — technical specification" class="linkLabel_ZnI_">iMessage pipeline — technical specification</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/imessage-pipeline-troubleshooting"><span title="iMessage Pipeline Troubleshooting Guide" class="linkLabel_ZnI_">iMessage Pipeline Troubleshooting Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/imessage-pipeline-usage"><span title="iMessage Pipeline Usage Guide" class="linkLabel_ZnI_">iMessage Pipeline Usage Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/logging"><span title="Logging and sinks" class="linkLabel_ZnI_">Logging and sinks</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/npm-automation-token-setup"><span title="NPM Automation Token Setup Guide" class="linkLabel_ZnI_">NPM Automation Token Setup Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/package-hygiene"><span title="Package Hygiene &amp; Metadata Quality" class="linkLabel_ZnI_">Package Hygiene &amp; Metadata Quality</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/pre-mode-consolidation-plan"><span title="Pre-Mode Workflow Consolidation Plan" class="linkLabel_ZnI_">Pre-Mode Workflow Consolidation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/pre-release-guide"><span title="Pre-Release Guide - Canary, Beta, and RC Releases" class="linkLabel_ZnI_">Pre-Release Guide - Canary, Beta, and RC Releases</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/prettier-best-practices"><span title="Prettier Best Practices &amp; Formatting Strategy" class="linkLabel_ZnI_">Prettier Best Practices &amp; Formatting Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/release-channels"><span title="Release Channels &amp; Prerelease Strategy" class="linkLabel_ZnI_">Release Channels &amp; Prerelease Strategy</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_pXRd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/imessage-timeline/docs/releases/changesets-canonical"><span title="releases" class="categoryLinkLabel_hinY">releases</span></a></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/sbom-generation-review"><span title="SBOM Generation Review" class="linkLabel_ZnI_">SBOM Generation Review</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/security-supply-chain"><span title="security-supply-chain" class="linkLabel_ZnI_">security-supply-chain</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/test-configuration-research"><span title="Test Configuration Best Practices Research" class="linkLabel_ZnI_">Test Configuration Best Practices Research</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/testing-best-practices"><span title="Testing best practices (Vitest + Testing Library + Wallaby)" class="linkLabel_ZnI_">Testing best practices (Vitest + Testing Library + Wallaby)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/imessage-timeline/docs/vitest-firecrawl-esm-bun-best-practices"><span title="Vitest + Firecrawl ESM &amp; Bun Best Practices for CLI Projects" class="linkLabel_ZnI_">Vitest + Firecrawl ESM &amp; Bun Best Practices for CLI Projects</span></a></li></ul></nav></div></div></aside><main class="docMainContainer_nkwQ"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_wBRg"><div class="docItemContainer_GvXy"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_n25q" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/imessage-timeline/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_Ebew"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">iMessage Pipeline Implementation Tasks</span></li></ul></nav><div class="tocCollapsible_twB_ theme-doc-toc-mobile tocMobile_BZyV"><button type="button" class="clean-btn tocCollapsibleButton_HJWU">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>iMessage Pipeline Implementation Tasks</h1></header>
+<blockquote>
+<p>Comprehensive task breakdown from <code>imessage-pipeline-tech-spec.md</code></p>
+<p><strong>Last updated</strong>: 2025-10-17</p>
+<p><strong>Total tasks</strong>: 30 across 6 epics</p>
+<p><strong>Tracking</strong>: Task state managed in <code>imessage-pipeline-task-state.json</code></p>
+</blockquote>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="task-status-legend">Task Status Legend<a href="#task-status-legend" class="hash-link" aria-label="Direct link to Task Status Legend" title="Direct link to Task Status Legend" translate="no">​</a></h2>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>Pending</strong> - Not started</li>
+<li class="">[~] <strong>In Progress</strong> - Currently being worked on</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>Completed</strong> - Finished and verified</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="epic-overview">Epic Overview<a href="#epic-overview" class="hash-link" aria-label="Direct link to Epic Overview" title="Direct link to Epic Overview" translate="no">​</a></h2>
+<table><thead><tr><th>Epic</th><th>Tasks</th><th>Risk Profile</th><th>Est. Days</th></tr></thead><tbody><tr><td>E1: Schema &amp; Validator</td><td>3</td><td>1 MEDIUM, 2 LOW</td><td>6 days</td></tr><tr><td>E2: Normalize-Link</td><td>8</td><td>3 HIGH, 2 MEDIUM, 3 LOW</td><td>24 days</td></tr><tr><td>E3: Enrich-AI</td><td>8</td><td>5 HIGH, 1 MEDIUM, 2 LOW</td><td>29 days</td></tr><tr><td>E4: Render-Markdown</td><td>4</td><td>1 HIGH, 1 MEDIUM, 2 LOW</td><td>10 days</td></tr><tr><td>E5: CI/Testing/Tooling</td><td>4</td><td>1 MEDIUM, 3 LOW</td><td>6 days</td></tr><tr><td>E6: Docs &amp; Migration</td><td>3</td><td>3 LOW</td><td>4 days</td></tr><tr><td><strong>TOTAL</strong></td><td><strong>30</strong></td><td><strong>10 HIGH, 5 MEDIUM, 15 LOW</strong></td><td><strong>79 days</strong></td></tr></tbody></table>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="e1-schema--validator-foundation">E1: Schema &amp; Validator (Foundation)<a href="#e1-schema--validator-foundation" class="hash-link" aria-label="Direct link to E1: Schema &amp; Validator (Foundation)" title="Direct link to E1: Schema &amp; Validator (Foundation)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="schema--t01-create-unified-message-schema-with-zod-validation">SCHEMA--T01: Create unified Message schema with Zod validation<a href="#schema--t01-create-unified-message-schema-with-zod-validation" class="hash-link" aria-label="Direct link to SCHEMA--T01: Create unified Message schema with Zod validation" title="Direct link to SCHEMA--T01: Create unified Message schema with Zod validation" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: MEDIUM | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+None</p>
+<p><strong>Description</strong>: Implement TypeScript interfaces and Zod validators for the
+unified Message model with discriminated union on messageKind.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T01-AC01</strong>: Message interface with messageKind discriminated
+union (&#x27;text&#x27;|&#x27;media&#x27;|&#x27;tapback&#x27;|&#x27;notification&#x27;)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T01-AC02</strong>: Zod schema with superRefine for cross-field
+invariants</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T01-AC03</strong>: Media payload validation (exists and complete when
+messageKind=&#x27;media&#x27;)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T01-AC04</strong>: Tapback payload validation (exists when
+messageKind=&#x27;tapback&#x27;)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T01-AC05</strong>: ISO 8601 date validation with Z suffix enforced</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T01-AC06</strong>: Absolute path validation for media.path when file
+exists</li>
+</ul>
+<p><strong>Notes</strong>: Foundation for entire pipeline. Complex cross-field invariants using
+Zod superRefine. Create <code>src/schema/message.ts</code> with full schema from refactor
+report.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="schema--t02-build-validator-cli-script">SCHEMA--T02: Build validator CLI script<a href="#schema--t02-build-validator-cli-script" class="hash-link" aria-label="Direct link to SCHEMA--T02: Build validator CLI script" title="Direct link to SCHEMA--T02: Build validator CLI script" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 1 day | <strong>Depends on</strong>:
+SCHEMA--T01</p>
+<p><strong>Description</strong>: Create scripts/validate-json.mts CLI to validate message
+artifacts against schema.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T02-AC01</strong>: CLI accepts JSON file path as argument</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T02-AC02</strong>: Validates against Message schema with detailed error
+messages including field paths</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T02-AC03</strong>: Exit code 0 on success, 1 on validation failure</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T02-AC04</strong>: Outputs summary stats (total messages, breakdown by
+messageKind)</li>
+</ul>
+<p><strong>Notes</strong>: Straightforward CLI script using Zod validation. Useful for debugging
+pipeline outputs.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="schema--t03-create-fixtures-and-schema-tests">SCHEMA--T03: Create fixtures and schema tests<a href="#schema--t03-create-fixtures-and-schema-tests" class="hash-link" aria-label="Direct link to SCHEMA--T03: Create fixtures and schema tests" title="Direct link to SCHEMA--T03: Create fixtures and schema tests" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+SCHEMA--T01</p>
+<p><strong>Description</strong>: Build test fixtures for all messageKind types and unit tests
+covering schema validation.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T03-AC01</strong>: Happy path fixtures for all messageKind types (text,
+media, tapback, notification)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T03-AC02</strong>: Invariant violation fixtures (media without payload,
+tapback without payload, etc.)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T03-AC03</strong>: Date format violation fixtures (missing Z, invalid
+ISO 8601)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>SCHEMA-T03-AC04</strong>: Unit tests cover all Zod schema branches with &gt;80%
+coverage</li>
+</ul>
+<p><strong>Notes</strong>: Data setup task. Create test fixtures in <code>__tests__/fixtures/</code>
+directory. Tests verify schema catches all invariant violations.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="e2-normalize-link-data-integration">E2: Normalize-Link (Data Integration)<a href="#e2-normalize-link-data-integration" class="hash-link" aria-label="Direct link to E2: Normalize-Link (Data Integration)" title="Direct link to E2: Normalize-Link (Data Integration)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t01-implement-csv-to-schema-mapping">NORMALIZE--T01: Implement CSV to schema mapping<a href="#normalize--t01-implement-csv-to-schema-mapping" class="hash-link" aria-label="Direct link to NORMALIZE--T01: Implement CSV to schema mapping" title="Direct link to NORMALIZE--T01: Implement CSV to schema mapping" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+SCHEMA--T01</p>
+<p><strong>Description</strong>: Build ingest-csv component to parse iMazing CSV and convert to
+Message schema.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T01-AC01</strong>: Parse iMazing CSV rows with correct field mapping
+per CSV header</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T01-AC02</strong>: Split rows into text/media/tapback/notification by
+analyzing content</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T01-AC03</strong>: Convert CSV dates to ISO 8601 UTC with Z suffix</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T01-AC04</strong>: Resolve iMazing attachment paths to absolute paths
+when files exist</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T01-AC05</strong>: Preserve row metadata (source, line number) for
+provenance</li>
+</ul>
+<p><strong>Notes</strong>: Well-defined CSV schema mapping. Output to
+<code>messages.csv.ingested.json</code>. Handle iMazing attachment path patterns.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t02-implement-db-row-splitting-with-part-guids">NORMALIZE--T02: Implement DB row splitting with part GUIDs<a href="#normalize--t02-implement-db-row-splitting-with-part-guids" class="hash-link" aria-label="Direct link to NORMALIZE--T02: Implement DB row splitting with part GUIDs" title="Direct link to NORMALIZE--T02: Implement DB row splitting with part GUIDs" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: MEDIUM | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+SCHEMA--T01</p>
+<p><strong>Description</strong>: Build logic to split Messages.app DB rows with attachments into
+1 text + N media messages with stable part GUIDs.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T02-AC01</strong>: Split DB messages with n attachments into 1 text
+message + n media messages</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T02-AC02</strong>: Generate stable part GUIDs using format
+<code>p:&lt;index&gt;/&lt;original_guid&gt;</code></li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T02-AC03</strong>: Preserve parent GUID reference in each part&#x27;s
+metadata</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T02-AC04</strong>: Convert Apple epoch timestamps to ISO 8601 UTC
+with Z</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T02-AC05</strong>: Maintain chronological ordering within split parts
+using index</li>
+</ul>
+<p><strong>Notes</strong>: Critical for media-as-message model. Stable part GUID generation
+crucial for dedup. Handle Apple epoch conversion carefully.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t03-implement-reply-and-tapback-linking-️-high-risk">NORMALIZE--T03: Implement reply and tapback linking ⚠️ HIGH RISK<a href="#normalize--t03-implement-reply-and-tapback-linking-️-high-risk" class="hash-link" aria-label="Direct link to NORMALIZE--T03: Implement reply and tapback linking ⚠️ HIGH RISK" title="Direct link to NORMALIZE--T03: Implement reply and tapback linking ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 5 days | <strong>Depends on</strong>:
+NORMALIZE--T01, NORMALIZE--T02</p>
+<p><strong>Description</strong>: Build linking logic using DB associations first, then
+heuristics for unlinked messages.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T03-AC01</strong>: Link replies using DB association_guid as primary
+method</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T03-AC02</strong>: Apply heuristics for unlinked replies (timestamp
+proximity <code>&lt;30s</code>, content patterns)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T03-AC03</strong>: Link tapbacks to parent message GUIDs (including
+part GUIDs)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T03-AC04</strong>: Handle ambiguous links with structured logging and
+tie counters</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T03-AC05</strong>: Maintain parity with CSV linking rules from
+original analyzer</li>
+</ul>
+<p><strong>Notes</strong>: Heuristic ambiguity is main concern per spec §13. Prefer DB
+associations, log all ties. Test extensively with edge cases.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t04-implement-deduplication-across-sources-️-high-risk">NORMALIZE--T04: Implement deduplication across sources ⚠️ HIGH RISK<a href="#normalize--t04-implement-deduplication-across-sources-️-high-risk" class="hash-link" aria-label="Direct link to NORMALIZE--T04: Implement deduplication across sources ⚠️ HIGH RISK" title="Direct link to NORMALIZE--T04: Implement deduplication across sources ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 4 days | <strong>Depends on</strong>:
+NORMALIZE--T01, NORMALIZE--T02</p>
+<p><strong>Description</strong>: Merge CSV and DB sources with deduplication by GUID equivalence
+and content similarity.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T04-AC01</strong>: Merge CSV and DB by exact GUID match as primary
+strategy</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T04-AC02</strong>: Prefer DB values for authoritative fields
+(timestamps, associations, handle)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T04-AC03</strong>: Detect content equivalence for messages without
+matching GUIDs (normalize text + compare)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T04-AC04</strong>: Verify no data loss during merge with count
+invariants (input count &gt;= output count)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T04-AC05</strong>: Ensure stable GUID assignment across multiple runs
+(deterministic merge)</li>
+</ul>
+<p><strong>Notes</strong>: Data loss risk per spec §13. Implement count verification and
+detailed merge logging. Test with overlapping datasets.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t05-implement-absolute-path-enforcement">NORMALIZE--T05: Implement absolute path enforcement<a href="#normalize--t05-implement-absolute-path-enforcement" class="hash-link" aria-label="Direct link to NORMALIZE--T05: Implement absolute path enforcement" title="Direct link to NORMALIZE--T05: Implement absolute path enforcement" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: MEDIUM | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+NORMALIZE--T01, NORMALIZE--T02</p>
+<p><strong>Description</strong>: Enforce absolute paths for all media files, retain filename
+with provenance for missing files.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T05-AC01</strong>: All media.path fields are absolute paths when
+files exist on disk</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T05-AC02</strong>: Missing files retain original filename with
+provenance metadata (source, last_seen)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T05-AC03</strong>: Path validation errors reported with counters
+(found vs missing)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T05-AC04</strong>: Support multiple attachment root directories from
+config</li>
+</ul>
+<p><strong>Notes</strong>: Missing file handling per spec §13. Use config for attachment roots.
+Log missing file warnings with counts.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t06-build-date-validator-and-converters-️-high-risk">NORMALIZE--T06: Build date validator and converters ⚠️ HIGH RISK<a href="#normalize--t06-build-date-validator-and-converters-️-high-risk" class="hash-link" aria-label="Direct link to NORMALIZE--T06: Build date validator and converters ⚠️ HIGH RISK" title="Direct link to NORMALIZE--T06: Build date validator and converters ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+NORMALIZE--T01, NORMALIZE--T02</p>
+<p><strong>Description</strong>: Create robust date handling for CSV UTC and DB Apple epoch with
+end-to-end validation.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T06-AC01</strong>: All timestamps in output are ISO 8601 with Z
+suffix (UTC)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T06-AC02</strong>: Apple epoch (Mac absolute time = seconds since
+2001-01-01) converts correctly to UTC</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T06-AC03</strong>: CSV UTC timestamps preserve timezone information
+(no drift)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T06-AC04</strong>: End-to-end date round-trip validation passes
+(parse → convert → validate)</li>
+</ul>
+<p><strong>Notes</strong>: Timezone drift risk per spec §13. Test with known timestamps and DST
+boundaries. Fixtures for edge cases.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t07-add-zod-validation-layer">NORMALIZE--T07: Add Zod validation layer<a href="#normalize--t07-add-zod-validation-layer" class="hash-link" aria-label="Direct link to NORMALIZE--T07: Add Zod validation layer" title="Direct link to NORMALIZE--T07: Add Zod validation layer" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: MEDIUM | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+NORMALIZE--T01-T06</p>
+<p><strong>Description</strong>: Apply Zod validation to all normalized messages with
+comprehensive error reporting.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T07-AC01</strong>: Run Zod schema validation on all normalized
+messages before output</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T07-AC02</strong>: Error reporting includes field path and validation
+failure reason (use Zod&#x27;s error formatting)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T07-AC03</strong>: Batch validation with error collection (don&#x27;t
+fail-fast, report all errors)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T07-AC04</strong>: camelCase field enforcement via Zod schema (reject
+snake_case)</li>
+</ul>
+<p><strong>Notes</strong>: Final validation gate. Output to <code>messages.normalized.json</code>. Collect
+all validation errors for debugging.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="normalize--t08-create-normalize-link-test-suite">NORMALIZE--T08: Create normalize-link test suite<a href="#normalize--t08-create-normalize-link-test-suite" class="hash-link" aria-label="Direct link to NORMALIZE--T08: Create normalize-link test suite" title="Direct link to NORMALIZE--T08: Create normalize-link test suite" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+NORMALIZE--T07</p>
+<p><strong>Description</strong>: Comprehensive tests for split, linking, dedup, dates, and paths
+with &gt;70% coverage.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T08-AC01</strong>: Unit tests for DB split logic with various
+attachment counts (0, 1, 5, 10)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T08-AC02</strong>: Integration tests for linking parity between CSV
+and DB sources</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T08-AC03</strong>: Dedup tests with overlapping CSV/DB datasets
+(exact match, content match, no match)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T08-AC04</strong>: Date conversion tests for edge cases (DST
+boundaries, leap seconds, epoch boundaries)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>NORMALIZE-T08-AC05</strong>: Path resolution tests with missing files and
+multiple roots</li>
+</ul>
+<p><strong>Notes</strong>: Test after implementation. Aim for &gt;70% branch coverage per spec §9.
+Use fixtures from T03.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="e3-enrich-ai-augmentation">E3: Enrich-AI (Augmentation)<a href="#e3-enrich-ai-augmentation" class="hash-link" aria-label="Direct link to E3: Enrich-AI (Augmentation)" title="Direct link to E3: Enrich-AI (Augmentation)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t01-implement-image-analysis-with-preview-generation-️-high-risk">ENRICH--T01: Implement image analysis with preview generation ⚠️ HIGH RISK<a href="#enrich--t01-implement-image-analysis-with-preview-generation-️-high-risk" class="hash-link" aria-label="Direct link to ENRICH--T01: Implement image analysis with preview generation ⚠️ HIGH RISK" title="Direct link to ENRICH--T01: Implement image analysis with preview generation ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 4 days | <strong>Depends on</strong>:
+SCHEMA--T01, NORMALIZE--T07</p>
+<p><strong>Description</strong>: Port image analysis: HEIC/TIFF → JPG preview, Gemini vision
+caption/summary.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T01-AC01</strong>: HEIC files convert to JPG preview with quality
+preservation (≥90% quality)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T01-AC02</strong>: TIFF files convert to JPG preview</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T01-AC03</strong>: Preview generated once per file and cached by
+filename (skip if preview exists)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T01-AC04</strong>: Gemini vision API call with structured prompt for
+caption + summary</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T01-AC05</strong>: Parse API response into enrichment array with
+kind=&#x27;image_analysis&#x27;</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T01-AC06</strong>: Store provenance (provider, model, version,
+timestamp) in enrichment entry</li>
+</ul>
+<p><strong>Notes</strong>: HEIC/TIFF handling complexity per spec §8. Cache preview by filename
+to avoid regeneration. Use sharp/imagemagick for conversion.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t02-implement-audio-transcription-with-structured-output-️-high-risk">ENRICH--T02: Implement audio transcription with structured output ⚠️ HIGH RISK<a href="#enrich--t02-implement-audio-transcription-with-structured-output-️-high-risk" class="hash-link" aria-label="Direct link to ENRICH--T02: Implement audio transcription with structured output ⚠️ HIGH RISK" title="Direct link to ENRICH--T02: Implement audio transcription with structured output ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 4 days | <strong>Depends on</strong>:
+SCHEMA--T01, NORMALIZE--T07</p>
+<p><strong>Description</strong>: Port audio transcription: structured prompt, timestamps,
+speaker labels, short description.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T02-AC01</strong>: Use structured prompt for transcription requesting
+timestamps and speakers</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T02-AC02</strong>: Extract speaker labels if available (Speaker 1,
+Speaker 2, etc.)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T02-AC03</strong>: Generate short description (1-2 sentences)
+summarizing audio content</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T02-AC04</strong>: Store under media.enrichment with
+kind=&#x27;transcription&#x27;</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T02-AC05</strong>: Handle long audio files (&gt;10min) with streaming or
+chunking strategy</li>
+</ul>
+<p><strong>Notes</strong>: Prompt engineering critical per spec. Test with various audio lengths
+and qualities. Store full transcript + short description.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t03-implement-pdf-and-video-handling">ENRICH--T03: Implement PDF and video handling<a href="#enrich--t03-implement-pdf-and-video-handling" class="hash-link" aria-label="Direct link to ENRICH--T03: Implement PDF and video handling" title="Direct link to ENRICH--T03: Implement PDF and video handling" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: MEDIUM | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+SCHEMA--T01, NORMALIZE--T07</p>
+<p><strong>Description</strong>: PDF summarization via Gemini, video copied with note (no heavy
+processing).</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T03-AC01</strong>: PDF summarization via Gemini with page limit (e.g.,
+first 10 pages)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T03-AC02</strong>: Video files copied to output with metadata note only
+(no transcription by default)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T03-AC03</strong>: Fallback to filename when summarization fails (with
+error logging)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T03-AC04</strong>: Track unsupported formats in error log with counts</li>
+</ul>
+<p><strong>Notes</strong>: PDF handling varies by format. Video is out of scope per spec §1. Log
+unsupported formats.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t04-implement-link-enrichment-with-fallbacks-️-high-risk">ENRICH--T04: Implement link enrichment with fallbacks ⚠️ HIGH RISK<a href="#enrich--t04-implement-link-enrichment-with-fallbacks-️-high-risk" class="hash-link" aria-label="Direct link to ENRICH--T04: Implement link enrichment with fallbacks ⚠️ HIGH RISK" title="Direct link to ENRICH--T04: Implement link enrichment with fallbacks ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 5 days | <strong>Depends on</strong>:
+SCHEMA--T01, NORMALIZE--T07</p>
+<p><strong>Description</strong>: Firecrawl primary, YouTube/Spotify/social fallbacks, resilient
+error handling.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T04-AC01</strong>: Firecrawl as primary provider for generic link
+context extraction</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T04-AC02</strong>: YouTube fallback using title/channel extraction from
+page source or API</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T04-AC03</strong>: Spotify fallback using track/artist extraction from
+embed data</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T04-AC04</strong>: Social media fallbacks (Twitter/Instagram) using meta
+tags and structured data</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T04-AC05</strong>: Never crash on link enrichment failure (wrap in
+try/catch, log error, continue)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T04-AC06</strong>: Store enrichment with kind=&#x27;link_context&#x27; and
+provider provenance</li>
+</ul>
+<p><strong>Notes</strong>: Rate limits and API changes per spec §13. Provider abstraction for
+easy mocking. Test all fallback paths.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t05-implement-enrichment-idempotency-️-high-risk">ENRICH--T05: Implement enrichment idempotency ⚠️ HIGH RISK<a href="#enrich--t05-implement-enrichment-idempotency-️-high-risk" class="hash-link" aria-label="Direct link to ENRICH--T05: Implement enrichment idempotency ⚠️ HIGH RISK" title="Direct link to ENRICH--T05: Implement enrichment idempotency ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [x] Completed | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+ENRICH--T01, ENRICH--T02, ENRICH--T03, ENRICH--T04</p>
+<p><strong>Description</strong>: Skip enrichment if media.id + kind already exists, prevent
+duplicate entries.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T05-AC01</strong>: Skip enrichment if media.enrichment already contains
+entry with matching kind</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T05-AC02</strong>: Deduplicate enrichment array by kind before adding
+new entries</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T05-AC03</strong>: Re-running enrich-ai does not create duplicate
+entries (verified with tests)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T05-AC04</strong>: Support --force-refresh flag to override idempotency
+and re-enrich</li>
+</ul>
+<p><strong>Notes</strong>: Completed with Wallaby TDD. Created src/enrich/idempotency.ts with
+comprehensive test coverage (92.31% branches). All 27 tests passing (19 unit + 8
+integration).</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t06-implement-checkpointing-and-resume-logic-️-high-risk">ENRICH--T06: Implement checkpointing and resume logic ⚠️ HIGH RISK<a href="#enrich--t06-implement-checkpointing-and-resume-logic-️-high-risk" class="hash-link" aria-label="Direct link to ENRICH--T06: Implement checkpointing and resume logic ⚠️ HIGH RISK" title="Direct link to ENRICH--T06: Implement checkpointing and resume logic ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [x] Completed | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 4 days | <strong>Depends on</strong>:
+ENRICH--T05</p>
+<p><strong>Description</strong>: Atomic checkpoint writes, resume within ≤1 item, config
+consistency verification.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T06-AC01</strong>: Write checkpoint after every N items (configurable,
+default 100)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T06-AC02</strong>: Checkpoint includes: last_index, partial_outputs,
+stats (processed/failed), failed_items array</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T06-AC03</strong>: Atomic checkpoint writes using temp file + rename
+pattern</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T06-AC04</strong>: Resume flag (--resume) restarts within ≤1 item of
+last checkpoint per spec §12 AC E5</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>ENRICH-T06-AC05</strong>: Verify config consistency (hash comparison) before
+resuming, fail if mismatch</li>
+</ul>
+<p><strong>Notes</strong>: Completed with Wallaby TDD. Created src/enrich/checkpoint.ts with 29
+unit tests (all passing). Coverage: 60% branches.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t07-implement-rate-limiting-and-retry-logic-️-high-risk">ENRICH--T07: Implement rate limiting and retry logic ⚠️ HIGH RISK<a href="#enrich--t07-implement-rate-limiting-and-retry-logic-️-high-risk" class="hash-link" aria-label="Direct link to ENRICH--T07: Implement rate limiting and retry logic ⚠️ HIGH RISK" title="Direct link to ENRICH--T07: Implement rate limiting and retry logic ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+ENRICH--T01, ENRICH--T02, ENRICH--T03, ENRICH--T04</p>
+<p><strong>Description</strong>: Configurable delays, exponential backoff with jitter, circuit
+breaker.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T07-AC01</strong>: Respect configurable rateLimitDelay between API calls
+(default 1000ms)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T07-AC02</strong>: Exponential backoff for 429 responses: 2^n seconds
+with +/- 25% jitter</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T07-AC03</strong>: Retry 5xx errors with maxRetries limit (default 3)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T07-AC04</strong>: Respect Retry-After header when present in 429/503
+responses</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T07-AC05</strong>: Circuit breaker after N consecutive failures
+(default 5) to prevent cascading failures</li>
+</ul>
+<p><strong>Notes</strong>: Rate limit handling per spec §6, §13. Test with mock rate limit
+responses. Jitter prevents thundering herd.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="enrich--t08-create-enrich-ai-test-suite">ENRICH--T08: Create enrich-ai test suite<a href="#enrich--t08-create-enrich-ai-test-suite" class="hash-link" aria-label="Direct link to ENRICH--T08: Create enrich-ai test suite" title="Direct link to ENRICH--T08: Create enrich-ai test suite" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+ENRICH--T05, ENRICH--T06, ENRICH--T07</p>
+<p><strong>Description</strong>: Mock providers, idempotency tests, checkpoint tests, rate limit
+tests, integration tests.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T08-AC01</strong>: Mock providers for image/audio/link enrichment (no
+real API calls in tests)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T08-AC02</strong>: Idempotency tests verify no duplicate enrichments on
+multiple runs</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T08-AC03</strong>: Checkpoint resume tests verify state restoration
+within ≤1 item</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T08-AC04</strong>: Rate limit gate tests verify delay enforcement and
+backoff behavior</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>ENRICH-T08-AC05</strong>: Integration tests with real file fixtures (small
+samples, no API calls)</li>
+</ul>
+<p><strong>Notes</strong>: Test after implementation. Use MSW for API mocking. Aim for &gt;70%
+branch coverage. Test failure scenarios.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="e4-render-markdown-output-generation">E4: Render-Markdown (Output Generation)<a href="#e4-render-markdown-output-generation" class="hash-link" aria-label="Direct link to E4: Render-Markdown (Output Generation)" title="Direct link to E4: Render-Markdown (Output Generation)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="render--t01-implement-grouping-and-anchor-generation">RENDER--T01: Implement grouping and anchor generation<a href="#render--t01-implement-grouping-and-anchor-generation" class="hash-link" aria-label="Direct link to RENDER--T01: Implement grouping and anchor generation" title="Direct link to RENDER--T01: Implement grouping and anchor generation" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+SCHEMA--T01, ENRICH--T06</p>
+<p><strong>Description</strong>: Group by date and time-of-day, generate Obsidian-friendly
+deep-link anchors.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T01-AC01</strong>: Group messages by date (YYYY-MM-DD) into separate
+markdown files</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T01-AC02</strong>: Sub-group by time-of-day: Morning (00:00-11:59),
+Afternoon (12:00-17:59), Evening (18:00-23:59)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T01-AC03</strong>: Generate unique anchor IDs for each message (e.g.,
+<code>#msg-{guid}</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T01-AC04</strong>: Deep-link anchors work in Obsidian (clickable,
+navigable)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T01-AC05</strong>: Maintain chronological ordering within time-of-day
+groups</li>
+</ul>
+<p><strong>Notes</strong>: Straightforward grouping logic. Output per-day markdown files to
+configured outputDir.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="render--t02-implement-nested-reply-and-tapback-rendering">RENDER--T02: Implement nested reply and tapback rendering<a href="#render--t02-implement-nested-reply-and-tapback-rendering" class="hash-link" aria-label="Direct link to RENDER--T02: Implement nested reply and tapback rendering" title="Direct link to RENDER--T02: Implement nested reply and tapback rendering" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: MEDIUM | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+RENDER--T01</p>
+<p><strong>Description</strong>: Render replies as nested blockquotes, tapbacks as emoji
+reactions with mapping.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T02-AC01</strong>: Render replies as nested blockquotes (&gt; prefix) under
+parent message</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T02-AC02</strong>: Render tapbacks as emoji reactions using documented
+emoji mapping</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T02-AC03</strong>: Handle multi-level nesting (reply to reply) with
+increasing indentation</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T02-AC04</strong>: Indent levels match conversation depth (2 spaces per
+level)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T02-AC05</strong>: Preserve sender attribution in nested content (e.g.,
+<strong>Sender</strong>: message)</li>
+</ul>
+<p><strong>Notes</strong>: Quote depth handling complexity. Test deeply nested threads. Emoji
+mapping from refactor report.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="render--t03-implement-embeds-and-blockquotes">RENDER--T03: Implement embeds and blockquotes<a href="#render--t03-implement-embeds-and-blockquotes" class="hash-link" aria-label="Direct link to RENDER--T03: Implement embeds and blockquotes" title="Direct link to RENDER--T03: Implement embeds and blockquotes" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+RENDER--T01</p>
+<p><strong>Description</strong>: Obsidian image embeds with preview preference,
+transcription/link context blockquotes.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T03-AC01</strong>: Embed images using Obsidian ![[path]] syntax</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T03-AC02</strong>: Use preview image path for HEIC/TIFF with link to
+original in caption</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T03-AC03</strong>: Quote audio transcriptions as blockquotes under media
+message</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T03-AC04</strong>: Quote link contexts as blockquotes under text message
+containing link</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T03-AC05</strong>: Format PDF summaries as blockquotes with &gt; prefix</li>
+</ul>
+<p><strong>Notes</strong>: Formatting task. Prefer preview images per spec §12 AC R4. Test
+various media types.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="render--t04-create-determinism-test-suite-️-high-risk">RENDER--T04: Create determinism test suite ⚠️ HIGH RISK<a href="#render--t04-create-determinism-test-suite-️-high-risk" class="hash-link" aria-label="Direct link to RENDER--T04: Create determinism test suite ⚠️ HIGH RISK" title="Direct link to RENDER--T04: Create determinism test suite ⚠️ HIGH RISK" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: HIGH | <strong>Est</strong>: 3 days | <strong>Depends on</strong>:
+RENDER--T01, RENDER--T02, RENDER--T03</p>
+<p><strong>Description</strong>: Snapshot tests verifying deterministic output, no network
+calls, performance validation.</p>
+<p><strong>TDD Required</strong>: Yes - Red-Green-Refactor cycle mandatory</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T04-AC01</strong>: Snapshot tests for fixed input produce identical
+output across runs</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T04-AC02</strong>: No network calls during rendering (verify with
+network mocks or offline mode)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T04-AC03</strong>: Deterministic ordering of same-timestamp messages
+(stable sort by guid)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T04-AC04</strong>: Reproducible markdown structure verified with diff
+comparison</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>RENDER-T04-AC05</strong>: Performance test: render 1000 messages in <code>&lt;10s</code></li>
+</ul>
+<p><strong>Notes</strong>: Determinism critical per spec §12 AC R1. Use Vitest snapshot testing.
+Verify no network activity.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="e5-citestingtooling-infrastructure">E5: CI/Testing/Tooling (Infrastructure)<a href="#e5-citestingtooling-infrastructure" class="hash-link" aria-label="Direct link to E5: CI/Testing/Tooling (Infrastructure)" title="Direct link to E5: CI/Testing/Tooling (Infrastructure)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="ci--t01-configure-vitest-with-proper-settings">CI--T01: Configure Vitest with proper settings<a href="#ci--t01-configure-vitest-with-proper-settings" class="hash-link" aria-label="Direct link to CI--T01: Configure Vitest with proper settings" title="Direct link to CI--T01: Configure Vitest with proper settings" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 1 day | <strong>Depends on</strong>:
+SCHEMA--T01</p>
+<p><strong>Description</strong>: Setup Vitest with threads pool, CI detection, jsdom, global
+setup, aliases.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T01-AC01</strong>: Configure threads pool with maxForks ≤ 8 for parallel
+execution</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T01-AC02</strong>: Set allowOnly: false to prevent .only in CI per spec §9</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T01-AC03</strong>: Configure jsdom environment for renderer-related tests</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T01-AC04</strong>: Setup global test setup file at
+tests/vitest/vitest-setup.ts</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T01-AC05</strong>: Configure Vite aliases (#lib, #components) in
+vitest.config.ts</li>
+</ul>
+<p><strong>Notes</strong>: Configuration task. Create vitest.config.ts following spec §9
+requirements.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="ci--t02-setup-coverage-with-thresholds-and-ci-reporters">CI--T02: Setup coverage with thresholds and CI reporters<a href="#ci--t02-setup-coverage-with-thresholds-and-ci-reporters" class="hash-link" aria-label="Direct link to CI--T02: Setup coverage with thresholds and CI reporters" title="Direct link to CI--T02: Setup coverage with thresholds and CI reporters" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: MEDIUM | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+CI--T01</p>
+<p><strong>Description</strong>: Install coverage-v8, configure thresholds ≥70%, CI output
+formats (JUnit, HTML, text-summary).</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T02-AC01</strong>: Install and configure @vitest/coverage-v8</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T02-AC02</strong>: Set branch coverage threshold ≥70% per spec §9</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T02-AC03</strong>: CI outputs JUnit XML to ./test-results/junit.xml</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T02-AC04</strong>: Coverage reports to ./test-results/coverage/ with
+formats: junit, html, text-summary</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T02-AC05</strong>: Detect CI environment via TF_BUILD variable</li>
+</ul>
+<p><strong>Notes</strong>: Coverage thresholds must be met. Configure reporters for Azure DevOps
+integration. Test CI detection.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="ci--t03-add-packagejson-test-scripts">CI--T03: Add package.json test scripts<a href="#ci--t03-add-packagejson-test-scripts" class="hash-link" aria-label="Direct link to CI--T03: Add package.json test scripts" title="Direct link to CI--T03: Add package.json test scripts" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 1 day | <strong>Depends on</strong>:
+CI--T01</p>
+<p><strong>Description</strong>: Create pnpm scripts for test, test<!-- -->:coverage<!-- -->, test<!-- -->:ci<!-- -->, lint,
+build.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T03-AC01</strong>: pnpm test runs vitest with proper config</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T03-AC02</strong>: pnpm test<!-- -->:coverage<!-- --> generates coverage reports with
+thresholds</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T03-AC03</strong>: pnpm test<!-- -->:ci<!-- --> runs with CI-specific settings (reporters,
+etc.)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T03-AC04</strong>: pnpm lint runs ESLint on all TypeScript files</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T03-AC05</strong>: pnpm build compiles TypeScript with proper config</li>
+</ul>
+<p><strong>Notes</strong>: Package.json script setup. Standard pnpm workspace patterns.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="ci--t04-create-test-helper-utilities">CI--T04: Create test helper utilities<a href="#ci--t04-create-test-helper-utilities" class="hash-link" aria-label="Direct link to CI--T04: Create test helper utilities" title="Direct link to CI--T04: Create test helper utilities" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+CI--T01</p>
+<p><strong>Description</strong>: Build test helpers: renderWithProviders (if React), mock
+providers, fixture loaders, schema assertions.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T04-AC01</strong>: renderWithProviders helper for React components (if
+needed per spec §5.4)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T04-AC02</strong>: Mock provider setup utilities for AI services (Gemini,
+Firecrawl)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T04-AC03</strong>: Fixture loading helpers for JSON message datasets</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>CI-T04-AC04</strong>: Assertion utilities for schema validation (wrappers
+around Zod)</li>
+</ul>
+<p><strong>Notes</strong>: Test utilities. Create in <code>tests/helpers/</code> directory. React helpers
+only if UI components added later.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="e6-docs--migration-knowledge-transfer">E6: Docs &amp; Migration (Knowledge Transfer)<a href="#e6-docs--migration-knowledge-transfer" class="hash-link" aria-label="Direct link to E6: Docs &amp; Migration (Knowledge Transfer)" title="Direct link to E6: Docs &amp; Migration (Knowledge Transfer)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="docs--t01-update-refactor-report-with-implementation-deltas">DOCS--T01: Update refactor report with implementation deltas<a href="#docs--t01-update-refactor-report-with-implementation-deltas" class="hash-link" aria-label="Direct link to DOCS--T01: Update refactor report with implementation deltas" title="Direct link to DOCS--T01: Update refactor report with implementation deltas" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 1 day | <strong>Depends on</strong>:
+NORMALIZE--T08, ENRICH--T08, RENDER--T04</p>
+<p><strong>Description</strong>: Document any changes from spec during implementation, update
+diagrams, capture lessons learned.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T01-AC01</strong>: Document all implementation deltas from original spec</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T01-AC02</strong>: Update architecture diagrams if component structure
+changed</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T01-AC03</strong>: Capture lessons learned and implementation gotchas</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T01-AC04</strong>: Link to all new files created with brief descriptions</li>
+</ul>
+<p><strong>Notes</strong>: Documentation task. Update
+<code>documentation/imessage-pipeline-refactor-report.md</code> with implementation notes.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="docs--t02-write-comprehensive-usage-documentation">DOCS--T02: Write comprehensive usage documentation<a href="#docs--t02-write-comprehensive-usage-documentation" class="hash-link" aria-label="Direct link to DOCS--T02: Write comprehensive usage documentation" title="Direct link to DOCS--T02: Write comprehensive usage documentation" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 2 days | <strong>Depends on</strong>:
+NORMALIZE--T08, ENRICH--T08, RENDER--T04</p>
+<p><strong>Description</strong>: Document how to run each stage, end-to-end workflow,
+configuration, environment setup, CLI usage.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T02-AC01</strong>: Document how to run each stage: ingest-csv, ingest-db,
+normalize-link, enrich-ai, render-markdown</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T02-AC02</strong>: End-to-end workflow example with sample data and
+expected outputs</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T02-AC03</strong>: Configuration file documentation with all available
+options and defaults</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T02-AC04</strong>: Environment variable setup guide (API keys:
+GEMINI_API_KEY, FIRECRAWL_API_KEY)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T02-AC05</strong>: CLI flags and options documentation for each command</li>
+</ul>
+<p><strong>Notes</strong>: Usage documentation. Create
+<code>documentation/imessage-pipeline-usage.md</code>. Include examples and screenshots.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="docs--t03-create-troubleshooting-guide">DOCS--T03: Create troubleshooting guide<a href="#docs--t03-create-troubleshooting-guide" class="hash-link" aria-label="Direct link to DOCS--T03: Create troubleshooting guide" title="Direct link to DOCS--T03: Create troubleshooting guide" translate="no">​</a></h3>
+<p><strong>Status</strong>: [ ] Pending | <strong>Risk</strong>: LOW | <strong>Est</strong>: 1 day | <strong>Depends on</strong>:
+NORMALIZE--T08, ENRICH--T08, RENDER--T04</p>
+<p><strong>Description</strong>: Document common issues: dates/timezones, missing files, rate
+limits, checkpoint failures, validation errors.</p>
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul class="contains-task-list containsTaskList_sbOn">
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T03-AC01</strong>: Date/timezone issues troubleshooting (Apple epoch, DST,
+UTC conversion)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T03-AC02</strong>: Missing media files troubleshooting (path resolution,
+attachment roots)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T03-AC03</strong>: Rate limit handling guide (429 errors, backoff, circuit
+breaker)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T03-AC04</strong>: Checkpoint resume failures (config mismatch, corrupted
+checkpoint)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>DOCS-T03-AC05</strong>: Common validation errors and fixes (schema violations,
+missing fields)</li>
+</ul>
+<p><strong>Notes</strong>: Troubleshooting documentation. Create
+<code>documentation/imessage-pipeline-troubleshooting.md</code>. FAQ format.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="dependency-graph">Dependency Graph<a href="#dependency-graph" class="hash-link" aria-label="Direct link to Dependency Graph" title="Direct link to Dependency Graph" translate="no">​</a></h2>
+<div class="language-text codeBlockContainer_Cu7V theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_aj1M"><pre tabindex="0" class="prism-code language-text codeBlock_ri4f thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_G9qo"><span class="token-line" style="color:#393A34"><span class="token plain">E1 (Schema) - Foundation</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01 → SCHEMA--T02</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01 → SCHEMA--T03</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── SCHEMA--T01 → CI--T01</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">E2 (Normalize) - Data Integration</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01 → NORMALIZE--T01</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01 → NORMALIZE--T02</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── NORMALIZE--T01, T02 → NORMALIZE--T03 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── NORMALIZE--T01, T02 → NORMALIZE--T04 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── NORMALIZE--T01, T02 → NORMALIZE--T05</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── NORMALIZE--T01, T02 → NORMALIZE--T06 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── NORMALIZE--T01-T06 → NORMALIZE--T07</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── NORMALIZE--T07 → NORMALIZE--T08</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">E3 (Enrich) - AI Augmentation</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01, NORMALIZE--T07 → ENRICH--T01 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01, NORMALIZE--T07 → ENRICH--T02 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01, NORMALIZE--T07 → ENRICH--T03</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01, NORMALIZE--T07 → ENRICH--T04 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── ENRICH--T01-T04 → ENRICH--T05 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── ENRICH--T05 → ENRICH--T06 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── ENRICH--T01-T04 → ENRICH--T07 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── ENRICH--T05, T06, T07 → ENRICH--T08</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">E4 (Render) - Markdown Generation</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01, ENRICH--T06 → RENDER--T01</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── RENDER--T01 → RENDER--T02</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── RENDER--T01 → RENDER--T03</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── RENDER--T01, T02, T03 → RENDER--T04 (HIGH RISK)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">E5 (CI) - Infrastructure</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── SCHEMA--T01 → CI--T01</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── CI--T01 → CI--T02</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── CI--T01 → CI--T03</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── CI--T01 → CI--T04</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">E6 (Docs) - Knowledge Transfer</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── All E2, E3, E4 → DOCS--T01</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── All E2, E3, E4 → DOCS--T02</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── All E2, E3, E4 → DOCS--T03</span><br></span></code></pre></div></div>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="high-risk-tasks-tdd-required">High Risk Tasks (TDD Required)<a href="#high-risk-tasks-tdd-required" class="hash-link" aria-label="Direct link to High Risk Tasks (TDD Required)" title="Direct link to High Risk Tasks (TDD Required)" translate="no">​</a></h2>
+<p>These tasks require strict Test-Driven Development (Red-Green-Refactor cycle):</p>
+<ol>
+<li class=""><strong>NORMALIZE--T03</strong>: Reply/tapback linking (heuristic ambiguity)</li>
+<li class=""><strong>NORMALIZE--T04</strong>: Deduplication (data loss risk)</li>
+<li class=""><strong>NORMALIZE--T06</strong>: Date conversion (timezone drift)</li>
+<li class=""><strong>ENRICH--T01</strong>: Image preview generation (HEIC/TIFF complexity)</li>
+<li class=""><strong>ENRICH--T02</strong>: Audio transcription (prompt engineering)</li>
+<li class=""><strong>ENRICH--T04</strong>: Link enrichment (rate limits, API changes)</li>
+<li class=""><strong>ENRICH--T05</strong>: Idempotency (duplicate prevention)</li>
+<li class=""><strong>ENRICH--T06</strong>: Checkpointing (resume correctness)</li>
+<li class=""><strong>ENRICH--T07</strong>: Rate limiting (retry logic)</li>
+<li class=""><strong>RENDER--T04</strong>: Determinism (output reproducibility)</li>
+</ol>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="milestones">Milestones<a href="#milestones" class="hash-link" aria-label="Direct link to Milestones" title="Direct link to Milestones" translate="no">​</a></h2>
+<ul>
+<li class=""><strong>M1</strong>: Schema + validator + fixtures (E1 complete) → <strong>6 days</strong></li>
+<li class=""><strong>M2</strong>: Normalize-link with CSV parity and tests (E2 complete) → <strong>+24 days</strong>
+(30 total)</li>
+<li class=""><strong>M3</strong>: DB split + linking parity + dates/paths validator → (part of M2)</li>
+<li class=""><strong>M4</strong>: Enrich-ai extraction with checkpoints and idempotency (E3 complete) →
+<strong>+29 days</strong> (59 total)</li>
+<li class=""><strong>M5</strong>: Render-markdown deterministic parity with snapshots (E4 complete) →
+<strong>+10 days</strong> (69 total)</li>
+<li class=""><strong>M6</strong>: CI green with coverage, docs finalized (E5, E6 complete) → <strong>+10
+days</strong> (79 total)</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_fz2_" id="usage-for-agents">Usage for Agents<a href="#usage-for-agents" class="hash-link" aria-label="Direct link to Usage for Agents" title="Direct link to Usage for Agents" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="updating-task-status">Updating Task Status<a href="#updating-task-status" class="hash-link" aria-label="Direct link to Updating Task Status" title="Direct link to Updating Task Status" translate="no">​</a></h3>
+<ol>
+<li class="">
+<p>Start a task:</p>
+<ul>
+<li class="">Update <code>status</code> to <code>&quot;in_progress&quot;</code></li>
+<li class="">Set <code>started_at</code> to current ISO 8601 timestamp</li>
+<li class="">Begin working through acceptance criteria</li>
+</ul>
+</li>
+<li class="">
+<p>Complete acceptance criteria:</p>
+<ul>
+<li class="">Move AC ID from <code>acs_remaining</code> to <code>acs_completed</code></li>
+<li class="">Add notes about implementation details</li>
+</ul>
+</li>
+<li class="">
+<p>Complete a task:</p>
+<ul>
+<li class="">Update <code>status</code> to <code>&quot;completed&quot;</code></li>
+<li class="">Set <code>completed_at</code> to current ISO 8601 timestamp</li>
+<li class="">Ensure all ACs are in <code>acs_completed</code></li>
+<li class="">Final notes summarizing work and any deviations</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_fz2_" id="example-update">Example Update<a href="#example-update" class="hash-link" aria-label="Direct link to Example Update" title="Direct link to Example Update" translate="no">​</a></h3>
+<div class="language-json codeBlockContainer_Cu7V theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_aj1M"><pre tabindex="0" class="prism-code language-json codeBlock_ri4f thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_G9qo"><span class="token-line" style="color:#393A34"><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">&quot;SCHEMA--T01&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">&quot;acs_completed&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">&quot;SCHEMA-T01-AC01&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;SCHEMA-T01-AC02&quot;</span><span class="token punctuation" style="color:#393A34">]</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">&quot;acs_remaining&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token string" style="color:#e3116c">&quot;SCHEMA-T01-AC03&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token string" style="color:#e3116c">&quot;SCHEMA-T01-AC04&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token string" style="color:#e3116c">&quot;SCHEMA-T01-AC05&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token string" style="color:#e3116c">&quot;SCHEMA-T01-AC06&quot;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token punctuation" style="color:#393A34">]</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">&quot;completed_at&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token null keyword" style="color:#00009f">null</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">&quot;notes&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;In progress. Completed Message interface and basic Zod schema. Working on cross-field invariants next.&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">&quot;started_at&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;2025-10-17T14:30:00.000Z&quot;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">&quot;status&quot;</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;in_progress&quot;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><br></span></code></pre></div></div>
+<hr>
+<p><strong>Generated from</strong>: <code>documentation/imessage-pipeline-tech-spec.md</code> <strong>Tracking
+file</strong>: <code>documentation/imessage-pipeline-task-state.json</code> <strong>Last updated</strong>:
+2025-10-17</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_XlAX"><a href="https://github.com/nathanvale/imessage-timeline/tree/main/website/docs/imessage-pipeline-tasks.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_mVSc" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_jnZY"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/imessage-timeline/docs/imessage-pipeline-refactor-report"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">iMessage pipeline refactor report</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/imessage-timeline/docs/imessage-pipeline-tech-spec"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">iMessage pipeline — technical specification</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_J9fL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#task-status-legend" class="table-of-contents__link toc-highlight">Task Status Legend</a></li><li><a href="#epic-overview" class="table-of-contents__link toc-highlight">Epic Overview</a></li><li><a href="#e1-schema--validator-foundation" class="table-of-contents__link toc-highlight">E1: Schema &amp; Validator (Foundation)</a><ul><li><a href="#schema--t01-create-unified-message-schema-with-zod-validation" class="table-of-contents__link toc-highlight">SCHEMA--T01: Create unified Message schema with Zod validation</a></li><li><a href="#schema--t02-build-validator-cli-script" class="table-of-contents__link toc-highlight">SCHEMA--T02: Build validator CLI script</a></li><li><a href="#schema--t03-create-fixtures-and-schema-tests" class="table-of-contents__link toc-highlight">SCHEMA--T03: Create fixtures and schema tests</a></li></ul></li><li><a href="#e2-normalize-link-data-integration" class="table-of-contents__link toc-highlight">E2: Normalize-Link (Data Integration)</a><ul><li><a href="#normalize--t01-implement-csv-to-schema-mapping" class="table-of-contents__link toc-highlight">NORMALIZE--T01: Implement CSV to schema mapping</a></li><li><a href="#normalize--t02-implement-db-row-splitting-with-part-guids" class="table-of-contents__link toc-highlight">NORMALIZE--T02: Implement DB row splitting with part GUIDs</a></li><li><a href="#normalize--t03-implement-reply-and-tapback-linking-️-high-risk" class="table-of-contents__link toc-highlight">NORMALIZE--T03: Implement reply and tapback linking ⚠️ HIGH RISK</a></li><li><a href="#normalize--t04-implement-deduplication-across-sources-️-high-risk" class="table-of-contents__link toc-highlight">NORMALIZE--T04: Implement deduplication across sources ⚠️ HIGH RISK</a></li><li><a href="#normalize--t05-implement-absolute-path-enforcement" class="table-of-contents__link toc-highlight">NORMALIZE--T05: Implement absolute path enforcement</a></li><li><a href="#normalize--t06-build-date-validator-and-converters-️-high-risk" class="table-of-contents__link toc-highlight">NORMALIZE--T06: Build date validator and converters ⚠️ HIGH RISK</a></li><li><a href="#normalize--t07-add-zod-validation-layer" class="table-of-contents__link toc-highlight">NORMALIZE--T07: Add Zod validation layer</a></li><li><a href="#normalize--t08-create-normalize-link-test-suite" class="table-of-contents__link toc-highlight">NORMALIZE--T08: Create normalize-link test suite</a></li></ul></li><li><a href="#e3-enrich-ai-augmentation" class="table-of-contents__link toc-highlight">E3: Enrich-AI (Augmentation)</a><ul><li><a href="#enrich--t01-implement-image-analysis-with-preview-generation-️-high-risk" class="table-of-contents__link toc-highlight">ENRICH--T01: Implement image analysis with preview generation ⚠️ HIGH RISK</a></li><li><a href="#enrich--t02-implement-audio-transcription-with-structured-output-️-high-risk" class="table-of-contents__link toc-highlight">ENRICH--T02: Implement audio transcription with structured output ⚠️ HIGH RISK</a></li><li><a href="#enrich--t03-implement-pdf-and-video-handling" class="table-of-contents__link toc-highlight">ENRICH--T03: Implement PDF and video handling</a></li><li><a href="#enrich--t04-implement-link-enrichment-with-fallbacks-️-high-risk" class="table-of-contents__link toc-highlight">ENRICH--T04: Implement link enrichment with fallbacks ⚠️ HIGH RISK</a></li><li><a href="#enrich--t05-implement-enrichment-idempotency-️-high-risk" class="table-of-contents__link toc-highlight">ENRICH--T05: Implement enrichment idempotency ⚠️ HIGH RISK</a></li><li><a href="#enrich--t06-implement-checkpointing-and-resume-logic-️-high-risk" class="table-of-contents__link toc-highlight">ENRICH--T06: Implement checkpointing and resume logic ⚠️ HIGH RISK</a></li><li><a href="#enrich--t07-implement-rate-limiting-and-retry-logic-️-high-risk" class="table-of-contents__link toc-highlight">ENRICH--T07: Implement rate limiting and retry logic ⚠️ HIGH RISK</a></li><li><a href="#enrich--t08-create-enrich-ai-test-suite" class="table-of-contents__link toc-highlight">ENRICH--T08: Create enrich-ai test suite</a></li></ul></li><li><a href="#e4-render-markdown-output-generation" class="table-of-contents__link toc-highlight">E4: Render-Markdown (Output Generation)</a><ul><li><a href="#render--t01-implement-grouping-and-anchor-generation" class="table-of-contents__link toc-highlight">RENDER--T01: Implement grouping and anchor generation</a></li><li><a href="#render--t02-implement-nested-reply-and-tapback-rendering" class="table-of-contents__link toc-highlight">RENDER--T02: Implement nested reply and tapback rendering</a></li><li><a href="#render--t03-implement-embeds-and-blockquotes" class="table-of-contents__link toc-highlight">RENDER--T03: Implement embeds and blockquotes</a></li><li><a href="#render--t04-create-determinism-test-suite-️-high-risk" class="table-of-contents__link toc-highlight">RENDER--T04: Create determinism test suite ⚠️ HIGH RISK</a></li></ul></li><li><a href="#e5-citestingtooling-infrastructure" class="table-of-contents__link toc-highlight">E5: CI/Testing/Tooling (Infrastructure)</a><ul><li><a href="#ci--t01-configure-vitest-with-proper-settings" class="table-of-contents__link toc-highlight">CI--T01: Configure Vitest with proper settings</a></li><li><a href="#ci--t02-setup-coverage-with-thresholds-and-ci-reporters" class="table-of-contents__link toc-highlight">CI--T02: Setup coverage with thresholds and CI reporters</a></li><li><a href="#ci--t03-add-packagejson-test-scripts" class="table-of-contents__link toc-highlight">CI--T03: Add package.json test scripts</a></li><li><a href="#ci--t04-create-test-helper-utilities" class="table-of-contents__link toc-highlight">CI--T04: Create test helper utilities</a></li></ul></li><li><a href="#e6-docs--migration-knowledge-transfer" class="table-of-contents__link toc-highlight">E6: Docs &amp; Migration (Knowledge Transfer)</a><ul><li><a href="#docs--t01-update-refactor-report-with-implementation-deltas" class="table-of-contents__link toc-highlight">DOCS--T01: Update refactor report with implementation deltas</a></li><li><a href="#docs--t02-write-comprehensive-usage-documentation" class="table-of-contents__link toc-highlight">DOCS--T02: Write comprehensive usage documentation</a></li><li><a href="#docs--t03-create-troubleshooting-guide" class="table-of-contents__link toc-highlight">DOCS--T03: Create troubleshooting guide</a></li></ul></li><li><a href="#dependency-graph" class="table-of-contents__link toc-highlight">Dependency Graph</a></li><li><a href="#high-risk-tasks-tdd-required" class="table-of-contents__link toc-highlight">High Risk Tasks (TDD Required)</a></li><li><a href="#milestones" class="table-of-contents__link toc-highlight">Milestones</a></li><li><a href="#usage-for-agents" class="table-of-contents__link toc-highlight">Usage for Agents</a><ul><li><a href="#updating-task-status" class="table-of-contents__link toc-highlight">Updating Task Status</a></li><li><a href="#example-update" class="table-of-contents__link toc-highlight">Example Update</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/imessage-timeline/docs/intro">Getting Started</a></li><li class="footer__item"><a class="footer__link-item" href="/imessage-timeline/docs/cli-usage">CLI Usage</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Project</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/nathanvale/imessage-timeline" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_h_1J"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://www.npmjs.com/package/imessage-timeline" target="_blank" rel="noopener noreferrer" class="footer__link-item">npm Package<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_h_1J"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/imessage-timeline/blog">Blog</a></li><li class="footer__item"><a class="footer__link-item" href="/imessage-timeline/docs/releases/changesets-canonical">Release Notes</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2025 Nathan Vale. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
