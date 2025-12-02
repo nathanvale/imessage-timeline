@@ -1,6 +1,7 @@
 # Release Playbook (ADHD-friendly)
 
 > **Visual learner?** See [RELEASES.mmd](./RELEASES.mmd) for a flowchart diagram.
+> **CI/CD docs?** See [CI.md](./CI.md) for complete workflow documentation and branch protection strategy.
 
 Quick rules
 - Signed commits are optional (signature enforcement is off). Keep signing if you like.
@@ -82,7 +83,7 @@ Three workflows handle releases. Pick based on your intent:
 - Uses Node 24 for npm 11.6+ (OIDC support)
 - Skips publish if no NPM_TOKEN and OIDC not configured (safety guard)
 - Companion workflow `version-packages-auto-merge.yml` enables auto-merge on bot PRs
-- **Known limitation**: Bot PRs don't trigger required status check workflows - see Troubleshooting
+- **Known limitation**: Bot PRs don't trigger required status check workflows - see [CI.md: Bot PR Problem](./CI.md#the-bot-pr-problem)
 
 ---
 
@@ -167,7 +168,10 @@ To add more workflows: npmjs.com → package Settings → Trusted Publisher → 
 ---
 
 Troubleshooting
-- “npm ERR! code ENEEDAUTH” during channel release: confirm `NPM_TOKEN` (automation scope) is set in repo secrets; the Channel Release workflow now writes `~/.npmrc` and exports `NODE_AUTH_TOKEN`, but it will still fail if the token is missing/expired.
+
+> **See also**: [CI.md: Troubleshooting](./CI.md#troubleshooting) for CI/CD-specific issues.
+
+- "npm ERR! code ENEEDAUTH" during channel release: confirm `NPM_TOKEN` (automation scope) is set in repo secrets; the Channel Release workflow now writes `~/.npmrc` and exports `NODE_AUTH_TOKEN`, but it will still fail if the token is missing/expired.
 - “npm ERR! code E404 Not Found - PUT https://registry.npmjs.org/<pkg>”: usually means the token cannot create/publish that package name. Ensure the token belongs to an owner/maintainer for the package (or switch to a scoped name you own, e.g., `@nathanvale/chatline`).
 - “Snapshot release is not allowed in pre mode”: exit pre-mode, rerun.
 - “Commit must have verified signatures”: signatures are optional now; if re-enabled later, sign locally and push.
