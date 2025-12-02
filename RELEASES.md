@@ -43,6 +43,7 @@ Troubleshooting
 - “Checks pending” on automation PRs: run `bun run lint` and `bun run test:ci` locally before pushing.
 - Quick status: `git status --short --branch`; auth: `gh auth status`, `npm whoami`.
 - “PR checks never started” (automation PRs): push an empty commit to trigger PR workflows: `git commit --allow-empty -m "chore: trigger checks" && git push`.
+- “Repo quality failed on .changeset/pre.json”: format locally and push: `bunx biome format .changeset/pre.json` (or `npx biome format …`), then commit and push.
 
 Suggested defaults
 - Day-to-day: stay in `next` pre-mode; use `version:pre` + `publish --tag next`.
