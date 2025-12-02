@@ -21,6 +21,11 @@ else
   bunx changeset pre exit
 fi
 
+# Normalize Changesets pre.json formatting so CI quality check passes
+if [[ -f ".changeset/pre.json" ]]; then
+  bunx biome format .changeset/pre.json || true
+fi
+
 git add .
 if git diff --cached --quiet; then
   echo "No pre-mode changes to commit"
