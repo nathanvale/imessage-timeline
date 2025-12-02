@@ -1,8 +1,8 @@
 {
-	"changesets": [],
-	"initialVersions": {
-		"imessage-timeline": "0.0.1"
-	},
-	"mode": "pre",
-	"tag": "next"
+  "changesets": [],
+  "initialVersions": {
+    "imessage-timeline": "0.0.1"
+  },
+  "mode": "exit",
+  "tag": "next"
 }
