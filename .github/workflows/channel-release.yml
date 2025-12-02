@@ -43,19 +43,21 @@ jobs:
         if: ${{ inputs.intent == 'publish' || inputs.intent == 'snapshot' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          TOKEN="${NODE_AUTH_TOKEN:-$NPM_TOKEN}"
-          if [ -z "$TOKEN" ]; then
-            echo "::error::NPM_TOKEN is not set; add it as a repo secret before publishing."
-            exit 1
-          fi
-          cat <<'EOF' > ~/.npmrc
-          //registry.npmjs.org/:_authToken=${TOKEN}
+          # npm CLI v11.5.1+ auto-detects OIDC from GitHub Actions (id-token: write permission).
+          # When trusted publishing is configured on npmjs.com, no NPM_TOKEN is needed.
+          # We keep NPM_TOKEN as fallback for bootstrap (first publish) or if OIDC isn't configured.
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            echo "::notice::NPM_TOKEN detected; using token auth (fallback mode)."
+            cat <<'EOF' > ~/.npmrc
+          //registry.npmjs.org/:_authToken=${NPM_TOKEN}
           registry=https://registry.npmjs.org
           always-auth=true
-          provenance=true
           EOF
+          else
+            echo "::notice::No NPM_TOKEN; relying on OIDC trusted publishing."
+            echo "::notice::Ensure trusted publisher is configured at npmjs.com/package/<pkg>/access"
+          fi
       - run: bun install --frozen-lockfile
       - name: Code quality (safe fixes)
         run: bun run quality-check:ci
@@ -83,16 +85,16 @@ jobs:
       - name: Publish prerelease
         if: ${{ inputs.intent == 'publish' }}
         env:
+          # NPM_TOKEN only needed if OIDC trusted publishing not configured
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bun run publish:pre
       - name: Canary snapshot publish
         if: ${{ inputs.intent == 'snapshot' }}
         env:
+          # NPM_TOKEN only needed if OIDC trusted publishing not configured
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bun run release:snapshot:canary

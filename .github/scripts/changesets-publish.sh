@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
-# Purpose: Safely invoke `changeset publish` via `pnpm release` only when NPM_TOKEN is available.
+# Purpose: Safely invoke `changeset publish` via `bun run release`.
+#
+# Authentication modes (in order of preference):
+# 1. OIDC Trusted Publishing (recommended) - npm CLI v11.5.1+ auto-detects OIDC from GitHub Actions
+#    when `id-token: write` permission is set and trusted publisher is configured on npmjs.com.
+#    No NPM_TOKEN needed!
+# 2. NPM_TOKEN fallback - for bootstrap (first publish) or if OIDC isn't configured yet.
+#
 # This prevents the Changesets workflow from failing on main for repositories that haven't
-# configured publishing yet. When NPM_TOKEN is set, we authenticate and publish normally.
+# configured publishing yet.
 
 set -euo pipefail
 
@@ -20,32 +27,37 @@ annotate() {
   fi
 }
 
-if [[ -z "${NPM_TOKEN:-}" ]]; then
-  annotate warning "NPM_TOKEN not set; skipping publish. Configure repository secret 'NPM_TOKEN' to enable publishing."
-  exit 0
-fi
-
 # Check if pre-release mode is active
 if [[ -f .changeset/pre.json ]]; then
   annotate notice "Pre-release mode is active. Skipping automated publish from main (use pre-release publishing workflow instead)."
   exit 0
 fi
 
-# Trap to ensure cleanup on exit
-trap 'rm -f "$HOME/.npmrc"' EXIT
+# Determine auth mode
+if [[ -n "${NPM_TOKEN:-}" ]]; then
+  # Fallback: use NPM_TOKEN (for bootstrap or if OIDC not configured)
+  annotate notice "NPM_TOKEN detected; using token auth (fallback mode)."
 
-# Authenticate npm for publish
-# Note: pnpm respects ~/.npmrc for auth to npm registry
-{
-  echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
-} > "$HOME/.npmrc"
-chmod 0600 "$HOME/.npmrc"
+  # Trap to ensure cleanup on exit
+  trap 'rm -f "$HOME/.npmrc"' EXIT
 
-echo "::group::Configure npm auth"
-echo "Wrote npm auth token to ~/.npmrc"
-echo "::endgroup::"
+  # Authenticate npm for publish
+  {
+    echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
+  } > "$HOME/.npmrc"
+  chmod 0600 "$HOME/.npmrc"
 
-annotate notice "NPM_TOKEN detected; attempting publish via 'bun run release'."
+  echo "::group::Configure npm auth"
+  echo "Wrote npm auth token to ~/.npmrc"
+  echo "::endgroup::"
+else
+  # Primary: OIDC trusted publishing (no token needed)
+  # npm CLI auto-detects OIDC from GitHub Actions when id-token: write is set
+  annotate notice "No NPM_TOKEN; relying on OIDC trusted publishing."
+  annotate notice "Ensure trusted publisher is configured at: npmjs.com/package/<pkg>/access"
+fi
+
+annotate notice "Attempting publish via 'bun run release'."
 
 # Run the project's publish script (configured to call `changeset publish`)
 bun run release
