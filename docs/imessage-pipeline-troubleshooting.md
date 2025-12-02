@@ -37,7 +37,7 @@ Refactor
 jq '.messages[] | select(.date | endswith("Z") | not)' normalized.json
 
 # Convert dates to UTC during ingest
-imessage-timeline ingest-csv \
+chatline ingest-csv \
   --input messages.csv \
   --output ingested.json \
   --force-utc
@@ -121,7 +121,7 @@ jq '.messages[].date | select(endswith("Z") | not)' normalized.json
 
 ```bash
 # Convert during ingest with timezone offset
-imessage-timeline ingest-csv \
+chatline ingest-csv \
   --input messages.csv \
   --output ingested.json \
   --source-timezone "America/New_York"
@@ -181,7 +181,7 @@ grep -r "23:59:60" normalized.json
 **Solution 1: Configure Multiple Attachment Roots**
 
 ```bash
-imessage-timeline ingest-csv \
+chatline ingest-csv \
   --input messages.csv \
   --output ingested.json \
   --attachment-roots \
@@ -228,7 +228,7 @@ done
 
 ```bash
 # Continue pipeline with provenance metadata for missing files
-imessage-timeline normalize-link \
+chatline normalize-link \
   --input ingested.json \
   --output normalized.json \
   --keep-missing-files \
@@ -281,7 +281,7 @@ convert IMG_5678.heic IMG_5678.jpg
 **Solution 3: Skip Failed Conversions**
 
 ```bash
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --skip-failed-conversions \
@@ -304,7 +304,7 @@ imessage-timeline enrich-ai \
 
 ```bash
 # Path validator converts relative → absolute
-imessage-timeline normalize-link \
+chatline normalize-link \
   --input ingested.json \
   --output normalized.json \
   --attachment-roots ~/Library/Messages/Attachments
@@ -342,7 +342,7 @@ jq '.messages[] | select(.messageKind == "media") | select(.media.path | startsw
 
 ```bash
 # Increase delay between requests to 4000ms (15 req/min)
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --rate-limit 4000
@@ -366,7 +366,7 @@ Upgrade to paid tier:
 
 ```bash
 # Let pipeline auto-resume after rate limit resets
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --checkpoint-interval 50 \
@@ -451,7 +451,7 @@ const delay = baseDelay + jitter
 ```bash
 # Wait 60 seconds, then resume
 sleep 60
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --resume
@@ -461,7 +461,7 @@ imessage-timeline enrich-ai \
 
 ```bash
 # Increase threshold to 10 failures
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --circuit-breaker-threshold 10 \
@@ -510,7 +510,7 @@ Generic meta tag parser
 
 ```bash
 # Skip Firecrawl, use fallbacks only
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --enable-firecrawl false
@@ -551,7 +551,7 @@ limit settings).
 ```bash
 # Remove checkpoint and start fresh
 rm -f checkpoints/enrich-checkpoint-*.json
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json
 ```
@@ -570,7 +570,7 @@ jq '.configHash, .createdAt' checkpoints/enrich-checkpoint-500.json
 
 ```bash
 # Override hash check (may cause inconsistent enrichments)
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --resume \
@@ -604,7 +604,7 @@ ls -lh checkpoints/enrich-checkpoint-*.json
 
 # Use earlier checkpoint
 cp checkpoints/enrich-checkpoint-200.json checkpoints/enrich-checkpoint-latest.json
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --resume
@@ -627,7 +627,7 @@ jq '.' checkpoints/enrich-checkpoint-300.json
 ```bash
 # Remove all checkpoints
 rm -rf checkpoints/
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --checkpoint-interval 25 # More frequent checkpoints
@@ -674,7 +674,7 @@ jq '.failedItems' checkpoints/enrich-checkpoint-500.json
 # ]
 
 # Re-enrich failed items manually
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --force-refresh \
@@ -701,7 +701,7 @@ imessage-timeline enrich-ai \
 
 ```bash
 # Write checkpoint every 500 items instead of 100
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --checkpoint-interval 500
@@ -746,7 +746,7 @@ jq '.messages[] | select(.guid == "abc-123")' ingested.json
 **Fix**: Re-ingest with strict validation:
 
 ```bash
-imessage-timeline ingest-csv \
+chatline ingest-csv \
   --input messages.csv \
   --output ingested.json \
   --strict-media-validation \
@@ -777,7 +777,7 @@ imessage-timeline ingest-csv \
 
 ```bash
 # Regenerate GUIDs during ingest
-imessage-timeline ingest-csv \
+chatline ingest-csv \
   --input messages.csv \
   --output ingested.json \
   --regenerate-guids
@@ -804,7 +804,7 @@ enrichments.
 
 ```bash
 # Re-enrich all messages (overwrites existing)
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --force-refresh
@@ -814,7 +814,7 @@ imessage-timeline enrich-ai \
 
 ```typescript
 // Clear only image_analysis, keep others
-import { clearEnrichmentByKind } from 'imessage-timeline'
+import { clearEnrichmentByKind } from 'chatline'
 
 for (const msg of messages) {
   if (msg.messageKind === 'media') {
@@ -883,7 +883,7 @@ jq 'keys' ingested.json | grep "_"
 
 ```bash
 # Default 1000ms → change to 500ms
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --rate-limit 500
 ```
 
@@ -893,7 +893,7 @@ imessage-timeline enrich-ai \
 
 ```bash
 # Skip audio transcription (slow)
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --enable-audio false
 ```
 
@@ -905,8 +905,8 @@ jq '.messages[0:500]' normalized.json > batch1.json
 jq '.messages[500:1000]' normalized.json > batch2.json
 
 # Run in parallel
-imessage-timeline enrich-ai --input batch1.json --output enriched1.json &
-imessage-timeline enrich-ai --input batch2.json --output enriched2.json &
+chatline enrich-ai --input batch1.json --output enriched1.json &
+chatline enrich-ai --input batch2.json --output enriched2.json &
 wait
 
 # Merge results
@@ -931,7 +931,7 @@ FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memor
 ```bash
 # Increase to 4GB
 NODE_OPTIONS="--max-old-space-size=4096" \
-  imessage-timeline enrich-ai \
+  chatline enrich-ai \
   --input normalized.json \
   --output enriched.json
 ```
@@ -940,7 +940,7 @@ NODE_OPTIONS="--max-old-space-size=4096" \
 
 ```bash
 # Process in chunks
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --streaming \
@@ -1027,7 +1027,7 @@ If you encounter an error not covered here:
 1. **Enable verbose logging**:
 
    ```bash
-   imessage-timeline enrich-ai \
+   chatline enrich-ai \
      --input normalized.json \
      --output enriched.json \
      --verbose \

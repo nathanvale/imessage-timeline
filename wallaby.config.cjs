@@ -1,5 +1,5 @@
 /*
-  WallabyJS Configuration for imessage-timeline
+  WallabyJS Configuration for chatline
   Purpose: Fast feedback loop + alignment with Vitest deterministic settings.
 */
 

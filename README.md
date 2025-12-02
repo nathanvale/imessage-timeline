@@ -7,8 +7,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
-[![CI](https://github.com/nathanvale/imessage-timeline/actions/workflows/pr-quality.yml/badge.svg?branch=main)](https://github.com/nathanvale/imessage-timeline/actions/workflows/pr-quality.yml)
-[![CodeQL](https://github.com/nathanvale/imessage-timeline/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/nathanvale/imessage-timeline/actions/workflows/codeql.yml)
+[![CI](https://github.com/nathanvale/chatline/actions/workflows/pr-quality.yml/badge.svg?branch=main)](https://github.com/nathanvale/chatline/actions/workflows/pr-quality.yml)
+[![CodeQL](https://github.com/nathanvale/chatline/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/nathanvale/chatline/actions/workflows/codeql.yml)
 [![Tests](https://img.shields.io/badge/Tests-50%2B-brightgreen)](#testing)
 [![Coverage](https://img.shields.io/badge/Coverage-70%25%2B-brightgreen)](#testing)
 
@@ -28,7 +28,7 @@ or personal history exports.
 ## 📚 Documentation
 
 **Full documentation available at:**
-[https://nathanvale.github.io/imessage-timeline/](https://nathanvale.github.io/imessage-timeline/)
+[https://nathanvale.github.io/chatline/](https://nathanvale.github.io/chatline/)
 
 The documentation site includes:
 
@@ -113,12 +113,12 @@ Docs:
 
 ## CLI
 
-The project publishes a CLI executable `imessage-timeline` and provides a fast
+The project publishes a CLI executable `chatline` and provides a fast
 Bun-powered development loop.
 
 - Dev (TypeScript direct): `pnpm dev -- --help`
 - Built dist run: `pnpm cli -- --help`
-- Installed (after publish): `imessage-timeline --help`
+- Installed (after publish): `chatline --help`
 
 Docs:
 
@@ -165,10 +165,10 @@ Pass arguments after `--` when using `pnpm dev` or `pnpm cli`.
 #### Install Global CLI
 
 ```bash
-npm install -g imessage-timeline
+npm install -g chatline
 ```
 
-This installs the `imessage-timeline` command globally, available from any
+This installs the `chatline` command globally, available from any
 directory.
 
 #### Environment Setup
@@ -190,7 +190,7 @@ export FIRECRAWL_API_KEY=your-api-key-here
 #### Verify Installation
 
 ```bash
-imessage-timeline doctor
+chatline doctor
 ```
 
 Should show all checks passing.
@@ -199,27 +199,27 @@ Should show all checks passing.
 
 ```bash
 # Initialize config (creates imessage-config.yaml)
-imessage-timeline init
+chatline init
 
 # Ingest CSV export from iMazing
-imessage-timeline ingest-csv -i messages.csv -o messages.csv.ingested.json
+chatline ingest-csv -i messages.csv -o messages.csv.ingested.json
 
 # Ingest from macOS Messages.app database
-imessage-timeline ingest-db -i db-export.json -o messages.db.ingested.json
+chatline ingest-db -i db-export.json -o messages.db.ingested.json
 
 # Normalize and link messages (merge sources, deduplicate, link replies)
-imessage-timeline normalize-link \
+chatline normalize-link \
   -i messages.csv.ingested.json messages.db.ingested.json \
   -o messages.normalized.json
 
 # Enrich with AI (images, audio, links)
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   -i messages.normalized.json \
   -o messages.enriched.json \
   --enable-vision --enable-audio --enable-links
 
 # Render to markdown
-imessage-timeline render-markdown \
+chatline render-markdown \
   -i messages.enriched.json \
   -o ./timeline
 ```
@@ -233,11 +233,11 @@ Output: A `timeline/` directory with daily markdown files, one per date.
 Install as a library in your Node.js/TypeScript project:
 
 ```bash
-npm install imessage-timeline
+npm install chatline
 # or
-pnpm add imessage-timeline
+pnpm add chatline
 # or
-yarn add imessage-timeline
+yarn add chatline
 ```
 
 ### TypeScript/JavaScript Import
@@ -264,13 +264,13 @@ import {
   type Message,
   type Config,
   type DeltaResult,
-} from 'imessage-timeline'
+} from 'chatline'
 ```
 
 ### Example: Load and Validate Config
 
 ```typescript
-import { loadConfig, validateConfig } from 'imessage-timeline'
+import { loadConfig, validateConfig } from 'chatline'
 
 // Load config with auto-discovery (looks for imessage-config.yaml/json)
 const config = await loadConfig()
@@ -288,8 +288,8 @@ const validated = validateConfig({
 ### Example: Ingest Messages from CSV
 
 ```typescript
-import { ingestCSV, createExportEnvelope } from 'imessage-timeline'
-import type { Message, IngestOptions } from 'imessage-timeline'
+import { ingestCSV, createExportEnvelope } from 'chatline'
+import type { Message, IngestOptions } from 'chatline'
 
 const options: IngestOptions = {
   attachmentDir: '/path/to/attachments',
@@ -306,8 +306,8 @@ console.log(`Ingested ${envelope.totalMessages} messages`)
 ### Example: Deduplicate and Merge Sources
 
 ```typescript
-import { dedupAndMerge } from 'imessage-timeline'
-import type { Message } from 'imessage-timeline'
+import { dedupAndMerge } from 'chatline'
+import type { Message } from 'chatline'
 
 const csvMessages: Message[] = ingestCSV('./messages.csv', options)
 const dbMessages: Message[] = JSON.parse(
@@ -324,8 +324,8 @@ console.log(`Deduped ${result.stats.duplicatesRemoved} duplicates`)
 ### Example: Detect New Messages (Incremental Processing)
 
 ```typescript
-import { detectDelta, extractGuidsFromMessages } from 'imessage-timeline'
-import type { Message, DeltaResult } from 'imessage-timeline'
+import { detectDelta, extractGuidsFromMessages } from 'chatline'
+import type { Message, DeltaResult } from 'chatline'
 
 const currentMessages: Message[] = loadCurrentMessages()
 const previousMessages: Message[] = loadPreviousCheckpoint()
@@ -344,8 +344,8 @@ await enrichOnlyNew(newGuids)
 ### Example: Rate Limiting for API Calls
 
 ```typescript
-import { createRateLimiter } from 'imessage-timeline'
-import type { RateLimitConfig } from 'imessage-timeline'
+import { createRateLimiter } from 'chatline'
+import type { RateLimitConfig } from 'chatline'
 
 const limiter = createRateLimiter({
   requestsPerSecond: 10,
@@ -364,7 +364,7 @@ console.log(`Status: ${response.status}`)
 ### Example: Generate Config Programmatically
 
 ```typescript
-import { generateConfigContent, getDefaultConfigPath } from 'imessage-timeline'
+import { generateConfigContent, getDefaultConfigPath } from 'chatline'
 import fs from 'node:fs/promises'
 
 // Generate YAML config with defaults
@@ -407,7 +407,7 @@ import type {
   RateLimitConfig,
   RateLimitState,
   ApiResponse,
-} from 'imessage-timeline'
+} from 'chatline'
 ```
 
 ### Advanced: Custom Pipeline
@@ -420,8 +420,8 @@ import {
   detectDelta,
   mergeEnrichments,
   createRateLimiter,
-} from 'imessage-timeline'
-import type { Message, Config } from 'imessage-timeline'
+} from 'chatline'
+import type { Message, Config } from 'chatline'
 
 async function runCustomPipeline() {
   // 1. Load configuration
@@ -480,8 +480,8 @@ async function runCustomPipeline() {
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/imessage-timeline.git
-cd imessage-timeline
+git clone https://github.com/yourusername/chatline.git
+cd chatline
 
 # Install dependencies
 pnpm install
@@ -1281,7 +1281,7 @@ pnpm quality-check
 To configure GitHub branch protection on `main` using our aggregate gate:
 
 ```bash
-bash scripts/setup-branch-protection.sh nathanvale imessage-timeline main
+bash scripts/setup-branch-protection.sh nathanvale chatline main
 ```
 
 This script enables auto-merge, enforces required checks (PR quality / gate,
@@ -1525,9 +1525,9 @@ See [LICENSE](LICENSE) file for full text.
 ## Contact & Support
 
 - **Issues & Bugs**:
-  [GitHub Issues](https://github.com/yourusername/imessage-timeline/issues)
+  [GitHub Issues](https://github.com/yourusername/chatline/issues)
 - **Discussions**:
-  [GitHub Discussions](https://github.com/yourusername/imessage-timeline/discussions)
+  [GitHub Discussions](https://github.com/yourusername/chatline/discussions)
 - **Email**: support@example.com (replace with actual contact)
 
 ---

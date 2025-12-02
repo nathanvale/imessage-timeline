@@ -44,7 +44,7 @@ export function createProgram(): Command {
 	const program = new Command()
 
 	program
-		.name('imessage-timeline')
+		.name('chatline')
 		.description(
 			'Extract, transform, and analyze iMessage conversations with AI-powered enrichment and timeline rendering',
 		)
@@ -101,13 +101,13 @@ export function createProgram(): Command {
 		if (err.code === 'commander.missingArgument') {
 			humanError(`❌ Error: ${err.message}`)
 			humanError(
-				`\nRun 'imessage-timeline ${program.args[0] || ''} --help' for usage information`,
+				`\nRun 'chatline ${program.args[0] || ''} --help' for usage information`,
 			)
 			process.exit(1)
 		}
 		if (err.code === 'commander.unknownCommand') {
 			humanError(`❌ Error: ${err.message}`)
-			humanError(`\nRun 'imessage-timeline --help' to see available commands`)
+			humanError(`\nRun 'chatline --help' to see available commands`)
 			process.exit(1)
 		}
 		humanError(`❌ Error: ${err.message}`)

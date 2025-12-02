@@ -1,6 +1,6 @@
 # Bun script best practices (CLI-focused)
 
-This repository ships a TypeScript CLI (`imessage-timeline`). We leverage Bun
+This repository ships a TypeScript CLI (`chatline`). We leverage Bun
 for local development convenience and faster tooling, while retaining Node +
 Vitest for testing and release stability.
 
@@ -44,7 +44,7 @@ Notes:
   - Build: `pnpm build` → emits `dist/**`
   - Local dist run: `pnpm cli -- --help`
 - Publish consumers:
-  - Use the installed command `imessage-timeline` (resolves to `dist/cli.js`).
+  - Use the installed command `chatline` (resolves to `dist/cli.js`).
 
 ## Testing and CI
 

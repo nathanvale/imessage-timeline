@@ -1,12 +1,12 @@
 /**
- * Public API for imessage-timeline library
+ * Public API for chatline library
  *
  * This package can be used both as:
- * 1. CLI tool: `npx imessage-timeline --help`
- * 2. Library: `import { loadConfig, ingestCSV } from 'imessage-timeline'`
+ * 1. CLI tool: `npx chatline --help`
+ * 2. Library: `import { loadConfig, ingestCSV } from 'chatline'`
  *
  * @packageDocumentation
- * @module imessage-timeline
+ * @module chatline
  */
 
 export {

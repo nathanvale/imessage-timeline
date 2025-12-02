@@ -107,7 +107,7 @@ type EnrichAIOptions = {
 }
 
 program
-	.name('imessage-timeline')
+	.name('chatline')
 	.version(packageJson.version)
 	.description(
 		'Extract, transform, and analyze iMessage conversations with AI-powered enrichment and timeline rendering',
@@ -166,7 +166,7 @@ program.exitOverride((err: CommanderError) => {
 	if (err.code === 'commander.missingArgument') {
 		humanError(`❌ Error: ${err.message}`)
 		humanError(
-			`\nRun 'imessage-timeline ${program.args[0] || ''} --help' for usage information`,
+			`\nRun 'chatline ${program.args[0] || ''} --help' for usage information`,
 		)
 		process.exit(1)
 	}
@@ -174,7 +174,7 @@ program.exitOverride((err: CommanderError) => {
 	// Handle unknown commands
 	if (err.code === 'commander.unknownCommand') {
 		humanError(`❌ Error: ${err.message}`)
-		humanError(`\nRun 'imessage-timeline --help' to see available commands`)
+		humanError(`\nRun 'chatline --help' to see available commands`)
 		process.exit(1)
 	}
 
@@ -1966,7 +1966,7 @@ program
 				pass: Boolean(foundConfig),
 				message: foundConfig
 					? `Found: ${foundConfig}`
-					: 'Not found (run: imessage-timeline init)',
+					: 'Not found (run: chatline init)',
 			})
 
 			// Check 4: API Keys
@@ -2051,7 +2051,7 @@ program
 				humanInfo('\n💡 Recommendations:')
 				failures.forEach((check) => {
 					if (check.name === 'Config file') {
-						humanInfo('   • Run: imessage-timeline init')
+						humanInfo('   • Run: chatline init')
 					} else if (check.name === 'GEMINI_API_KEY') {
 						humanInfo(
 							'   • Get API key from: https://ai.google.dev/tutorials/setup',

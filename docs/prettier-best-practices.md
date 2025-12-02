@@ -1,6 +1,6 @@
 # Prettier Best Practices & Formatting Strategy
 
-This document outlines formatting strategy choices for `imessage-timeline`,
+This document outlines formatting strategy choices for `chatline`,
 uplift actions taken, and future improvements leveraging Prettier (2025 state)
 plus ecosystem anecdotes (Context7 usage; Firecrawl-related JSON normalization
 needs).

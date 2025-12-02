@@ -4,10 +4,10 @@
 		"url": "https://github.com/nathanvale"
 	},
 	"bin": {
-		"imessage-timeline": "./dist/bin/index.js"
+		"chatline": "./dist/bin/index.js"
 	},
 	"bugs": {
-		"url": "https://github.com/nathanvale/imessage-timeline/issues"
+		"url": "https://github.com/nathanvale/chatline/issues"
 	},
 	"dependencies": {
 		"@google/generative-ai": "^0.21.0",
@@ -71,7 +71,7 @@
 			"url": "https://github.com/sponsors/nathanvale"
 		}
 	],
-	"homepage": "https://github.com/nathanvale/imessage-timeline#readme",
+	"homepage": "https://github.com/nathanvale/chatline#readme",
 	"imports": {
 		"#enrich/*": "./src/enrich/*",
 		"#ingest/*": "./src/ingest/*",
@@ -99,14 +99,14 @@
 		]
 	},
 	"main": "./dist/index.js",
-	"name": "imessage-timeline",
+	"name": "chatline",
 	"publishConfig": {
 		"access": "public",
 		"provenance": true
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/nathanvale/imessage-timeline.git"
+		"url": "git+https://github.com/nathanvale/chatline.git"
 	},
 	"scripts": {
 		"research:actionlint": "bun scripts/firecrawl/actionlint-best-practices.ts",

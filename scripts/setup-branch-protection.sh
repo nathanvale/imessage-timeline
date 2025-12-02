@@ -11,7 +11,7 @@ set -euo pipefail
 #
 # Arguments:
 #   OWNER   GitHub username/org (default: nathanvale)
-#   REPO    Repository name (default: imessage-timeline)
+#   REPO    Repository name (default: chatline)
 #   BRANCH  Branch to protect (default: main)
 #
 # Examples:
@@ -43,7 +43,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 OWNER=${1:-nathanvale}
-REPO=${2:-imessage-timeline}
+REPO=${2:-chatline}
 BRANCH=${3:-main}
 
 if ! command -v gh >/dev/null 2>&1; then

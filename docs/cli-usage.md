@@ -1,10 +1,10 @@
 # CLI usage
 
-The project provides a CLI named `imessage-timeline` for extracting, enriching,
+The project provides a CLI named `chatline` for extracting, enriching,
 and rendering iMessage conversations.
 
-- Package name: `imessage-timeline`
-- Executable: `imessage-timeline` (mapped via `bin` → `dist/cli.js`)
+- Package name: `chatline`
+- Executable: `chatline` (mapped via `bin` → `dist/cli.js`)
 
 ## Local development
 
@@ -29,28 +29,28 @@ and rendering iMessage conversations.
 ## Installed usage (after publish)
 
 Once installed globally or used via `pnpm dlx`, the CLI is available as
-`imessage-timeline`:
+`chatline`:
 
 ```sh
 # Global install (optional)
-pnpm add -g imessage-timeline
-imessage-timeline --help
+pnpm add -g chatline
+chatline --help
 
 # One-off execution without global install (when published)
-pnpm dlx imessage-timeline --help
+pnpm dlx chatline --help
 ```
 
 ## Common flags (examples)
 
 ```sh
 # Minimal config
-imessage-timeline --config examples/imessage-config.yaml
+chatline --config examples/imessage-config.yaml
 
 # CSV ingest example
-imessage-timeline ingest --csv ./path/to/messages.csv --out ./out
+chatline ingest --csv ./path/to/messages.csv --out ./out
 
 # Render timeline to HTML/markdown
-imessage-timeline render --input ./out/normalized.json --format html
+chatline render --input ./out/normalized.json --format html
 ```
 
 Refer to `--help` for the complete, authoritative list of commands and options.

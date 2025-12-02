@@ -3,7 +3,7 @@
 > **⚡ Quick Start:** For practical, step-by-step instructions on publishing
 > pre-releases, see the **[Pre-Release Guide](./pre-release-guide.md)**
 
-This document defines the multi-channel release process for `imessage-timeline`,
+This document defines the multi-channel release process for `chatline`,
 enabling safe iteration and promotion flows while preserving stable `latest`
 integrity and supply chain guarantees.
 
@@ -139,19 +139,19 @@ future enhancement: add SBOM generation step into channel workflow for parity
 Downstream project wanting latest beta:
 
 ```
-pnpm add imessage-timeline@beta
+pnpm add chatline@beta
 ```
 
 For rc testing:
 
 ```
-pnpm add imessage-timeline@rc
+pnpm add chatline@rc
 ```
 
 For canary snapshot pin:
 
 ```
-pnpm add imessage-timeline@1.2.0-canary-20250101123045
+pnpm add chatline@1.2.0-canary-20250101123045
 ```
 
 ## Risks & Mitigations

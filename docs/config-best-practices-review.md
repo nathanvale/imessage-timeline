@@ -1,6 +1,6 @@
 ## Configuration & Best Practices Review (November 2025)
 
-Project: `imessage-timeline`
+Project: `chatline`
 
 Scope covered: TypeScript (build & emit), ESM packaging, Exports strategy,
 Vitest, Coverage, ESLint (flat config), Prettier, Changesets, Release hygiene,
@@ -82,7 +82,7 @@ integration).
 4. Preserve CLI shebang: confirm `tsconfig` has `preserveShebang: true` (TS
    5.4+), or introduce a tiny wrapper script.
 5. Update `.changeset/config.json` repo reference to
-   `nathanvale/imessage-timeline`.
+   `nathanvale/chatline`.
 
 **Medium Priority** 6. Introduce `eslint-plugin-import` with `import/order`
 alphabetical + groups. 7. Add `testTimeout` (e.g. 20_000 ms) & optionally

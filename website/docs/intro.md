@@ -25,20 +25,20 @@ iMessage Timeline is a command-line tool and library that:
 ### Installation
 
 ```bash
-npm install -g imessage-timeline
+npm install -g chatline
 ```
 
 ### Basic Usage
 
 ```bash
 # Extract messages from a conversation
-imessage-timeline extract --conversation "John Doe"
+chatline extract --conversation "John Doe"
 
 # Enrich messages with link context
-imessage-timeline enrich --input messages.json
+chatline enrich --input messages.json
 
 # Render to HTML
-imessage-timeline render --input enriched.json --output timeline.html
+chatline render --input enriched.json --output timeline.html
 ```
 
 ## Key Features
@@ -100,8 +100,8 @@ See the individual documentation pages for detailed information on each topic.
 
 ## Support
 
-- [GitHub Issues](https://github.com/nathanvale/imessage-timeline/issues)
-- [GitHub Discussions](https://github.com/nathanvale/imessage-timeline/discussions)
+- [GitHub Issues](https://github.com/nathanvale/chatline/issues)
+- [GitHub Discussions](https://github.com/nathanvale/chatline/discussions)
 
 ## License
 

@@ -48,11 +48,11 @@ with commander.js, subcommands, and proper error handling
 **Example Usage**:
 
 ```bash
-imessage-timeline --version
+chatline --version
 # 1.0.0
 
-imessage-timeline --help
-# Usage: imessage-timeline [options] [command]
+chatline --help
+# Usage: chatline [options] [command]
 #
 # Extract, transform, and analyze iMessage conversations
 #
@@ -83,13 +83,13 @@ imessage-timeline --help
 **Command Structure**:
 
 ```bash
-imessage-timeline ingest-csv \
+chatline ingest-csv \
   --input <path> \
   --output <path> \
   --attachment-roots <path1> <path2> \
   [--verbose]
 
-imessage-timeline ingest-db \
+chatline ingest-db \
   --db-path <path> \
   --output <path> \
   --contact <identifier> \
@@ -127,7 +127,7 @@ option support.
 **Command Structure**:
 
 ```bash
-imessage-timeline normalize-link \
+chatline normalize-link \
   --input <path> \
   --output <path> \
   [--merge-csv-db] \
@@ -135,7 +135,7 @@ imessage-timeline normalize-link \
   [--db-input <path>] \
   [--verbose]
 
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input <path> \
   --output <path> \
   [--checkpoint-interval <n>] \
@@ -179,7 +179,7 @@ imessage-timeline enrich-ai \
 **Command Structure**:
 
 ```bash
-imessage-timeline render-markdown \
+chatline render-markdown \
   --input <path> \
   --output-dir <path> \
   [--date-range <start:end>] \
@@ -208,20 +208,20 @@ imessage-timeline render-markdown \
 
 ```bash
 # Validate JSON structure
-imessage-timeline validate <file>
+chatline validate <file>
 
 # Show statistics
-imessage-timeline stats <file>
+chatline stats <file>
 # Output:
 # Total messages: 3,098
 # By kind: text (2,275), media (823), tapback (234), notification (12)
 # Date range: 2024-01-01 to 2024-12-31
 
 # Clean up temporary files
-imessage-timeline clean [--checkpoints] [--cache] [--all]
+chatline clean [--checkpoints] [--cache] [--all]
 
 # Diagnose issues
-imessage-timeline doctor
+chatline doctor
 # Checks:
 # ✓ Node.js version >= 22.20
 # ✓ pnpm installed
@@ -269,7 +269,7 @@ import { enrichAiCommand } from './cli/commands/enrich-ai'
 const program = new Command()
 
 program
-  .name('imessage-timeline')
+  .name('chatline')
   .version('1.0.0')
   .description('Extract, transform, and analyze iMessage conversations')
   .option('-c, --config <path>', 'config file path', 'imessage-config.json')
@@ -561,11 +561,11 @@ function substituteEnvVars(obj: any): any {
 **Command**:
 
 ```bash
-imessage-timeline init [--format yaml]
+chatline init [--format yaml]
 # ✓ Created imessage-config.yaml with defaults
 # Edit this file to customize your pipeline settings
 
-imessage-timeline init --format json
+chatline init --format json
 # ✓ Created imessage-config.json
 ```
 
@@ -923,7 +923,7 @@ export async function mergeEnrichedMessages(
 
 ```bash
 # First run: enrich all messages
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --incremental
@@ -932,7 +932,7 @@ imessage-timeline enrich-ai \
 # ✓ Enriched 823 messages
 
 # Second run: only new messages
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --incremental
@@ -942,7 +942,7 @@ imessage-timeline enrich-ai \
 # ✓ Enriched 142 new messages (965 total)
 
 # Reset state
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --incremental \

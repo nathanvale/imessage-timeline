@@ -1240,7 +1240,7 @@ functionality operational:
 ### File Structure (As Implemented)
 
 ```
-imessage-timeline/
+chatline/
 ├── src/
 │   ├── schema/
 │   │   └── message.ts          # Unified Message schema with Zod

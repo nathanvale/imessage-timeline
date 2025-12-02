@@ -39,7 +39,7 @@ provides recommendations for:
 **How to Structure:**
 
 ```
-imessage-timeline/
+chatline/
 ├── .changeset/
 ├── .github/
 ├── dist/
@@ -146,7 +146,7 @@ imessage-timeline/
 
 Your project currently has:
 
-- 1 publishable package (`imessage-timeline`)
+- 1 publishable package (`chatline`)
 - Docusaurus would be a dev-only tool (not published)
 
 ### Recommendation: Defer Workspaces Until You Need Them
@@ -171,21 +171,21 @@ Your project currently has:
 If you later decide to split into packages:
 
 ```
-imessage-timeline/                    # Monorepo root
+chatline/                    # Monorepo root
 ├── .changeset/
 ├── .github/
 ├── pnpm-workspace.yaml              # NEW: Workspace config
 ├── package.json                     # Root package (scripts only)
 ├── packages/
-│   ├── core/                        # @imessage-timeline/core
+│   ├── core/                        # @chatline/core
 │   │   ├── src/
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   ├── cli/                         # imessage-timeline (CLI)
+│   ├── cli/                         # chatline (CLI)
 │   │   ├── src/
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   └── utils/                       # @imessage-timeline/utils
+│   └── utils/                       # @chatline/utils
 │       ├── src/
 │       ├── package.json
 │       └── tsconfig.json
@@ -484,7 +484,7 @@ This document synthesizes research from:
 
 ## 8. Key Takeaways
 
-### For imessage-timeline Project
+### For chatline Project
 
 1. **Add Docusaurus now** - High value, low complexity, no structural changes
 2. **Keep single-repo structure** - No need for workspaces until you have

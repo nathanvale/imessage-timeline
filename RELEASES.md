@@ -40,7 +40,7 @@ Stable release
 
 Troubleshooting
 - “npm ERR! code ENEEDAUTH” during channel release: confirm `NPM_TOKEN` (automation scope) is set in repo secrets; the Channel Release workflow now writes `~/.npmrc` and exports `NODE_AUTH_TOKEN`, but it will still fail if the token is missing/expired.
-- “npm ERR! code E404 Not Found - PUT https://registry.npmjs.org/<pkg>”: usually means the token cannot create/publish that package name. Ensure the token belongs to an owner/maintainer for the package (or switch to a scoped name you own, e.g., `@nathanvale/imessage-timeline`).
+- “npm ERR! code E404 Not Found - PUT https://registry.npmjs.org/<pkg>”: usually means the token cannot create/publish that package name. Ensure the token belongs to an owner/maintainer for the package (or switch to a scoped name you own, e.g., `@nathanvale/chatline`).
 - “Snapshot release is not allowed in pre mode”: exit pre-mode, rerun.
 - “Commit must have verified signatures”: signatures are optional now; if re-enabled later, sign locally and push.
 - “Checks pending” on automation PRs: run `bun run lint` and `bun run test:ci` locally before pushing.

@@ -55,7 +55,7 @@ This project uses a comprehensive automated release workflow that ensures:
   "baseBranch": "main",
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "nathanvale/imessage-timeline" }
+    { "repo": "nathanvale/chatline" }
   ],
   "commit": false,
   "fixed": [],
@@ -266,9 +266,9 @@ pnpm version:gen
 
 ```
 🦋  Which packages would you like to include?
-◉ imessage-timeline
+◉ chatline
 
-🦋  Which type of change is this for imessage-timeline?
+🦋  Which type of change is this for chatline?
 ❯ patch (0.0.0 → 0.0.1)
   minor (0.0.0 → 0.1.0)
   major (0.0.0 → 1.0.0)
@@ -283,7 +283,7 @@ Add JSON export format for timeline rendering
 
 ```markdown
 ---
-'imessage-timeline': minor
+'chatline': minor
 ---
 
 Add JSON export format for timeline rendering
@@ -409,7 +409,7 @@ Fixed stuff        # Capitalized, not descriptive
 ```bash
 pnpm version:gen
 
-# Select: imessage-timeline → minor
+# Select: chatline → minor
 # Summary: "Add JSON export format for timeline rendering"
 ```
 
@@ -418,7 +418,7 @@ pnpm version:gen
 ```bash
 pnpm version:gen
 
-# Select: imessage-timeline → patch
+# Select: chatline → patch
 # Summary: "Fix CSV parsing for empty quoted fields"
 ```
 
@@ -427,7 +427,7 @@ pnpm version:gen
 ```bash
 pnpm version:gen
 
-# Select: imessage-timeline → major
+# Select: chatline → major
 # Summary: "Remove deprecated loadConfig synchronous API"
 ```
 
@@ -437,7 +437,7 @@ Changesets are stored in `.changeset/` directory:
 
 ```markdown
 ---
-'imessage-timeline': minor
+'chatline': minor
 ---
 
 Add JSON export format for timeline rendering. This allows users to export
@@ -453,7 +453,7 @@ You can manually create changeset files:
 ```bash
 # Create .changeset/add-json-export.md
 ---
-"imessage-timeline": minor
+"chatline": minor
 ---
 
 Add JSON export format for timeline rendering
@@ -468,7 +468,7 @@ pnpm changeset status
 # All changesets:
 #
 # minor:
-#   imessage-timeline: add JSON export format
+#   chatline: add JSON export format
 ```
 
 ### Pre-release Workflow (Advanced)
@@ -754,15 +754,15 @@ steps:
 14. **Verify release:**
 
     ```bash
-    npm view imessage-timeline version
+    npm view chatline version
     # Should show: 0.1.0
 
-    npm install imessage-timeline@latest
+    npm install chatline@latest
     # Should install new version
     ```
 
 15. **Verify GitHub release:**
-    - Visit: https://github.com/nathanvale/imessage-timeline/releases
+    - Visit: https://github.com/nathanvale/chatline/releases
     - Check release notes and tag
 
 ---
@@ -886,7 +886,7 @@ git push origin main
 
 ```
 npm ERR! code E403
-npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/imessage-timeline
+npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/chatline
 ```
 
 **Causes:**
@@ -899,14 +899,14 @@ npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/imessage-timeline
 
 1. **Verify NPM token:**
    - Visit:
-     https://github.com/nathanvale/imessage-timeline/settings/secrets/actions
+     https://github.com/nathanvale/chatline/settings/secrets/actions
    - Ensure `NPM_TOKEN` is set and valid
    - Generate new token: https://www.npmjs.com/settings/~/tokens
 
 2. **Check package name availability:**
 
    ```bash
-   npm view imessage-timeline
+   npm view chatline
    # Should show your package, not someone else's
    ```
 
@@ -1054,7 +1054,7 @@ export default {
 
 ```markdown
 ---
-'imessage-timeline': minor
+'chatline': minor
 ---
 
 Add JSON export format for timeline rendering. This allows users to export
@@ -1157,13 +1157,13 @@ publishConfig: { 'access': 'public', 'provenance': true }
 
 ### Multi-Package Monorepos (Future)
 
-If you add more packages (e.g., `imessage-timeline-ui`):
+If you add more packages (e.g., `chatline-ui`):
 
 **Update `.changeset/config.json`:**
 
 ```json
 {
-  "fixed": [["imessage-timeline", "imessage-timeline-ui"]],
+  "fixed": [["chatline", "chatline-ui"]],
   "linked": []
 }
 ```

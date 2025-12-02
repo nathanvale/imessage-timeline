@@ -32,7 +32,7 @@ workflow. Check items off as we implement them.
 
 ## Changesets & Release hygiene
 
-- [x] .changeset/config.json: update repo to `nathanvale/imessage-timeline`
+- [x] .changeset/config.json: update repo to `nathanvale/chatline`
 - [x] package.json `files`: add `CHANGELOG.md`
 
 ## Bun Hybrid Adoption

@@ -98,7 +98,7 @@ Ensure these checks are required before merging:
   the event—re-run the workflow or enable auto-merge manually in the PR UI.
 - Publish failed:
   - Verify `NPM_TOKEN` is present and has publish scope to the
-    `imessage-timeline` package.
+    `chatline` package.
   - Ensure `id-token: write` permissions are enabled where provenance is
     required.
 - Alpha snapshots not appearing: check the cron logs for
