@@ -12,26 +12,26 @@ import type { Message } from '#schema/message'
  */
 
 export type MergeStats = {
-  csvCount: number
-  dbCount: number
-  outputCount: number
-  exactMatches: number
-  contentMatches: number
-  conflicts: number
-  noMatches: number
+	csvCount: number
+	dbCount: number
+	outputCount: number
+	exactMatches: number
+	contentMatches: number
+	conflicts: number
+	noMatches: number
 }
 
 export type ContentMatch = {
-  message: Message
-  confidence: number
-  reasons: string[]
+	message: Message
+	confidence: number
+	reasons: string[]
 }
 
 export type MergeResult = {
-  messages: Message[]
-  stats: MergeStats
-  conflicts?: Array<{ csvMsg: Message; dbMsg: Message; confidence: number }>
-  warnings?: string[]
+	messages: Message[]
+	stats: MergeStats
+	conflicts?: Array<{ csvMsg: Message; dbMsg: Message; confidence: number }>
+	warnings?: string[]
 }
 
 /**
@@ -49,112 +49,112 @@ export type MergeResult = {
  * 5. Ensure determinism (AC05)
  */
 export function dedupAndMerge(
-  csvMessages: Message[],
-  dbMessages: Message[],
+	csvMessages: Message[],
+	dbMessages: Message[],
 ): MergeResult {
-  // AC05: Sort inputs for determinism
-  const sortedCsv = [...csvMessages].sort((a, b) =>
-    a.guid.localeCompare(b.guid),
-  )
-  const sortedDb = [...dbMessages].sort((a, b) => a.guid.localeCompare(b.guid))
+	// AC05: Sort inputs for determinism
+	const sortedCsv = [...csvMessages].sort((a, b) =>
+		a.guid.localeCompare(b.guid),
+	)
+	const sortedDb = [...dbMessages].sort((a, b) => a.guid.localeCompare(b.guid))
 
-  const stats: MergeStats = {
-    csvCount: csvMessages.length,
-    dbCount: dbMessages.length,
-    outputCount: 0,
-    exactMatches: 0,
-    contentMatches: 0,
-    conflicts: 0,
-    noMatches: 0,
-  }
+	const stats: MergeStats = {
+		csvCount: csvMessages.length,
+		dbCount: dbMessages.length,
+		outputCount: 0,
+		exactMatches: 0,
+		contentMatches: 0,
+		conflicts: 0,
+		noMatches: 0,
+	}
 
-  const outputMessages: Message[] = []
-  const matchedDbGuids = new Set<string>()
+	const outputMessages: Message[] = []
+	const matchedDbGuids = new Set<string>()
 
-  // Build O(1) lookup indices for DB messages
-  const dbByGuid = new Map<string, Message>()
-  const dbByNormalizedContent = new Map<string, Message[]>()
+	// Build O(1) lookup indices for DB messages
+	const dbByGuid = new Map<string, Message>()
+	const dbByNormalizedContent = new Map<string, Message[]>()
 
-  for (const dbMsg of sortedDb) {
-    dbByGuid.set(dbMsg.guid, dbMsg)
+	for (const dbMsg of sortedDb) {
+		dbByGuid.set(dbMsg.guid, dbMsg)
 
-    // Index by normalized text for content equivalence (text messages only)
-    if (dbMsg.messageKind === 'text' && dbMsg.text) {
-      const normalizedKey = `${dbMsg.handle || ''}:${normalizeTextForIndex(dbMsg.text)}`
-      const existing = dbByNormalizedContent.get(normalizedKey)
-      if (existing) {
-        existing.push(dbMsg)
-      } else {
-        dbByNormalizedContent.set(normalizedKey, [dbMsg])
-      }
-    }
-  }
+		// Index by normalized text for content equivalence (text messages only)
+		if (dbMsg.messageKind === 'text' && dbMsg.text) {
+			const normalizedKey = `${dbMsg.handle || ''}:${normalizeTextForIndex(dbMsg.text)}`
+			const existing = dbByNormalizedContent.get(normalizedKey)
+			if (existing) {
+				existing.push(dbMsg)
+			} else {
+				dbByNormalizedContent.set(normalizedKey, [dbMsg])
+			}
+		}
+	}
 
-  // Process each CSV message
-  for (const csvMsg of sortedCsv) {
-    // AC01: Try exact GUID match first - O(1) lookup
-    const exactMatch = dbByGuid.get(csvMsg.guid) || null
+	// Process each CSV message
+	for (const csvMsg of sortedCsv) {
+		// AC01: Try exact GUID match first - O(1) lookup
+		const exactMatch = dbByGuid.get(csvMsg.guid) || null
 
-    if (exactMatch) {
-      // AC02: Merge with DB authoritiveness
-      const merged = applyDbAuthoritiveness(csvMsg, exactMatch)
-      outputMessages.push(merged)
-      matchedDbGuids.add(exactMatch.guid)
-      stats.exactMatches++
-    } else {
-      // AC03: Try content equivalence using indexed lookup - O(1) average case for text
-      let contentMatch = detectContentEquivalenceIndexed(
-        csvMsg,
-        dbByNormalizedContent,
-        matchedDbGuids,
-      )
+		if (exactMatch) {
+			// AC02: Merge with DB authoritiveness
+			const merged = applyDbAuthoritiveness(csvMsg, exactMatch)
+			outputMessages.push(merged)
+			matchedDbGuids.add(exactMatch.guid)
+			stats.exactMatches++
+		} else {
+			// AC03: Try content equivalence using indexed lookup - O(1) average case for text
+			let contentMatch = detectContentEquivalenceIndexed(
+				csvMsg,
+				dbByNormalizedContent,
+				matchedDbGuids,
+			)
 
-      // Fallback to linear scan for non-text messages (media, tapback, notification)
-      // The indexed lookup only handles text messages; media uses media.id comparison
-      if (!contentMatch && csvMsg.messageKind !== 'text') {
-        const unmatchedDbMessages = sortedDb.filter(
-          (dbMsg) => !matchedDbGuids.has(dbMsg.guid),
-        )
-        contentMatch = detectContentEquivalence(csvMsg, unmatchedDbMessages)
-      }
+			// Fallback to linear scan for non-text messages (media, tapback, notification)
+			// The indexed lookup only handles text messages; media uses media.id comparison
+			if (!contentMatch && csvMsg.messageKind !== 'text') {
+				const unmatchedDbMessages = sortedDb.filter(
+					(dbMsg) => !matchedDbGuids.has(dbMsg.guid),
+				)
+				contentMatch = detectContentEquivalence(csvMsg, unmatchedDbMessages)
+			}
 
-      if (contentMatch) {
-        // AC02: Merge with DB authoritiveness
-        const merged = applyDbAuthoritiveness(csvMsg, contentMatch.message)
-        outputMessages.push(merged)
-        matchedDbGuids.add(contentMatch.message.guid)
-        stats.contentMatches++
-      } else {
-        // No match found, keep CSV message as-is
-        outputMessages.push(csvMsg)
-        stats.noMatches++
-      }
-    }
-  }
+			if (contentMatch) {
+				// AC02: Merge with DB authoritiveness
+				const merged = applyDbAuthoritiveness(csvMsg, contentMatch.message)
+				outputMessages.push(merged)
+				matchedDbGuids.add(contentMatch.message.guid)
+				stats.contentMatches++
+			} else {
+				// No match found, keep CSV message as-is
+				outputMessages.push(csvMsg)
+				stats.noMatches++
+			}
+		}
+	}
 
-  // Add unmatched DB messages
-  for (const dbMsg of sortedDb) {
-    if (!matchedDbGuids.has(dbMsg.guid)) {
-      outputMessages.push(dbMsg)
-    }
-  }
+	// Add unmatched DB messages
+	for (const dbMsg of sortedDb) {
+		if (!matchedDbGuids.has(dbMsg.guid)) {
+			outputMessages.push(dbMsg)
+		}
+	}
 
-  stats.outputCount = outputMessages.length
+	stats.outputCount = outputMessages.length
 
-  return {
-    messages: outputMessages,
-    stats,
-  }
+	return {
+		messages: outputMessages,
+		stats,
+	}
 }
 
 /**
  * AC01: Find exact GUID match in DB messages
  */
 export function findExactMatch(
-  message: Message,
-  dbMessages: Message[],
+	message: Message,
+	dbMessages: Message[],
 ): Message | null {
-  return dbMessages.find((dbMsg) => dbMsg.guid === message.guid) || null
+	return dbMessages.find((dbMsg) => dbMsg.guid === message.guid) || null
 }
 
 /**
@@ -168,68 +168,68 @@ export function findExactMatch(
  * Returns match with confidence score (1.0 = exact match)
  */
 export function detectContentEquivalence(
-  csvMsg: Message,
-  candidates: Message[],
-  threshold = 0.9,
+	csvMsg: Message,
+	candidates: Message[],
+	threshold = 0.9,
 ): ContentMatch | null {
-  for (const candidate of candidates) {
-    const reasons: string[] = []
-    let confidence = 0
+	for (const candidate of candidates) {
+		const reasons: string[] = []
+		let confidence = 0
 
-    // Must have same messageKind
-    if (csvMsg.messageKind !== candidate.messageKind) {
-      continue
-    }
+		// Must have same messageKind
+		if (csvMsg.messageKind !== candidate.messageKind) {
+			continue
+		}
 
-    // Must have same sender (handle)
-    const csvHandle = csvMsg.handle || null
-    const candidateHandle = candidate.handle || null
-    if (csvHandle !== candidateHandle) {
-      continue
-    }
+		// Must have same sender (handle)
+		const csvHandle = csvMsg.handle || null
+		const candidateHandle = candidate.handle || null
+		if (csvHandle !== candidateHandle) {
+			continue
+		}
 
-    // For text messages, compare normalized text
-    if (csvMsg.messageKind === 'text' && candidate.messageKind === 'text') {
-      const csvText = normalizeText(csvMsg.text || '')
-      const candidateText = normalizeText(candidate.text || '')
+		// For text messages, compare normalized text
+		if (csvMsg.messageKind === 'text' && candidate.messageKind === 'text') {
+			const csvText = normalizeText(csvMsg.text || '')
+			const candidateText = normalizeText(candidate.text || '')
 
-      if (csvText === candidateText) {
-        confidence = 1.0
-        reasons.push('exact text match after normalization')
-      } else {
-        // Not an exact match, skip to avoid false positives
-        continue
-      }
-    } else if (
-      csvMsg.messageKind === 'media' &&
-      candidate.messageKind === 'media'
-    ) {
-      // For media messages, compare media metadata
-      const csvMediaId = csvMsg.media?.id
-      const candidateMediaId = candidate.media?.id
+			if (csvText === candidateText) {
+				confidence = 1.0
+				reasons.push('exact text match after normalization')
+			} else {
+				// Not an exact match, skip to avoid false positives
+				continue
+			}
+		} else if (
+			csvMsg.messageKind === 'media' &&
+			candidate.messageKind === 'media'
+		) {
+			// For media messages, compare media metadata
+			const csvMediaId = csvMsg.media?.id
+			const candidateMediaId = candidate.media?.id
 
-      if (csvMediaId && candidateMediaId && csvMediaId === candidateMediaId) {
-        confidence = 1.0
-        reasons.push('exact media ID match')
-      } else {
-        continue
-      }
-    } else {
-      // Other message types - require exact text or skip
-      continue
-    }
+			if (csvMediaId && candidateMediaId && csvMediaId === candidateMediaId) {
+				confidence = 1.0
+				reasons.push('exact media ID match')
+			} else {
+				continue
+			}
+		} else {
+			// Other message types - require exact text or skip
+			continue
+		}
 
-    // Only return if confidence meets threshold
-    if (confidence >= threshold) {
-      return {
-        message: candidate,
-        confidence,
-        reasons,
-      }
-    }
-  }
+		// Only return if confidence meets threshold
+		if (confidence >= threshold) {
+			return {
+				message: candidate,
+				confidence,
+				reasons,
+			}
+		}
+	}
 
-  return null
+	return null
 }
 
 /**
@@ -239,12 +239,12 @@ export function detectContentEquivalence(
  * - Remove punctuation and extra spaces
  */
 function normalizeText(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s]/g, '') // Remove punctuation
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .trim()
+	return text
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s]/g, '') // Remove punctuation
+		.replace(/\s+/g, ' ') // Normalize whitespace
+		.trim()
 }
 
 /**
@@ -252,7 +252,7 @@ function normalizeText(text: string): string {
  * Used when building the content equivalence index
  */
 function normalizeTextForIndex(text: string): string {
-  return normalizeText(text)
+	return normalizeText(text)
 }
 
 /**
@@ -264,35 +264,35 @@ function normalizeTextForIndex(text: string): string {
  * @returns ContentMatch if found, null otherwise
  */
 function detectContentEquivalenceIndexed(
-  csvMsg: Message,
-  contentIndex: Map<string, Message[]>,
-  matchedGuids: Set<string>,
+	csvMsg: Message,
+	contentIndex: Map<string, Message[]>,
+	matchedGuids: Set<string>,
 ): ContentMatch | null {
-  // Only text messages are indexed
-  if (csvMsg.messageKind !== 'text' || !csvMsg.text) {
-    return null
-  }
+	// Only text messages are indexed
+	if (csvMsg.messageKind !== 'text' || !csvMsg.text) {
+		return null
+	}
 
-  // Build the lookup key
-  const normalizedKey = `${csvMsg.handle || ''}:${normalizeTextForIndex(csvMsg.text)}`
-  const candidates = contentIndex.get(normalizedKey)
+	// Build the lookup key
+	const normalizedKey = `${csvMsg.handle || ''}:${normalizeTextForIndex(csvMsg.text)}`
+	const candidates = contentIndex.get(normalizedKey)
 
-  if (!candidates || candidates.length === 0) {
-    return null
-  }
+	if (!candidates || candidates.length === 0) {
+		return null
+	}
 
-  // Find first unmatched candidate
-  for (const candidate of candidates) {
-    if (!matchedGuids.has(candidate.guid)) {
-      return {
-        message: candidate,
-        confidence: 1.0,
-        reasons: ['exact text match after normalization (indexed)'],
-      }
-    }
-  }
+	// Find first unmatched candidate
+	for (const candidate of candidates) {
+		if (!matchedGuids.has(candidate.guid)) {
+			return {
+				message: candidate,
+				confidence: 1.0,
+				reasons: ['exact text match after normalization (indexed)'],
+			}
+		}
+	}
 
-  return null
+	return null
 }
 
 /**
@@ -306,50 +306,50 @@ function detectContentEquivalenceIndexed(
  * CSV fields are preserved when DB doesn't have them
  */
 export function applyDbAuthoritiveness(
-  csvMsg: Message,
-  dbMsg: Message,
+	csvMsg: Message,
+	dbMsg: Message,
 ): Message {
-  // Start with CSV message
-  const merged: Message = { ...csvMsg }
+	// Start with CSV message
+	const merged: Message = { ...csvMsg }
 
-  // DB authoritative: timestamps
-  merged.date = dbMsg.date
-  if (dbMsg.dateRead !== undefined) merged.dateRead = dbMsg.dateRead
-  if (dbMsg.dateDelivered !== undefined)
-    merged.dateDelivered = dbMsg.dateDelivered
-  if (dbMsg.dateEdited !== undefined) merged.dateEdited = dbMsg.dateEdited
+	// DB authoritative: timestamps
+	merged.date = dbMsg.date
+	if (dbMsg.dateRead !== undefined) merged.dateRead = dbMsg.dateRead
+	if (dbMsg.dateDelivered !== undefined)
+		merged.dateDelivered = dbMsg.dateDelivered
+	if (dbMsg.dateEdited !== undefined) merged.dateEdited = dbMsg.dateEdited
 
-  // DB authoritative: handle
-  if (dbMsg.handle !== undefined) merged.handle = dbMsg.handle
+	// DB authoritative: handle
+	if (dbMsg.handle !== undefined) merged.handle = dbMsg.handle
 
-  // DB authoritative: associations (replyingTo)
-  if (dbMsg.replyingTo?.targetMessageGuid !== undefined) {
-    merged.replyingTo = {
-      ...merged.replyingTo,
-      targetMessageGuid: dbMsg.replyingTo.targetMessageGuid,
-    }
-  }
+	// DB authoritative: associations (replyingTo)
+	if (dbMsg.replyingTo?.targetMessageGuid !== undefined) {
+		merged.replyingTo = {
+			...merged.replyingTo,
+			targetMessageGuid: dbMsg.replyingTo.targetMessageGuid,
+		}
+	}
 
-  // DB authoritative: isRead status
-  if (dbMsg.isRead !== undefined) merged.isRead = dbMsg.isRead
+	// DB authoritative: isRead status
+	if (dbMsg.isRead !== undefined) merged.isRead = dbMsg.isRead
 
-  // Prefer DB GUID (stable choice)
-  merged.guid = dbMsg.guid
+	// Prefer DB GUID (stable choice)
+	merged.guid = dbMsg.guid
 
-  return merged
+	return merged
 }
 
 /**
  * AC04: Verify count invariants to prevent data loss
  */
 export function verifyNoDataLoss(
-  csvCount: number,
-  dbCount: number,
-  outputCount: number,
+	csvCount: number,
+	dbCount: number,
+	outputCount: number,
 ): boolean {
-  // TODO: Implement count verification
-  // Invariant: outputCount >= max(csvCount, dbCount) - dedup count
-  return outputCount >= Math.max(csvCount, dbCount)
+	// TODO: Implement count verification
+	// Invariant: outputCount >= max(csvCount, dbCount) - dedup count
+	return outputCount >= Math.max(csvCount, dbCount)
 }
 
 export type { Message }

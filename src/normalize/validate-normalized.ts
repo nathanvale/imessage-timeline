@@ -2,15 +2,14 @@
 // Zod validation layer for normalized messages
 // Spec §4.3, §9: Schema validation with comprehensive error reporting
 
+import type { ZodIssue } from 'zod'
+import type { Message } from '../schema/message'
 import { MessageSchema } from '../schema/message'
 
-import type { Message } from '../schema/message'
-import type { ZodIssue } from 'zod'
-
 export type ValidationError = {
-  index: number
-  fieldPath: string
-  message: string
+	index: number
+	fieldPath: string
+	message: string
 }
 
 /**
@@ -22,60 +21,60 @@ export type ValidationError = {
  * @throws Error with formatted error messages if any validation fails
  */
 export function validateNormalizedMessages(messages: unknown[]): Message[] {
-  if (!Array.isArray(messages)) {
-    throw new Error('Messages must be an array')
-  }
+	if (!Array.isArray(messages)) {
+		throw new Error('Messages must be an array')
+	}
 
-  const validatedMessages: Message[] = []
-  const errors: ValidationError[] = []
+	const validatedMessages: Message[] = []
+	const errors: ValidationError[] = []
 
-  // Process each message and collect errors (AC03: no fail-fast)
-  for (let i = 0; i < messages.length; i++) {
-    const message = messages[i]
+	// Process each message and collect errors (AC03: no fail-fast)
+	for (let i = 0; i < messages.length; i++) {
+		const message = messages[i]
 
-    // AC04: Check for snake_case fields before schema validation
-    if (
-      typeof message === 'object' &&
-      message !== null &&
-      hasSnakeCaseFields(message)
-    ) {
-      const snakeCaseFields = getSnakeCaseFields(message)
-      const fieldList = snakeCaseFields.join(', ')
-      errors.push({
-        index: i,
-        fieldPath: 'root',
-        message: `Message contains snake_case fields: ${fieldList}. Use camelCase instead.`,
-      })
-      continue
-    }
+		// AC04: Check for snake_case fields before schema validation
+		if (
+			typeof message === 'object' &&
+			message !== null &&
+			hasSnakeCaseFields(message)
+		) {
+			const snakeCaseFields = getSnakeCaseFields(message)
+			const fieldList = snakeCaseFields.join(', ')
+			errors.push({
+				index: i,
+				fieldPath: 'root',
+				message: `Message contains snake_case fields: ${fieldList}. Use camelCase instead.`,
+			})
+			continue
+		}
 
-    // Validate against schema
-    const result = MessageSchema.safeParse(message)
+		// Validate against schema
+		const result = MessageSchema.safeParse(message)
 
-    if (!result.success) {
-      // AC02: Format Zod errors with field paths
-      const formattedErrors = formatValidationErrors(i, result.error.errors)
-      errors.push({
-        index: i,
-        fieldPath: 'multiple',
-        message: formattedErrors,
-      })
-    } else {
-      validatedMessages.push(result.data as Message)
-    }
-  }
+		if (!result.success) {
+			// AC02: Format Zod errors with field paths
+			const formattedErrors = formatValidationErrors(i, result.error.errors)
+			errors.push({
+				index: i,
+				fieldPath: 'multiple',
+				message: formattedErrors,
+			})
+		} else {
+			validatedMessages.push(result.data as Message)
+		}
+	}
 
-  // If any errors occurred, throw with all collected errors (AC03)
-  if (errors.length > 0) {
-    const errorSummary = errors
-      .map((e) => `messages.${e.index}: ${e.message}`)
-      .join('\n')
-    const error = new Error(`Validation failed:\n${errorSummary}`)
-    error.name = 'ValidationError'
-    throw error
-  }
+	// If any errors occurred, throw with all collected errors (AC03)
+	if (errors.length > 0) {
+		const errorSummary = errors
+			.map((e) => `messages.${e.index}: ${e.message}`)
+			.join('\n')
+		const error = new Error(`Validation failed:\n${errorSummary}`)
+		error.name = 'ValidationError'
+		throw error
+	}
 
-  return validatedMessages
+	return validatedMessages
 }
 
 /**
@@ -86,23 +85,23 @@ export function validateNormalizedMessages(messages: unknown[]): Message[] {
  * @returns Formatted error message string
  */
 export function formatValidationErrors(
-  messageIndex: number,
-  zodErrors: ZodIssue[],
+	_messageIndex: number,
+	zodErrors: ZodIssue[],
 ): string {
-  if (!Array.isArray(zodErrors) || zodErrors.length === 0) {
-    return 'Unknown validation error'
-  }
+	if (!Array.isArray(zodErrors) || zodErrors.length === 0) {
+		return 'Unknown validation error'
+	}
 
-  const formatted = zodErrors
-    .map((error) => {
-      // Build path: ["media", "enrichment", 0, "createdAt"] -> "media.enrichment.0.createdAt"
-      const path = (error.path || []).join('.')
-      const pathPrefix = path ? `${path}: ` : ''
-      return `${pathPrefix}${error.message}`
-    })
-    .join('; ')
+	const formatted = zodErrors
+		.map((error) => {
+			// Build path: ["media", "enrichment", 0, "createdAt"] -> "media.enrichment.0.createdAt"
+			const path = (error.path || []).join('.')
+			const pathPrefix = path ? `${path}: ` : ''
+			return `${pathPrefix}${error.message}`
+		})
+		.join('; ')
 
-  return formatted
+	return formatted
 }
 
 /**
@@ -112,27 +111,27 @@ export function formatValidationErrors(
  * @returns true if any snake_case fields found
  */
 export function hasSnakeCaseFields(obj: unknown, depth = 0): boolean {
-  if (depth > 10) return false // Prevent infinite recursion
-  if (typeof obj !== 'object' || obj === null) return false
+	if (depth > 10) return false // Prevent infinite recursion
+	if (typeof obj !== 'object' || obj === null) return false
 
-  const record = obj as Record<string, unknown>
+	const record = obj as Record<string, unknown>
 
-  for (const key of Object.keys(record)) {
-    // Check if key contains underscore (snake_case indicator)
-    if (key.includes('_') && !key.startsWith('__')) {
-      return true
-    }
+	for (const key of Object.keys(record)) {
+		// Check if key contains underscore (snake_case indicator)
+		if (key.includes('_') && !key.startsWith('__')) {
+			return true
+		}
 
-    // Recursively check nested objects
-    const value = record[key]
-    if (typeof value === 'object' && value !== null) {
-      if (hasSnakeCaseFields(value, depth + 1)) {
-        return true
-      }
-    }
-  }
+		// Recursively check nested objects
+		const value = record[key]
+		if (typeof value === 'object' && value !== null) {
+			if (hasSnakeCaseFields(value, depth + 1)) {
+				return true
+			}
+		}
+	}
 
-  return false
+	return false
 }
 
 /**
@@ -141,32 +140,32 @@ export function hasSnakeCaseFields(obj: unknown, depth = 0): boolean {
  * @returns Array of field names that use snake_case
  */
 export function getSnakeCaseFields(
-  obj: unknown,
-  prefix = '',
-  depth = 0,
+	obj: unknown,
+	prefix = '',
+	depth = 0,
 ): string[] {
-  if (depth > 10) return [] // Prevent infinite recursion
-  if (typeof obj !== 'object' || obj === null) return []
+	if (depth > 10) return [] // Prevent infinite recursion
+	if (typeof obj !== 'object' || obj === null) return []
 
-  const snakeCaseFields: string[] = []
-  const record = obj as Record<string, unknown>
+	const snakeCaseFields: string[] = []
+	const record = obj as Record<string, unknown>
 
-  for (const key of Object.keys(record)) {
-    const fullPath = prefix ? `${prefix}.${key}` : key
+	for (const key of Object.keys(record)) {
+		const fullPath = prefix ? `${prefix}.${key}` : key
 
-    // Check if key contains underscore (snake_case indicator)
-    if (key.includes('_') && !key.startsWith('__')) {
-      snakeCaseFields.push(fullPath)
-    }
+		// Check if key contains underscore (snake_case indicator)
+		if (key.includes('_') && !key.startsWith('__')) {
+			snakeCaseFields.push(fullPath)
+		}
 
-    // Recursively check nested objects
-    const value = record[key]
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      snakeCaseFields.push(...getSnakeCaseFields(value, fullPath, depth + 1))
-    }
-  }
+		// Recursively check nested objects
+		const value = record[key]
+		if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+			snakeCaseFields.push(...getSnakeCaseFields(value, fullPath, depth + 1))
+		}
+	}
 
-  return snakeCaseFields
+	return snakeCaseFields
 }
 
 /**
@@ -176,9 +175,9 @@ export function getSnakeCaseFields(
  * @returns Formatted error messages with indices
  */
 export function collectValidationErrors(
-  errorList: ValidationError[],
+	errorList: ValidationError[],
 ): string[] {
-  return errorList.map(
-    (e) => `messages.${e.index}.${e.fieldPath}: ${e.message}`,
-  )
+	return errorList.map(
+		(e) => `messages.${e.index}.${e.fieldPath}: ${e.message}`,
+	)
 }

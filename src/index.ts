@@ -9,93 +9,82 @@
  * @module imessage-timeline
  */
 
-// ===== Core Types & Schemas =====
-export type {
-  Message,
-  MessageCore,
-  MessageGUID,
-  ChatId,
-  MediaMeta,
-  MediaKind,
-  MediaEnrichment,
-  MediaProvenance,
-  ReplyInfo,
-  TapbackInfo,
-  ExportEnvelope,
-} from './schema/message.js'
-
 export {
-  MediaEnrichmentSchema,
-  MediaProvenanceSchema,
-  MediaMetaSchema,
-  ReplyInfoSchema,
-  TapbackInfoSchema,
-  MessageCoreSchema,
-} from './schema/message.js'
-
+	generateConfigContent,
+	getDefaultConfigPath,
+	validateGeneratedConfig,
+} from './config/generator.js'
 // ===== Config Management =====
 export {
-  loadConfig,
-  loadConfigFile,
-  discoverConfigFile,
-  substituteEnvVars,
-  mergeConfig,
-  clearConfigCache,
-  isConfigCached,
+	clearConfigCache,
+	discoverConfigFile,
+	isConfigCached,
+	loadConfig,
+	loadConfigFile,
+	mergeConfig,
+	substituteEnvVars,
 } from './config/loader.js'
-
-export {
-  generateConfigContent,
-  validateGeneratedConfig,
-  getDefaultConfigPath,
-} from './config/generator.js'
-
 export type { Config, ConfigFormat } from './config/schema.js'
 export {
-  validateConfig,
-  validateConfigSafe,
-  DEFAULT_CONFIG,
-  CONFIG_FILE_PATTERNS,
-  detectConfigFormat,
+	CONFIG_FILE_PATTERNS,
+	DEFAULT_CONFIG,
+	detectConfigFormat,
+	validateConfig,
+	validateConfigSafe,
 } from './config/schema.js'
-
-// ===== Ingest Functions =====
-export { ingestCSV, createExportEnvelope } from './ingest/ingest-csv.js'
-export type { IngestOptions, CSVRow } from './ingest/ingest-csv.js'
-
-export { dedupAndMerge } from './ingest/dedup-merge.js'
 export type {
-  MergeStats,
-  MergeResult as IngestMergeResult,
-} from './ingest/dedup-merge.js'
-
-// ===== Utilities =====
-export {
-  detectDelta,
-  extractGuidsFromMessages,
-  logDeltaSummary,
-  getDeltaStats,
-} from './utils/delta-detection.js'
-
-export type { DeltaResult } from './utils/delta-detection.js'
-
-export { mergeEnrichments } from './utils/enrichment-merge.js'
-export type {
-  MergeOptions,
-  MergeStatistics,
-  MergeResult as EnrichmentMergeResult,
-} from './utils/enrichment-merge.js'
-
+	ApiResponse,
+	RateLimitConfig,
+	RateLimitState,
+} from './enrich/rate-limiting.js'
 // ===== Rate Limiting =====
 export {
-  createRateLimiter,
-  is5xx,
-  isRetryableStatus,
-  RateLimiter,
+	createRateLimiter,
+	is5xx,
+	isRetryableStatus,
+	RateLimiter,
 } from './enrich/rate-limiting.js'
-
 export type {
-  RateLimitConfig,
-  RateLimitState,
-  ApiResponse,
-} from './enrich/rate-limiting.js'
+	MergeResult as IngestMergeResult,
+	MergeStats,
+} from './ingest/dedup-merge.js'
+export { dedupAndMerge } from './ingest/dedup-merge.js'
+export type { CSVRow, IngestOptions } from './ingest/ingest-csv.js'
+// ===== Ingest Functions =====
+export { createExportEnvelope, ingestCSV } from './ingest/ingest-csv.js'
+// ===== Core Types & Schemas =====
+export type {
+	ChatId,
+	ExportEnvelope,
+	MediaEnrichment,
+	MediaKind,
+	MediaMeta,
+	MediaProvenance,
+	Message,
+	MessageCore,
+	MessageGUID,
+	ReplyInfo,
+	TapbackInfo,
+} from './schema/message.js'
+export {
+	MediaEnrichmentSchema,
+	MediaMetaSchema,
+	MediaProvenanceSchema,
+	MessageCoreSchema,
+	ReplyInfoSchema,
+	TapbackInfoSchema,
+} from './schema/message.js'
+export type { DeltaResult } from './utils/delta-detection.js'
+// ===== Utilities =====
+export {
+	detectDelta,
+	extractGuidsFromMessages,
+	getDeltaStats,
+	logDeltaSummary,
+} from './utils/delta-detection.js'
+export type {
+	MergeOptions,
+	MergeResult as EnrichmentMergeResult,
+	MergeStatistics,
+} from './utils/enrichment-merge.js'
+export { mergeEnrichments } from './utils/enrichment-merge.js'

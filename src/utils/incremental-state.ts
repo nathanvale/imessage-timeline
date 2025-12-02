@@ -18,9 +18,9 @@
  * - verifyConfigHash: Detect config changes between runs
  */
 
-import crypto from 'crypto'
-import { promises as fs } from 'fs'
-import path from 'path'
+import crypto from 'node:crypto'
+import { promises as fs } from 'node:fs'
+import path from 'node:path'
 
 import { humanWarn } from '#utils/human'
 import { createLogger } from '#utils/logger'
@@ -30,15 +30,15 @@ import { createLogger } from '#utils/logger'
 // ============================================================================
 
 export type EnrichmentStats = {
-  processedCount: number
-  failedCount: number
-  startTime: string
-  endTime: string
+	processedCount: number
+	failedCount: number
+	startTime: string
+	endTime: string
 }
 
 export type PipelineConfig = {
-  configHash: string
-  // Future: add API keys status, CLI flags hash, etc.
+	configHash: string
+	// Future: add API keys status, CLI flags hash, etc.
 }
 
 /**
@@ -46,23 +46,23 @@ export type PipelineConfig = {
  * Stored in .imessage-state.json at output directory root
  */
 export type IncrementalState = {
-  /** Schema version for backward compatibility */
-  version: string
+	/** Schema version for backward compatibility */
+	version: string
 
-  /** ISO 8601 UTC timestamp of last enrichment run */
-  lastEnrichedAt: string
+	/** ISO 8601 UTC timestamp of last enrichment run */
+	lastEnrichedAt: string
 
-  /** Total messages as of last run (for progress reporting) */
-  totalMessages: number
+	/** Total messages as of last run (for progress reporting) */
+	totalMessages: number
 
-  /** Array of enriched message GUIDs (for delta detection) */
-  enrichedGuids: string[]
+	/** Array of enriched message GUIDs (for delta detection) */
+	enrichedGuids: string[]
 
-  /** Pipeline configuration hash (detects config changes) */
-  pipelineConfig: PipelineConfig
+	/** Pipeline configuration hash (detects config changes) */
+	pipelineConfig: PipelineConfig
 
-  /** Optional: Stats from last enrichment run */
-  enrichmentStats: EnrichmentStats | null
+	/** Optional: Stats from last enrichment run */
+	enrichmentStats: EnrichmentStats | null
 }
 
 // ============================================================================
@@ -70,9 +70,9 @@ export type IncrementalState = {
 // ============================================================================
 
 export type CreateStateOptions = {
-  totalMessages?: number
-  enrichedGuids?: string[]
-  enrichmentStats?: EnrichmentStats | null
+	totalMessages?: number
+	enrichedGuids?: string[]
+	enrichmentStats?: EnrichmentStats | null
 }
 
 /**
@@ -82,18 +82,18 @@ export type CreateStateOptions = {
  * @returns New IncrementalState with current timestamp and config hash
  */
 export function createIncrementalState(
-  options: CreateStateOptions = {},
+	options: CreateStateOptions = {},
 ): IncrementalState {
-  return {
-    version: '1.0',
-    lastEnrichedAt: new Date().toISOString(),
-    totalMessages: options.totalMessages ?? 0,
-    enrichedGuids: options.enrichedGuids ?? [],
-    pipelineConfig: {
-      configHash: generateConfigHash(),
-    },
-    enrichmentStats: options.enrichmentStats ?? null,
-  }
+	return {
+		version: '1.0',
+		lastEnrichedAt: new Date().toISOString(),
+		totalMessages: options.totalMessages ?? 0,
+		enrichedGuids: options.enrichedGuids ?? [],
+		pipelineConfig: {
+			configHash: generateConfigHash(),
+		},
+		enrichmentStats: options.enrichmentStats ?? null,
+	}
 }
 
 /**
@@ -103,17 +103,17 @@ export function createIncrementalState(
  * @returns SHA-256 hex digest of current config
  */
 function generateConfigHash(): string {
-  // Hash config including API key presence (not the actual key)
-  const hasGeminiKey = process.env.GEMINI_API_KEY !== undefined
-  const hasFirecrawlKey = process.env.FIRECRAWL_API_KEY !== undefined
+	// Hash config including API key presence (not the actual key)
+	const hasGeminiKey = process.env.GEMINI_API_KEY !== undefined
+	const hasFirecrawlKey = process.env.FIRECRAWL_API_KEY !== undefined
 
-  const config = JSON.stringify({
-    version: '1.0',
-    // Add API key presence (not the actual key)
-    hasGeminiKey,
-    hasFirecrawlKey,
-  })
-  return crypto.createHash('sha256').update(config).digest('hex')
+	const config = JSON.stringify({
+		version: '1.0',
+		// Add API key presence (not the actual key)
+		hasGeminiKey,
+		hasFirecrawlKey,
+	})
+	return crypto.createHash('sha256').update(config).digest('hex')
 }
 
 // ============================================================================
@@ -131,19 +131,19 @@ function generateConfigHash(): string {
  * @returns Array of new GUID strings not in enriched set
  */
 export function detectNewMessages(
-  currentGuids: Set<string>,
-  state: IncrementalState,
+	currentGuids: Set<string>,
+	state: IncrementalState,
 ): string[] {
-  const enrichedSet = new Set(state.enrichedGuids)
-  const newGuids: string[] = []
+	const enrichedSet = new Set(state.enrichedGuids)
+	const newGuids: string[] = []
 
-  for (const guid of currentGuids) {
-    if (!enrichedSet.has(guid)) {
-      newGuids.push(guid)
-    }
-  }
+	for (const guid of currentGuids) {
+		if (!enrichedSet.has(guid)) {
+			newGuids.push(guid)
+		}
+	}
 
-  return newGuids
+	return newGuids
 }
 
 // ============================================================================
@@ -163,31 +163,31 @@ export function detectNewMessages(
  * @throws Error if write fails (permission, disk full, etc.)
  */
 export async function saveIncrementalState(
-  state: IncrementalState,
-  filePath: string,
+	state: IncrementalState,
+	filePath: string,
 ): Promise<void> {
-  const dir = path.dirname(filePath)
-  const tempFile = `${filePath}.${Date.now()}.tmp`
+	const dir = path.dirname(filePath)
+	const tempFile = `${filePath}.${Date.now()}.tmp`
 
-  try {
-    // Ensure parent directory exists
-    await fs.mkdir(dir, { recursive: true })
+	try {
+		// Ensure parent directory exists
+		await fs.mkdir(dir, { recursive: true })
 
-    // Write to temp file
-    const content = JSON.stringify(state, null, 2)
-    await fs.writeFile(tempFile, content, 'utf-8')
+		// Write to temp file
+		const content = JSON.stringify(state, null, 2)
+		await fs.writeFile(tempFile, content, 'utf-8')
 
-    // Atomic rename
-    await fs.rename(tempFile, filePath)
-  } catch (error) {
-    // Clean up temp file if rename failed
-    try {
-      await fs.unlink(tempFile)
-    } catch {
-      // ignore cleanup errors
-    }
-    throw error
-  }
+		// Atomic rename
+		await fs.rename(tempFile, filePath)
+	} catch (error) {
+		// Clean up temp file if rename failed
+		try {
+			await fs.unlink(tempFile)
+		} catch {
+			// ignore cleanup errors
+		}
+		throw error
+	}
 }
 
 /**
@@ -201,30 +201,30 @@ export async function saveIncrementalState(
  * @returns IncrementalState if valid, null if missing or corrupted
  */
 export async function loadIncrementalState(
-  filePath: string,
+	filePath: string,
 ): Promise<IncrementalState | null> {
-  try {
-    const content = await fs.readFile(filePath, 'utf-8')
-    const parsed = JSON.parse(content) as IncrementalState
+	try {
+		const content = await fs.readFile(filePath, 'utf-8')
+		const parsed = JSON.parse(content) as IncrementalState
 
-    // Validate schema version
-    if (parsed.version !== '1.0') {
-      const logger = createLogger('utils:incremental-state')
-      logger.warn('Unknown state version. Ignoring.', {
-        version: parsed.version,
-      })
-      return null
-    }
+		// Validate schema version
+		if (parsed.version !== '1.0') {
+			const logger = createLogger('utils:incremental-state')
+			logger.warn('Unknown state version. Ignoring.', {
+				version: parsed.version,
+			})
+			return null
+		}
 
-    return parsed
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ENOENT')) {
-      // File doesn't exist - first run
-      return null
-    }
-    // Corrupted JSON or other read error - ignore
-    return null
-  }
+		return parsed
+	} catch (error) {
+		if (error instanceof Error && error.message.includes('ENOENT')) {
+			// File doesn't exist - first run
+			return null
+		}
+		// Corrupted JSON or other read error - ignore
+		return null
+	}
 }
 
 // ============================================================================
@@ -239,10 +239,10 @@ export async function loadIncrementalState(
  * @returns true if hashes match
  */
 export function verifyConfigHash(
-  currentHash: string,
-  expectedHash: string = generateConfigHash(),
+	currentHash: string,
+	expectedHash: string = generateConfigHash(),
 ): boolean {
-  return currentHash === expectedHash
+	return currentHash === expectedHash
 }
 
 /**
@@ -255,28 +255,28 @@ export function verifyConfigHash(
  * @returns true if state is older than threshold
  */
 export function isStateOutdated(
-  state: IncrementalState,
-  daysThreshold: number = 7,
+	state: IncrementalState,
+	daysThreshold = 7,
 ): boolean {
-  const lastEnrichedTime = new Date(state.lastEnrichedAt).getTime()
-  const now = Date.now()
-  const ageMs = now - lastEnrichedTime
-  const ageDays = ageMs / (1000 * 60 * 60 * 24)
+	const lastEnrichedTime = new Date(state.lastEnrichedAt).getTime()
+	const now = Date.now()
+	const ageMs = now - lastEnrichedTime
+	const ageDays = ageMs / (1000 * 60 * 60 * 24)
 
-  if (ageDays > daysThreshold) {
-    const logger = createLogger('utils:incremental-state')
-    logger.warn('State file is old. Consider full re-enrichment.', {
-      ageDays: Math.floor(ageDays),
-      daysThreshold,
-    })
-    // Human-visible warning for tests & interactive CLI (console.warn spied in tests)
-    humanWarn(
-      `State file is old (ageDays=${Math.floor(ageDays)}, threshold=${daysThreshold}). Consider full re-enrichment.`,
-    )
-    return true
-  }
+	if (ageDays > daysThreshold) {
+		const logger = createLogger('utils:incremental-state')
+		logger.warn('State file is old. Consider full re-enrichment.', {
+			ageDays: Math.floor(ageDays),
+			daysThreshold,
+		})
+		// Human-visible warning for tests & interactive CLI (console.warn spied in tests)
+		humanWarn(
+			`State file is old (ageDays=${Math.floor(ageDays)}, threshold=${daysThreshold}). Consider full re-enrichment.`,
+		)
+		return true
+	}
 
-  return false
+	return false
 }
 
 // ============================================================================
@@ -296,25 +296,25 @@ export function isStateOutdated(
  * @param enrichmentStats - Optional enrichment stats
  */
 export function updateStateWithEnrichedGuids(
-  state: IncrementalState,
-  newGuids: string[],
-  enrichmentStats?: EnrichmentStats,
+	state: IncrementalState,
+	newGuids: string[],
+	enrichmentStats?: EnrichmentStats,
 ): void {
-  // Add new GUIDs, avoiding duplicates
-  const existingSet = new Set(state.enrichedGuids)
-  for (const guid of newGuids) {
-    if (!existingSet.has(guid)) {
-      state.enrichedGuids.push(guid)
-    }
-  }
+	// Add new GUIDs, avoiding duplicates
+	const existingSet = new Set(state.enrichedGuids)
+	for (const guid of newGuids) {
+		if (!existingSet.has(guid)) {
+			state.enrichedGuids.push(guid)
+		}
+	}
 
-  // Update timestamp
-  state.lastEnrichedAt = new Date().toISOString()
+	// Update timestamp
+	state.lastEnrichedAt = new Date().toISOString()
 
-  // Update stats if provided
-  if (enrichmentStats) {
-    state.enrichmentStats = enrichmentStats
-  }
+	// Update stats if provided
+	if (enrichmentStats) {
+		state.enrichmentStats = enrichmentStats
+	}
 }
 
 // ============================================================================
@@ -328,8 +328,6 @@ export function updateStateWithEnrichedGuids(
  * @param totalMessages - Total messages to initialize with
  * @returns Fresh IncrementalState with no enriched GUIDs
  */
-export function resetIncrementalState(
-  totalMessages: number = 0,
-): IncrementalState {
-  return createIncrementalState({ totalMessages })
+export function resetIncrementalState(totalMessages = 0): IncrementalState {
+	return createIncrementalState({ totalMessages })
 }

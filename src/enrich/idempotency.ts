@@ -13,10 +13,10 @@
  * - Force-refresh bypasses idempotency checks
  */
 
-import type { Message, MediaEnrichment } from '#schema/message'
+import type { MediaEnrichment, Message } from '#schema/message'
 
 type IdempotencyOptions = {
-  forceRefresh?: boolean
+	forceRefresh?: boolean
 }
 
 /**
@@ -27,14 +27,14 @@ type IdempotencyOptions = {
  * @returns true if enrichment with matching kind exists, false otherwise
  */
 export function shouldSkipEnrichment(
-  message: Message,
-  kind: MediaEnrichment['kind'],
+	message: Message,
+	kind: MediaEnrichment['kind'],
 ): boolean {
-  if (!message.media?.enrichment) {
-    return false
-  }
+	if (!message.media?.enrichment) {
+		return false
+	}
 
-  return message.media.enrichment.some((enrichment) => enrichment.kind === kind)
+	return message.media.enrichment.some((enrichment) => enrichment.kind === kind)
 }
 
 /**
@@ -47,29 +47,29 @@ export function shouldSkipEnrichment(
  * @returns Deduplicated array with latest enrichment per kind
  */
 export function deduplicateEnrichmentByKind(
-  enrichments: MediaEnrichment[],
+	enrichments: MediaEnrichment[],
 ): MediaEnrichment[] {
-  const kindMap = new Map<MediaEnrichment['kind'], MediaEnrichment>()
+	const kindMap = new Map<MediaEnrichment['kind'], MediaEnrichment>()
 
-  for (const enrichment of enrichments) {
-    const existing = kindMap.get(enrichment.kind)
+	for (const enrichment of enrichments) {
+		const existing = kindMap.get(enrichment.kind)
 
-    if (!existing) {
-      // First enrichment of this kind
-      kindMap.set(enrichment.kind, enrichment)
-    } else {
-      // Compare timestamps - keep the most recent
-      const existingTime = new Date(existing.createdAt).getTime()
-      const newTime = new Date(enrichment.createdAt).getTime()
+		if (!existing) {
+			// First enrichment of this kind
+			kindMap.set(enrichment.kind, enrichment)
+		} else {
+			// Compare timestamps - keep the most recent
+			const existingTime = new Date(existing.createdAt).getTime()
+			const newTime = new Date(enrichment.createdAt).getTime()
 
-      if (newTime > existingTime) {
-        kindMap.set(enrichment.kind, enrichment)
-      }
-      // If existing is more recent, keep it (no update)
-    }
-  }
+			if (newTime > existingTime) {
+				kindMap.set(enrichment.kind, enrichment)
+			}
+			// If existing is more recent, keep it (no update)
+		}
+	}
 
-  return Array.from(kindMap.values())
+	return Array.from(kindMap.values())
 }
 
 /**
@@ -87,55 +87,55 @@ export function deduplicateEnrichmentByKind(
  * @returns Updated message with enrichment added (or original if skipped)
  */
 export function addEnrichmentIdempotent(
-  message: Message,
-  enrichment: MediaEnrichment,
-  options: IdempotencyOptions = {},
+	message: Message,
+	enrichment: MediaEnrichment,
+	options: IdempotencyOptions = {},
 ): Message {
-  const { forceRefresh = false } = options
+	const { forceRefresh = false } = options
 
-  // Early return if not a media message or media is null
-  if (message.messageKind !== 'media' || !message.media) {
-    return message
-  }
+	// Early return if not a media message or media is null
+	if (message.messageKind !== 'media' || !message.media) {
+		return message
+	}
 
-  // Initialize enrichment array if missing
-  const currentEnrichments = message.media.enrichment || []
+	// Initialize enrichment array if missing
+	const currentEnrichments = message.media.enrichment || []
 
-  // Check if enrichment with same kind already exists
-  const existingIndex = currentEnrichments.findIndex(
-    (e) => e.kind === enrichment.kind,
-  )
+	// Check if enrichment with same kind already exists
+	const existingIndex = currentEnrichments.findIndex(
+		(e) => e.kind === enrichment.kind,
+	)
 
-  let updatedEnrichments: MediaEnrichment[]
+	let updatedEnrichments: MediaEnrichment[]
 
-  if (existingIndex >= 0) {
-    // Enrichment with same kind already exists
-    if (forceRefresh) {
-      // AC04: Replace existing enrichment (force-refresh mode)
-      updatedEnrichments = [
-        ...currentEnrichments.slice(0, existingIndex),
-        enrichment,
-        ...currentEnrichments.slice(existingIndex + 1),
-      ]
-    } else {
-      // AC01: Skip adding (default idempotent behavior)
-      updatedEnrichments = currentEnrichments
-    }
-  } else {
-    // New enrichment kind, add it
-    updatedEnrichments = [...currentEnrichments, enrichment]
-  }
+	if (existingIndex >= 0) {
+		// Enrichment with same kind already exists
+		if (forceRefresh) {
+			// AC04: Replace existing enrichment (force-refresh mode)
+			updatedEnrichments = [
+				...currentEnrichments.slice(0, existingIndex),
+				enrichment,
+				...currentEnrichments.slice(existingIndex + 1),
+			]
+		} else {
+			// AC01: Skip adding (default idempotent behavior)
+			updatedEnrichments = currentEnrichments
+		}
+	} else {
+		// New enrichment kind, add it
+		updatedEnrichments = [...currentEnrichments, enrichment]
+	}
 
-  // AC02: Deduplicate before returning
-  const deduped = deduplicateEnrichmentByKind(updatedEnrichments)
+	// AC02: Deduplicate before returning
+	const deduped = deduplicateEnrichmentByKind(updatedEnrichments)
 
-  return {
-    ...message,
-    media: {
-      ...message.media,
-      enrichment: deduped,
-    },
-  }
+	return {
+		...message,
+		media: {
+			...message.media,
+			enrichment: deduped,
+		},
+	}
 }
 
 /**
@@ -149,17 +149,17 @@ export function addEnrichmentIdempotent(
  * @returns Updated messages
  */
 export function addEnrichmentsIdempotent(
-  messages: Message[],
-  enrichments: Map<string, MediaEnrichment>,
-  options: IdempotencyOptions = {},
+	messages: Message[],
+	enrichments: Map<string, MediaEnrichment>,
+	options: IdempotencyOptions = {},
 ): Message[] {
-  return messages.map((message) => {
-    const enrichment = enrichments.get(message.guid)
-    if (!enrichment) {
-      return message
-    }
-    return addEnrichmentIdempotent(message, enrichment, options)
-  })
+	return messages.map((message) => {
+		const enrichment = enrichments.get(message.guid)
+		if (!enrichment) {
+			return message
+		}
+		return addEnrichmentIdempotent(message, enrichment, options)
+	})
 }
 
 /**
@@ -172,15 +172,15 @@ export function addEnrichmentsIdempotent(
  * @returns true if message has all required enrichment kinds
  */
 export function hasAllEnrichments(
-  message: Message,
-  requiredKinds: MediaEnrichment['kind'][],
+	message: Message,
+	requiredKinds: MediaEnrichment['kind'][],
 ): boolean {
-  if (!message.media?.enrichment) {
-    return false
-  }
+	if (!message.media?.enrichment) {
+		return false
+	}
 
-  const enrichedKinds = new Set(message.media.enrichment.map((e) => e.kind))
-  return requiredKinds.every((kind) => enrichedKinds.has(kind))
+	const enrichedKinds = new Set(message.media.enrichment.map((e) => e.kind))
+	return requiredKinds.every((kind) => enrichedKinds.has(kind))
 }
 
 /**
@@ -191,14 +191,14 @@ export function hasAllEnrichments(
  * @returns Enrichment if found, undefined otherwise
  */
 export function getEnrichmentByKind(
-  message: Message,
-  kind: MediaEnrichment['kind'],
+	message: Message,
+	kind: MediaEnrichment['kind'],
 ): MediaEnrichment | undefined {
-  if (!message.media?.enrichment) {
-    return undefined
-  }
+	if (!message.media?.enrichment) {
+		return undefined
+	}
 
-  return message.media.enrichment.find((e) => e.kind === kind)
+	return message.media.enrichment.find((e) => e.kind === kind)
 }
 
 /**
@@ -209,30 +209,30 @@ export function getEnrichmentByKind(
  * @returns Updated message without enrichment of specified kind
  */
 export function clearEnrichmentByKind(
-  message: Message,
-  kind: MediaEnrichment['kind'],
+	message: Message,
+	kind: MediaEnrichment['kind'],
 ): Message {
-  if (!message.media?.enrichment) {
-    return message
-  }
+	if (!message.media?.enrichment) {
+		return message
+	}
 
-  const filtered = message.media.enrichment.filter((e) => e.kind !== kind)
+	const filtered = message.media.enrichment.filter((e) => e.kind !== kind)
 
-  // If no enrichments remain, omit the enrichment field entirely
-  if (filtered.length === 0) {
-    const { enrichment: _enrichment, ...mediaWithoutEnrichment } = message.media
-    return {
-      ...message,
-      media: mediaWithoutEnrichment,
-    }
-  }
+	// If no enrichments remain, omit the enrichment field entirely
+	if (filtered.length === 0) {
+		const { enrichment: _enrichment, ...mediaWithoutEnrichment } = message.media
+		return {
+			...message,
+			media: mediaWithoutEnrichment,
+		}
+	}
 
-  // If enrichments remain, update with filtered array
-  return {
-    ...message,
-    media: {
-      ...message.media,
-      enrichment: filtered,
-    },
-  }
+	// If enrichments remain, update with filtered array
+	return {
+		...message,
+		media: {
+			...message.media,
+			enrichment: filtered,
+		},
+	}
 }

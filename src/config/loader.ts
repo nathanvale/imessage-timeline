@@ -5,8 +5,8 @@
  * Loads config from YAML/JSON files with env var substitution and precedence
  */
 
-import { constants } from 'fs'
-import { access, readFile } from 'fs/promises'
+import { constants } from 'node:fs'
+import { access, readFile } from 'node:fs/promises'
 
 import yaml from 'js-yaml'
 
@@ -31,28 +31,28 @@ let configCachePath: string | null = null
  * @returns Path to first existing config file, or null if none found
  */
 export async function discoverConfigFile(
-  baseDir: string = process.cwd(),
+	baseDir: string = process.cwd(),
 ): Promise<string | null> {
-  const fileNames = [
-    'imessage-config.yaml',
-    'imessage-config.yml',
-    'imessage-config.json',
-  ]
+	const fileNames = [
+		'imessage-config.yaml',
+		'imessage-config.yml',
+		'imessage-config.json',
+	]
 
-  for (const fileName of fileNames) {
-    const filePath = baseDir.startsWith('/')
-      ? `${baseDir}/${fileName}`
-      : `./${baseDir}/${fileName}`.replace(/\/\.\//g, '/')
+	for (const fileName of fileNames) {
+		const filePath = baseDir.startsWith('/')
+			? `${baseDir}/${fileName}`
+			: `./${baseDir}/${fileName}`.replace(/\/\.\//g, '/')
 
-    try {
-      await access(filePath, constants.R_OK)
-      return filePath
-    } catch {
-      // File doesn't exist or not readable, try next
-    }
-  }
+		try {
+			await access(filePath, constants.R_OK)
+			return filePath
+		} catch {
+			// File doesn't exist or not readable, try next
+		}
+	}
 
-  return null
+	return null
 }
 
 /**
@@ -65,33 +65,33 @@ export async function discoverConfigFile(
  * @throws Error if file cannot be read or parsed
  */
 export async function loadConfigFile(filePath: string): Promise<unknown> {
-  const content = await readFile(filePath, 'utf-8')
-  const format = detectConfigFormat(filePath)
+	const content = await readFile(filePath, 'utf-8')
+	const format = detectConfigFormat(filePath)
 
-  if (format === 'json') {
-    try {
-      return JSON.parse(content)
-    } catch (error) {
-      throw new Error(
-        `Failed to parse JSON config file ${filePath}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      )
-    }
-  } else if (format === 'yaml') {
-    try {
-      // js-yaml v4+ is safe by default - use JSON_SCHEMA for extra safety
-      return yaml.load(content, { schema: yaml.JSON_SCHEMA })
-    } catch (error) {
-      throw new Error(
-        `Failed to parse YAML config file ${filePath}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      )
-    }
-  }
+	if (format === 'json') {
+		try {
+			return JSON.parse(content)
+		} catch (error) {
+			throw new Error(
+				`Failed to parse JSON config file ${filePath}: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
+			)
+		}
+	} else if (format === 'yaml') {
+		try {
+			// js-yaml v4+ is safe by default - use JSON_SCHEMA for extra safety
+			return yaml.load(content, { schema: yaml.JSON_SCHEMA })
+		} catch (error) {
+			throw new Error(
+				`Failed to parse YAML config file ${filePath}: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
+			)
+		}
+	}
 
-  throw new Error(`Unsupported config format: ${filePath}`)
+	throw new Error(`Unsupported config format: ${filePath}`)
 }
 
 /**
@@ -110,36 +110,36 @@ export async function loadConfigFile(filePath: string): Promise<unknown> {
  * ```
  */
 export function substituteEnvVars(obj: unknown): unknown {
-  // Handle strings - replace ${VAR} patterns
-  if (typeof obj === 'string') {
-    return obj.replace(/\$\{(\w+)\}/g, (_match, envVar) => {
-      const value = process.env[envVar]
-      if (value === undefined) {
-        throw new Error(
-          `Environment variable ${envVar} is not set but referenced in config`,
-        )
-      }
-      return value
-    })
-  }
+	// Handle strings - replace ${VAR} patterns
+	if (typeof obj === 'string') {
+		return obj.replace(/\$\{(\w+)\}/g, (_match, envVar) => {
+			const value = process.env[envVar]
+			if (value === undefined) {
+				throw new Error(
+					`Environment variable ${envVar} is not set but referenced in config`,
+				)
+			}
+			return value
+		})
+	}
 
-  // Handle arrays - recursively substitute each element
-  if (Array.isArray(obj)) {
-    return obj.map(substituteEnvVars)
-  }
+	// Handle arrays - recursively substitute each element
+	if (Array.isArray(obj)) {
+		return obj.map(substituteEnvVars)
+	}
 
-  // Handle objects - recursively substitute each value
-  if (typeof obj === 'object' && obj !== null) {
-    return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [
-        key,
-        substituteEnvVars(value),
-      ]),
-    )
-  }
+	// Handle objects - recursively substitute each value
+	if (typeof obj === 'object' && obj !== null) {
+		return Object.fromEntries(
+			Object.entries(obj).map(([key, value]) => [
+				key,
+				substituteEnvVars(value),
+			]),
+		)
+	}
 
-  // Primitives (numbers, booleans, null) pass through unchanged
-  return obj
+	// Primitives (numbers, booleans, null) pass through unchanged
+	return obj
 }
 
 /**
@@ -155,48 +155,48 @@ export function substituteEnvVars(obj: unknown): unknown {
  * @returns Merged config object
  */
 export function mergeConfig(
-  fileConfig: Partial<Config>,
-  cliOptions: Partial<Config> = {},
+	fileConfig: Partial<Config>,
+	cliOptions: Partial<Config> = {},
 ): Partial<Config> {
-  // Deep merge: CLI options override file config
-  // Note: Zod schema will apply defaults for missing fields
-  const merged: Partial<Config> = {
-    ...fileConfig,
-    ...cliOptions,
-  }
+	// Deep merge: CLI options override file config
+	// Note: Zod schema will apply defaults for missing fields
+	const merged: Partial<Config> = {
+		...fileConfig,
+		...cliOptions,
+	}
 
-  // Deep merge nested objects if they exist
-  if (fileConfig.gemini || cliOptions.gemini) {
-    merged.gemini = {
-      ...fileConfig.gemini,
-      ...cliOptions.gemini,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
-  }
+	// Deep merge nested objects if they exist
+	if (fileConfig.gemini || cliOptions.gemini) {
+		merged.gemini = {
+			...fileConfig.gemini,
+			...cliOptions.gemini,
+			// biome-ignore lint/suspicious/noExplicitAny: Zod schema mismatch with spread
+		} as any
+	}
 
-  if (cliOptions.firecrawl !== undefined) {
-    merged.firecrawl = cliOptions.firecrawl
-  } else if (fileConfig.firecrawl !== undefined) {
-    merged.firecrawl = fileConfig.firecrawl
-  }
+	if (cliOptions.firecrawl !== undefined) {
+		merged.firecrawl = cliOptions.firecrawl
+	} else if (fileConfig.firecrawl !== undefined) {
+		merged.firecrawl = fileConfig.firecrawl
+	}
 
-  if (fileConfig.enrichment || cliOptions.enrichment) {
-    merged.enrichment = {
-      ...fileConfig.enrichment,
-      ...cliOptions.enrichment,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
-  }
+	if (fileConfig.enrichment || cliOptions.enrichment) {
+		merged.enrichment = {
+			...fileConfig.enrichment,
+			...cliOptions.enrichment,
+			// biome-ignore lint/suspicious/noExplicitAny: Zod schema mismatch with spread
+		} as any
+	}
 
-  if (fileConfig.render || cliOptions.render) {
-    merged.render = {
-      ...fileConfig.render,
-      ...cliOptions.render,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
-  }
+	if (fileConfig.render || cliOptions.render) {
+		merged.render = {
+			...fileConfig.render,
+			...cliOptions.render,
+			// biome-ignore lint/suspicious/noExplicitAny: Zod schema mismatch with spread
+		} as any
+	}
 
-  return merged
+	return merged
 }
 
 /**
@@ -231,58 +231,58 @@ export function mergeConfig(
  * ```
  */
 export async function loadConfig(
-  options: {
-    configPath?: string
-    cliOptions?: Partial<Config>
-    skipCache?: boolean
-  } = {},
+	options: {
+		configPath?: string
+		cliOptions?: Partial<Config>
+		skipCache?: boolean
+	} = {},
 ): Promise<Config> {
-  const { configPath, cliOptions = {}, skipCache = false } = options
+	const { configPath, cliOptions = {}, skipCache = false } = options
 
-  // CONFIG-T02-AC05: Return cached config if available
-  if (!skipCache && configCache && configCachePath === configPath) {
-    return configCache
-  }
+	// CONFIG-T02-AC05: Return cached config if available
+	if (!skipCache && configCache && configCachePath === configPath) {
+		return configCache
+	}
 
-  // 1. Discover or use provided config file path
-  const filePath = configPath || (await discoverConfigFile())
+	// 1. Discover or use provided config file path
+	const filePath = configPath || (await discoverConfigFile())
 
-  // 2. Load config from file (if exists)
-  let fileConfig: Partial<Config> = {}
-  if (filePath) {
-    try {
-      const rawConfig = await loadConfigFile(filePath)
+	// 2. Load config from file (if exists)
+	let fileConfig: Partial<Config> = {}
+	if (filePath) {
+		try {
+			const rawConfig = await loadConfigFile(filePath)
 
-      // 3. CONFIG-T02-AC03: Substitute environment variables
-      const withEnvVars = substituteEnvVars(rawConfig)
+			// 3. CONFIG-T02-AC03: Substitute environment variables
+			const withEnvVars = substituteEnvVars(rawConfig)
 
-      fileConfig = withEnvVars as Partial<Config>
-    } catch (error) {
-      throw new Error(
-        `Failed to load config from ${filePath}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      )
-    }
-  }
+			fileConfig = withEnvVars as Partial<Config>
+		} catch (error) {
+			throw new Error(
+				`Failed to load config from ${filePath}: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
+			)
+		}
+	}
 
-  // 4. CONFIG-T02-AC02: Merge with CLI options (CLI > file)
-  const merged = mergeConfig(fileConfig, cliOptions)
+	// 4. CONFIG-T02-AC02: Merge with CLI options (CLI > file)
+	const merged = mergeConfig(fileConfig, cliOptions)
 
-  // 5. CONFIG-T02-AC04: Validate with schema and apply defaults
-  try {
-    const validated = validateConfig(merged)
+	// 5. CONFIG-T02-AC04: Validate with schema and apply defaults
+	try {
+		const validated = validateConfig(merged)
 
-    // Cache the result
-    configCache = validated
-    configCachePath = configPath || null
+		// Cache the result
+		configCache = validated
+		configCachePath = configPath || null
 
-    return validated
-  } catch (error) {
-    throw new Error(
-      `Config validation failed: ${error instanceof Error ? error.message : String(error)}`,
-    )
-  }
+		return validated
+	} catch (error) {
+		throw new Error(
+			`Config validation failed: ${error instanceof Error ? error.message : String(error)}`,
+		)
+	}
 }
 
 /**
@@ -291,8 +291,8 @@ export async function loadConfig(
  * Useful for testing or when config needs to be reloaded
  */
 export function clearConfigCache(): void {
-  configCache = null
-  configCachePath = null
+	configCache = null
+	configCachePath = null
 }
 
 /**
@@ -301,5 +301,5 @@ export function clearConfigCache(): void {
  * @returns True if config is cached
  */
 export function isConfigCached(): boolean {
-  return configCache !== null
+	return configCache !== null
 }

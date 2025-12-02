@@ -20,7 +20,7 @@
  * - updateMergeStatistics: Statistics calculation
  */
 
-import { promises as fs } from 'fs'
+import { promises as fs } from 'node:fs'
 
 import type { ExportEnvelope, Message } from '#schema/message'
 
@@ -36,51 +36,51 @@ import { createLogger } from '#utils/logger'
  * Options for merge behavior
  */
 export type MergeOptions = {
-  /** Force refresh overwrites existing enrichments (default: false) */
-  forceRefresh?: boolean
+	/** Force refresh overwrites existing enrichments (default: false) */
+	forceRefresh?: boolean
 }
 
 /**
  * Statistics from merge operation
  */
 export type MergeStatistics = {
-  /** Number of messages merged (existing GUIDs updated) */
-  mergedCount: number
+	/** Number of messages merged (existing GUIDs updated) */
+	mergedCount: number
 
-  /** Number of messages added (new GUIDs) */
-  addedCount: number
+	/** Number of messages added (new GUIDs) */
+	addedCount: number
 
-  /** Number of messages with preserved enrichments */
-  preservedCount: number
+	/** Number of messages with preserved enrichments */
+	preservedCount: number
 
-  /** Total messages in result */
-  totalMessages: number
+	/** Total messages in result */
+	totalMessages: number
 
-  /** Percentage of messages that were merged */
-  mergedPercentage?: number
+	/** Percentage of messages that were merged */
+	mergedPercentage?: number
 
-  /** Percentage of messages that were added */
-  addedPercentage?: number
+	/** Percentage of messages that were added */
+	addedPercentage?: number
 }
 
 /**
  * Result of merge operation
  */
 export type MergeResult = {
-  /** Merged messages with enrichments preserved/updated */
-  messages: Message[]
+	/** Merged messages with enrichments preserved/updated */
+	messages: Message[]
 
-  /** Statistics about the merge operation */
-  statistics: MergeStatistics
+	/** Statistics about the merge operation */
+	statistics: MergeStatistics
 
-  /** Count of messages merged */
-  mergedCount: number
+	/** Count of messages merged */
+	mergedCount: number
 
-  /** Count of messages added */
-  addedCount: number
+	/** Count of messages added */
+	addedCount: number
 
-  /** Count of messages with preserved enrichments */
-  preservedCount: number
+	/** Count of messages with preserved enrichments */
+	preservedCount: number
 }
 
 // ============================================================================
@@ -100,26 +100,26 @@ export type MergeResult = {
  * @returns ExportEnvelope if valid, null if missing or corrupted
  */
 export async function loadExistingEnriched(
-  filePath: string,
+	filePath: string,
 ): Promise<ExportEnvelope | null> {
-  try {
-    const content = await fs.readFile(filePath, 'utf-8')
-    const parsed = JSON.parse(content) as ExportEnvelope
+	try {
+		const content = await fs.readFile(filePath, 'utf-8')
+		const parsed = JSON.parse(content) as ExportEnvelope
 
-    // Validate basic structure
-    if (!parsed.messages || !Array.isArray(parsed.messages)) {
-      return null
-    }
+		// Validate basic structure
+		if (!parsed.messages || !Array.isArray(parsed.messages)) {
+			return null
+		}
 
-    return parsed
-  } catch (error) {
-    // File doesn't exist or is corrupted
-    if (error instanceof Error && error.message.includes('ENOENT')) {
-      return null
-    }
-    // JSON parse error or other read error
-    return null
-  }
+		return parsed
+	} catch (error) {
+		// File doesn't exist or is corrupted
+		if (error instanceof Error && error.message.includes('ENOENT')) {
+			return null
+		}
+		// JSON parse error or other read error
+		return null
+	}
 }
 
 // ============================================================================
@@ -142,77 +142,77 @@ export async function loadExistingEnriched(
  * @returns MergeResult with merged messages and statistics
  */
 export function mergeEnrichments(
-  existingMessages: Message[],
-  newMessages: Message[],
-  options: MergeOptions = {},
+	existingMessages: Message[],
+	newMessages: Message[],
+	options: MergeOptions = {},
 ): MergeResult {
-  // Build index of existing messages by GUID
-  const existingByGuid = new Map<string, Message>()
-  for (const msg of existingMessages) {
-    existingByGuid.set(msg.guid, msg)
-  }
+	// Build index of existing messages by GUID
+	const existingByGuid = new Map<string, Message>()
+	for (const msg of existingMessages) {
+		existingByGuid.set(msg.guid, msg)
+	}
 
-  // Track merge statistics
-  let mergedCount = 0
-  let addedCount = 0
-  let preservedCount = 0
+	// Track merge statistics
+	let mergedCount = 0
+	let addedCount = 0
+	let preservedCount = 0
 
-  // Track GUIDs we've processed to avoid duplicates
-  const processedGuids = new Set<string>()
+	// Track GUIDs we've processed to avoid duplicates
+	const processedGuids = new Set<string>()
 
-  // Result messages with merged enrichments
-  const resultMessages: Message[] = []
+	// Result messages with merged enrichments
+	const resultMessages: Message[] = []
 
-  // Process new messages
-  for (const newMsg of newMessages) {
-    const existing = existingByGuid.get(newMsg.guid)
+	// Process new messages
+	for (const newMsg of newMessages) {
+		const existing = existingByGuid.get(newMsg.guid)
 
-    if (existing) {
-      // Message exists: merge enrichments
-      if (!processedGuids.has(newMsg.guid)) {
-        const merged = mergeMessageEnrichments(existing, newMsg, options)
-        resultMessages.push(merged)
-        mergedCount++
+		if (existing) {
+			// Message exists: merge enrichments
+			if (!processedGuids.has(newMsg.guid)) {
+				const merged = mergeMessageEnrichments(existing, newMsg, options)
+				resultMessages.push(merged)
+				mergedCount++
 
-        // Count preserved enrichments
-        if (
-          merged.messageKind === 'media' &&
-          merged.media?.enrichment &&
-          merged.media.enrichment.length > 0
-        ) {
-          preservedCount++
-        }
+				// Count preserved enrichments
+				if (
+					merged.messageKind === 'media' &&
+					merged.media?.enrichment &&
+					merged.media.enrichment.length > 0
+				) {
+					preservedCount++
+				}
 
-        processedGuids.add(newMsg.guid)
-      }
-    } else {
-      // New message: add to result
-      if (!processedGuids.has(newMsg.guid)) {
-        resultMessages.push(newMsg)
-        addedCount++
-        processedGuids.add(newMsg.guid)
-      }
-    }
-  }
+				processedGuids.add(newMsg.guid)
+			}
+		} else {
+			// New message: add to result
+			if (!processedGuids.has(newMsg.guid)) {
+				resultMessages.push(newMsg)
+				addedCount++
+				processedGuids.add(newMsg.guid)
+			}
+		}
+	}
 
-  const totalMessages = resultMessages.length
+	const totalMessages = resultMessages.length
 
-  return {
-    messages: resultMessages,
-    statistics: {
-      mergedCount,
-      addedCount,
-      preservedCount,
-      totalMessages,
-      mergedPercentage:
-        totalMessages > 0 ? (mergedCount / totalMessages) * 100 : 0,
-      addedPercentage:
-        totalMessages > 0 ? (addedCount / totalMessages) * 100 : 0,
-    },
-    mergedCount,
-    addedCount,
-    preservedCount,
-  }
+	return {
+		messages: resultMessages,
+		statistics: {
+			mergedCount,
+			addedCount,
+			preservedCount,
+			totalMessages,
+			mergedPercentage:
+				totalMessages > 0 ? (mergedCount / totalMessages) * 100 : 0,
+			addedPercentage:
+				totalMessages > 0 ? (addedCount / totalMessages) * 100 : 0,
+		},
+		mergedCount,
+		addedCount,
+		preservedCount,
+	}
 }
 
 /**
@@ -231,51 +231,51 @@ export function mergeEnrichments(
  * @returns Merged message with preserved enrichments
  */
 function mergeMessageEnrichments(
-  existing: Message,
-  newMsg: Message,
-  options: MergeOptions,
+	existing: Message,
+	newMsg: Message,
+	options: MergeOptions,
 ): Message {
-  // If not media message, just return existing (no enrichment to merge)
-  if (existing.messageKind !== 'media' || !existing.media) {
-    return existing
-  }
+	// If not media message, just return existing (no enrichment to merge)
+	if (existing.messageKind !== 'media' || !existing.media) {
+		return existing
+	}
 
-  // If no new enrichments, keep existing as-is
-  if (!newMsg.media?.enrichment || newMsg.media.enrichment.length === 0) {
-    return existing
-  }
+	// If no new enrichments, keep existing as-is
+	if (!newMsg.media?.enrichment || newMsg.media.enrichment.length === 0) {
+		return existing
+	}
 
-  // If forceRefresh, use all new enrichments
-  if (options.forceRefresh) {
-    return {
-      ...existing,
-      media: {
-        ...existing.media,
-        enrichment: newMsg.media.enrichment,
-      },
-    }
-  }
+	// If forceRefresh, use all new enrichments
+	if (options.forceRefresh) {
+		return {
+			...existing,
+			media: {
+				...existing.media,
+				enrichment: newMsg.media.enrichment,
+			},
+		}
+	}
 
-  // Otherwise: preserve existing, append new for different kinds
-  const existingEnrichment = existing.media.enrichment ?? []
-  const newEnrichment = newMsg.media.enrichment ?? []
+	// Otherwise: preserve existing, append new for different kinds
+	const existingEnrichment = existing.media.enrichment ?? []
+	const newEnrichment = newMsg.media.enrichment ?? []
 
-  // Build set of existing enrichment kinds
-  const existingKinds = new Set(existingEnrichment.map((e) => e.kind))
+	// Build set of existing enrichment kinds
+	const existingKinds = new Set(existingEnrichment.map((e) => e.kind))
 
-  // Only add new enrichments for kinds not already present
-  const mergedEnrichment = [
-    ...existingEnrichment,
-    ...newEnrichment.filter((e) => !existingKinds.has(e.kind)),
-  ]
+	// Only add new enrichments for kinds not already present
+	const mergedEnrichment = [
+		...existingEnrichment,
+		...newEnrichment.filter((e) => !existingKinds.has(e.kind)),
+	]
 
-  return {
-    ...existing,
-    media: {
-      ...existing.media,
-      enrichment: mergedEnrichment,
-    },
-  }
+	return {
+		...existing,
+		media: {
+			...existing.media,
+			enrichment: mergedEnrichment,
+		},
+	}
 }
 
 // ============================================================================
@@ -291,13 +291,13 @@ function mergeMessageEnrichments(
  * @returns Updated statistics with percentages
  */
 export function updateMergeStatistics(stats: MergeStatistics): MergeStatistics {
-  const total = stats.totalMessages
+	const total = stats.totalMessages
 
-  return {
-    ...stats,
-    mergedPercentage: total > 0 ? (stats.mergedCount / total) * 100 : 0,
-    addedPercentage: total > 0 ? (stats.addedCount / total) * 100 : 0,
-  }
+	return {
+		...stats,
+		mergedPercentage: total > 0 ? (stats.mergedCount / total) * 100 : 0,
+		addedPercentage: total > 0 ? (stats.addedCount / total) * 100 : 0,
+	}
 }
 
 // ============================================================================
@@ -316,9 +316,9 @@ export function updateMergeStatistics(stats: MergeStatistics): MergeStatistics {
  * @throws Error if source file can't be read
  */
 export async function backupEnrichedJson(filePath: string): Promise<void> {
-  const backupPath = `${filePath}.backup`
-  const content = await fs.readFile(filePath, 'utf-8')
-  await fs.writeFile(backupPath, content, 'utf-8')
+	const backupPath = `${filePath}.backup`
+	const content = await fs.readFile(filePath, 'utf-8')
+	await fs.writeFile(backupPath, content, 'utf-8')
 }
 
 // ============================================================================
@@ -333,29 +333,29 @@ export async function backupEnrichedJson(filePath: string): Promise<void> {
  * @returns Complete MergeResult
  */
 export function createEnrichmentMergeResult(
-  messages: Message[],
-  options: {
-    mergedCount: number
-    addedCount: number
-    preservedCount: number
-  },
+	messages: Message[],
+	options: {
+		mergedCount: number
+		addedCount: number
+		preservedCount: number
+	},
 ): MergeResult {
-  return {
-    messages,
-    statistics: {
-      mergedCount: options.mergedCount,
-      addedCount: options.addedCount,
-      preservedCount: options.preservedCount,
-      totalMessages: messages.length,
-      mergedPercentage:
-        messages.length > 0 ? (options.mergedCount / messages.length) * 100 : 0,
-      addedPercentage:
-        messages.length > 0 ? (options.addedCount / messages.length) * 100 : 0,
-    },
-    mergedCount: options.mergedCount,
-    addedCount: options.addedCount,
-    preservedCount: options.preservedCount,
-  }
+	return {
+		messages,
+		statistics: {
+			mergedCount: options.mergedCount,
+			addedCount: options.addedCount,
+			preservedCount: options.preservedCount,
+			totalMessages: messages.length,
+			mergedPercentage:
+				messages.length > 0 ? (options.mergedCount / messages.length) * 100 : 0,
+			addedPercentage:
+				messages.length > 0 ? (options.addedCount / messages.length) * 100 : 0,
+		},
+		mergedCount: options.mergedCount,
+		addedCount: options.addedCount,
+		preservedCount: options.preservedCount,
+	}
 }
 
 // ============================================================================
@@ -373,24 +373,24 @@ export function createEnrichmentMergeResult(
  * @param result - MergeResult to summarize
  */
 export function logMergeSummary(result: MergeResult): void {
-  const { mergedCount, addedCount, preservedCount } = result
-  const logger = createLogger('utils:enrichment-merge')
+	const { mergedCount, addedCount, preservedCount } = result
+	const logger = createLogger('utils:enrichment-merge')
 
-  if (mergedCount > 0) {
-    logger.info('Merged existing messages with new enrichments', {
-      mergedCount,
-    })
-  }
+	if (mergedCount > 0) {
+		logger.info('Merged existing messages with new enrichments', {
+			mergedCount,
+		})
+	}
 
-  if (addedCount > 0) {
-    logger.info('Added new messages to enriched.json', { addedCount })
-  }
+	if (addedCount > 0) {
+		logger.info('Added new messages to enriched.json', { addedCount })
+	}
 
-  if (preservedCount > 0) {
-    logger.info('Preserved enrichments from prior run', { preservedCount })
-  }
+	if (preservedCount > 0) {
+		logger.info('Preserved enrichments from prior run', { preservedCount })
+	}
 
-  if (mergedCount === 0 && addedCount === 0) {
-    logger.info('No new enrichments to merge')
-  }
+	if (mergedCount === 0 && addedCount === 0) {
+		logger.info('No new enrichments to merge')
+	}
 }

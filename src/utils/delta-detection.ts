@@ -19,13 +19,11 @@
  * - logDeltaSummary: Human-readable delta report
  */
 
-import { loadIncrementalState, detectNewMessages } from './incremental-state'
-
 import type { Message } from '#schema/message'
-import type { IncrementalState } from './incremental-state'
-
 import { humanInfo } from '#utils/human'
 import { createLogger } from '#utils/logger'
+import type { IncrementalState } from './incremental-state'
+import { detectNewMessages, loadIncrementalState } from './incremental-state'
 
 // ============================================================================
 // Types (AC01-AC05)
@@ -43,23 +41,23 @@ import { createLogger } from '#utils/logger'
  * - state: Loaded or created state for update after enrichment
  */
 export type DeltaResult = {
-  /** GUIDs of messages to enrich (new since last run) */
-  newGuids: string[]
+	/** GUIDs of messages to enrich (new since last run) */
+	newGuids: string[]
 
-  /** Total messages in normalized dataset */
-  totalMessages: number
+	/** Total messages in normalized dataset */
+	totalMessages: number
 
-  /** Count of previously enriched messages */
-  previousEnrichedCount: number
+	/** Count of previously enriched messages */
+	previousEnrichedCount: number
 
-  /** Number of new messages found in delta */
-  newCount: number
+	/** Number of new messages found in delta */
+	newCount: number
 
-  /** true if no prior state file found */
-  isFirstRun: boolean
+	/** true if no prior state file found */
+	isFirstRun: boolean
 
-  /** IncrementalState to update and save after enrichment */
-  state: IncrementalState
+	/** IncrementalState to update and save after enrichment */
+	state: IncrementalState
 }
 
 // ============================================================================
@@ -78,9 +76,9 @@ export type DeltaResult = {
  * @returns IncrementalState if found and valid, null if missing or corrupted
  */
 async function loadPreviousState(
-  stateFilePath: string,
+	stateFilePath: string,
 ): Promise<IncrementalState | null> {
-  return loadIncrementalState(stateFilePath)
+	return loadIncrementalState(stateFilePath)
 }
 
 // ============================================================================
@@ -96,11 +94,11 @@ async function loadPreviousState(
  * @returns Set of unique message GUIDs
  */
 export function extractGuidsFromMessages(messages: Message[]): Set<string> {
-  const guids = new Set<string>()
-  for (const msg of messages) {
-    guids.add(msg.guid)
-  }
-  return guids
+	const guids = new Set<string>()
+	for (const msg of messages) {
+		guids.add(msg.guid)
+	}
+	return guids
 }
 
 /**
@@ -117,16 +115,16 @@ export function extractGuidsFromMessages(messages: Message[]): Set<string> {
  * @returns New GUIDs not in previous state
  */
 function computeDelta(
-  currentGuids: Set<string>,
-  previousState: IncrementalState | null,
+	currentGuids: Set<string>,
+	previousState: IncrementalState | null,
 ): string[] {
-  if (!previousState) {
-    // First run: all current messages are "new"
-    return Array.from(currentGuids)
-  }
+	if (!previousState) {
+		// First run: all current messages are "new"
+		return Array.from(currentGuids)
+	}
 
-  // Use existing delta detection from incremental-state module
-  return detectNewMessages(currentGuids, previousState)
+	// Use existing delta detection from incremental-state module
+	return detectNewMessages(currentGuids, previousState)
 }
 
 // ============================================================================
@@ -145,34 +143,34 @@ function computeDelta(
  * @param result - DeltaResult to summarize
  */
 export function logDeltaSummary(result: DeltaResult): void {
-  const logger = createLogger('utils:delta-detection')
-  const newCount = result.newCount
-  const totalCount = result.totalMessages
-  const previousCount = result.previousEnrichedCount
+	const logger = createLogger('utils:delta-detection')
+	const newCount = result.newCount
+	const totalCount = result.totalMessages
+	const previousCount = result.previousEnrichedCount
 
-  // Log delta summary (AC05)
-  if (result.isFirstRun) {
-    // Structured log (machine consumption)
-    logger.info('First enrichment run', { totalMessages: totalCount })
-    // Human-friendly console output retained for tests & CLI UX
-    // Format expected by tests: contains both 'First enrichment run' and '<N> messages'
-    humanInfo(`First enrichment run: ${totalCount} messages`)
-  } else {
-    const percentNew = totalCount > 0 ? (newCount / totalCount) * 100 : 0
-    // Structured log
-    logger.info('Delta detected', {
-      newMessages: newCount,
-      percentNew,
-      totalMessages: totalCount,
-      previouslyEnriched: previousCount,
-    })
-    // Human-readable lines expected by tests
-    // Includes phrases: 'Delta detected', '<X> new messages', '<Y.Y%>' and 'Previously enriched: <N>'
-    humanInfo(
-      `Delta detected: ${newCount} new messages (${percentNew.toFixed(1)}%) of ${totalCount} total messages`,
-    )
-    humanInfo(`Previously enriched: ${previousCount}`)
-  }
+	// Log delta summary (AC05)
+	if (result.isFirstRun) {
+		// Structured log (machine consumption)
+		logger.info('First enrichment run', { totalMessages: totalCount })
+		// Human-friendly console output retained for tests & CLI UX
+		// Format expected by tests: contains both 'First enrichment run' and '<N> messages'
+		humanInfo(`First enrichment run: ${totalCount} messages`)
+	} else {
+		const percentNew = totalCount > 0 ? (newCount / totalCount) * 100 : 0
+		// Structured log
+		logger.info('Delta detected', {
+			newMessages: newCount,
+			percentNew,
+			totalMessages: totalCount,
+			previouslyEnriched: previousCount,
+		})
+		// Human-readable lines expected by tests
+		// Includes phrases: 'Delta detected', '<X> new messages', '<Y.Y%>' and 'Previously enriched: <N>'
+		humanInfo(
+			`Delta detected: ${newCount} new messages (${percentNew.toFixed(1)}%) of ${totalCount} total messages`,
+		)
+		humanInfo(`Previously enriched: ${previousCount}`)
+	}
 }
 
 // ============================================================================
@@ -199,40 +197,40 @@ export function logDeltaSummary(result: DeltaResult): void {
  * @throws Error if state file can't be read (permission denied, etc.)
  */
 export async function detectDelta(
-  messages: Message[],
-  stateFilePath: string,
+	messages: Message[],
+	stateFilePath: string,
 ): Promise<DeltaResult> {
-  // AC01 + AC04: Load previous state (null if missing)
-  const previousState = await loadPreviousState(stateFilePath)
-  const isFirstRun = previousState === null
+	// AC01 + AC04: Load previous state (null if missing)
+	const previousState = await loadPreviousState(stateFilePath)
+	const isFirstRun = previousState === null
 
-  // AC02 + AC03: Extract current GUIDs and compute delta
-  const currentGuids = extractGuidsFromMessages(messages)
-  const newGuids = computeDelta(currentGuids, previousState)
+	// AC02 + AC03: Extract current GUIDs and compute delta
+	const currentGuids = extractGuidsFromMessages(messages)
+	const newGuids = computeDelta(currentGuids, previousState)
 
-  // Build result
-  const result: DeltaResult = {
-    newGuids,
-    totalMessages: messages.length,
-    previousEnrichedCount: previousState?.enrichedGuids.length ?? 0,
-    newCount: newGuids.length,
-    isFirstRun,
-    state: previousState ?? {
-      version: '1.0',
-      lastEnrichedAt: new Date().toISOString(),
-      totalMessages: messages.length,
-      enrichedGuids: [],
-      pipelineConfig: {
-        configHash: '',
-      },
-      enrichmentStats: null,
-    },
-  }
+	// Build result
+	const result: DeltaResult = {
+		newGuids,
+		totalMessages: messages.length,
+		previousEnrichedCount: previousState?.enrichedGuids.length ?? 0,
+		newCount: newGuids.length,
+		isFirstRun,
+		state: previousState ?? {
+			version: '1.0',
+			lastEnrichedAt: new Date().toISOString(),
+			totalMessages: messages.length,
+			enrichedGuids: [],
+			pipelineConfig: {
+				configHash: '',
+			},
+			enrichmentStats: null,
+		},
+	}
 
-  // AC05: Log summary
-  logDeltaSummary(result)
+	// AC05: Log summary
+	logDeltaSummary(result)
 
-  return result
+	return result
 }
 
 // ============================================================================
@@ -251,21 +249,21 @@ export async function detectDelta(
  * @returns Statistics object with counts and percentages
  */
 export function getDeltaStats(result: DeltaResult): {
-  total: number
-  new: number
-  previous: number
-  percentNew: number
-  percentPrevious: number
+	total: number
+	new: number
+	previous: number
+	percentNew: number
+	percentPrevious: number
 } {
-  const total = result.totalMessages
-  const newCount = result.newCount
-  const previousCount = result.previousEnrichedCount
+	const total = result.totalMessages
+	const newCount = result.newCount
+	const previousCount = result.previousEnrichedCount
 
-  return {
-    total,
-    new: newCount,
-    previous: previousCount,
-    percentNew: total > 0 ? (newCount / total) * 100 : 0,
-    percentPrevious: total > 0 ? (previousCount / total) * 100 : 0,
-  }
+	return {
+		total,
+		new: newCount,
+		previous: previousCount,
+		percentNew: total > 0 ? (newCount / total) * 100 : 0,
+		percentPrevious: total > 0 ? (previousCount / total) * 100 : 0,
+	}
 }

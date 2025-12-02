@@ -40,11 +40,11 @@ jobs:
         run: echo "Pre-mode not active; skipping alpha snapshot." && exit 0
       - name: Standard CI Env
         uses: ./.github/actions/standard-ci-env
-      - name: Setup pnpm toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
       - name: Install dependencies
         if: steps.pre.outputs.active == 'true'
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Alpha snapshot version + publish
         if: steps.pre.outputs.active == 'true'
         shell: bash
