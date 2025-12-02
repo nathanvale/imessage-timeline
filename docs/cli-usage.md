@@ -33,11 +33,11 @@ Once installed globally or used via `pnpm dlx`, the CLI is available as
 
 ```sh
 # Global install (optional)
-pnpm add -g chatline
+pnpm add -g /chatline
 chatline --help
 
 # One-off execution without global install (when published)
-pnpm dlx chatline --help
+pnpm dlx /chatline --help
 ```
 
 ## Common flags (examples)

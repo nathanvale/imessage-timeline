@@ -69,10 +69,10 @@ pnpm test
 
 ```bash
 # Via npm
-npm install -g chatline
+npm install -g /chatline
 
 # Via pnpm
-pnpm add -g chatline
+pnpm add -g /chatline
 ```
 
 ---
@@ -219,7 +219,7 @@ mkdir imessage-analysis
 cd imessage-analysis
 
 # Install chatline
-pnpm add chatline
+pnpm add /chatline
 
 # Setup environment variables
 cat > .env << EOF
@@ -799,7 +799,7 @@ You can extend enrichment with custom providers:
 
 ```typescript
 // custom-provider.ts
-import type { MediaEnrichment } from 'chatline'
+import type { MediaEnrichment } from '@nathanvale/chatline'
 
 export async function enrichWithCustomAPI(
   mediaPath: string,
@@ -825,7 +825,7 @@ export async function enrichWithCustomAPI(
 Then integrate in your workflow:
 
 ```typescript
-import { renderMessages } from 'chatline'
+import { renderMessages } from '@nathanvale/chatline'
 import { enrichWithCustomAPI } from './custom-provider'
 
 // Load normalized messages

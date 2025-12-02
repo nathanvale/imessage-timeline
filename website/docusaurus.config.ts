@@ -24,7 +24,7 @@ const config: Config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'nathanvale', // Usually your GitHub org/user name.
-  projectName: 'chatline', // Usually your repo name.
+  projectName: '@nathanvale/chatline', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -120,7 +120,7 @@ const config: Config = {
             },
             {
               label: 'npm Package',
-              href: 'https://www.npmjs.com/package/chatline',
+              href: 'https://www.npmjs.com/package/@nathanvale/chatline',
             },
           ],
         },

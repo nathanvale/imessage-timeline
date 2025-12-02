@@ -283,7 +283,7 @@ Add JSON export format for timeline rendering
 
 ```markdown
 ---
-'chatline': minor
+'@nathanvale/chatline': minor
 ---
 
 Add JSON export format for timeline rendering
@@ -437,7 +437,7 @@ Changesets are stored in `.changeset/` directory:
 
 ```markdown
 ---
-'chatline': minor
+'@nathanvale/chatline': minor
 ---
 
 Add JSON export format for timeline rendering. This allows users to export
@@ -757,7 +757,7 @@ steps:
     npm view chatline version
     # Should show: 0.1.0
 
-    npm install chatline@latest
+    npm install /chatline@latest
     # Should install new version
     ```
 
@@ -1054,7 +1054,7 @@ export default {
 
 ```markdown
 ---
-'chatline': minor
+'@nathanvale/chatline': minor
 ---
 
 Add JSON export format for timeline rendering. This allows users to export

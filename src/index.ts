@@ -3,7 +3,7 @@
  *
  * This package can be used both as:
  * 1. CLI tool: `npx chatline --help`
- * 2. Library: `import { loadConfig, ingestCSV } from 'chatline'`
+ * 2. Library: `import { loadConfig, ingestCSV } from '@nathanvale/chatline'`
  *
  * @packageDocumentation
  * @module chatline
