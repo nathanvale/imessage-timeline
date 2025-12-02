@@ -2,7 +2,7 @@
 
 **Project**: iMessage Timeline Refactor **Status**: ✅ 100% Complete (30/30
 tasks) **Implementation Period**: October 15-19, 2025 **Repository**:
-`/Users/nathanvale/code/imessage-timeline`
+`/Users/nathanvale/code/chatline`
 
 ## Quick Links
 
@@ -21,7 +21,7 @@ tasks) **Implementation Period**: October 15-19, 2025 **Repository**:
 
 | File                                                                        | Purpose                                    | Lines | Tests       |
 | --------------------------------------------------------------------------- | ------------------------------------------ | ----- | ----------- |
-| [`src/schema/message.ts`](../../../imessage-timeline/src/schema/message.ts) | Unified Message schema with Zod validation | ~250  | N/A (types) |
+| [`src/schema/message.ts`](../../../chatline/src/schema/message.ts) | Unified Message schema with Zod validation | ~250  | N/A (types) |
 
 **Key Features**: Discriminated union on `messageKind`, `superRefine` for
 cross-field validation, full TypeScript types
@@ -32,10 +32,10 @@ cross-field validation, full TypeScript types
 
 | File                                                                                                            | Purpose                     | Lines | Tests |
 | --------------------------------------------------------------------------------------------------------------- | --------------------------- | ----- | ----- |
-| [`src/ingest/ingest-csv.ts`](../../../imessage-timeline/src/ingest/ingest-csv.ts)                               | iMazing CSV parser          | ~200  | 27    |
-| [`src/ingest/ingest-db.ts`](../../../imessage-timeline/src/ingest/ingest-db.ts)                                 | Messages.app DB exporter    | ~180  | 23    |
-| [`src/ingest/link-replies-and-tapbacks.ts`](../../../imessage-timeline/src/ingest/link-replies-and-tapbacks.ts) | Reply/tapback linking logic | ~220  | 23    |
-| [`src/ingest/dedup-merge.ts`](../../../imessage-timeline/src/ingest/dedup-merge.ts)                             | Cross-source deduplication  | ~250  | 30    |
+| [`src/ingest/ingest-csv.ts`](../../../chatline/src/ingest/ingest-csv.ts)                               | iMazing CSV parser          | ~200  | 27    |
+| [`src/ingest/ingest-db.ts`](../../../chatline/src/ingest/ingest-db.ts)                                 | Messages.app DB exporter    | ~180  | 23    |
+| [`src/ingest/link-replies-and-tapbacks.ts`](../../../chatline/src/ingest/link-replies-and-tapbacks.ts) | Reply/tapback linking logic | ~220  | 23    |
+| [`src/ingest/dedup-merge.ts`](../../../chatline/src/ingest/dedup-merge.ts)                             | Cross-source deduplication  | ~250  | 30    |
 
 **Key Features**: Part GUID generation (`p:<index>/<guid>`), heuristic linking
 with confidence scoring, content-based deduplication
@@ -46,9 +46,9 @@ with confidence scoring, content-based deduplication
 
 | File                                                                                                      | Purpose                          | Lines | Tests |
 | --------------------------------------------------------------------------------------------------------- | -------------------------------- | ----- | ----- |
-| [`src/normalize/date-converters.ts`](../../../imessage-timeline/src/normalize/date-converters.ts)         | Apple epoch + CSV UTC → ISO 8601 | ~150  | 339   |
-| [`src/normalize/path-validator.ts`](../../../imessage-timeline/src/normalize/path-validator.ts)           | Absolute path enforcement        | ~120  | 25    |
-| [`src/normalize/validate-normalized.ts`](../../../imessage-timeline/src/normalize/validate-normalized.ts) | Zod validation layer             | ~100  | 26    |
+| [`src/normalize/date-converters.ts`](../../../chatline/src/normalize/date-converters.ts)         | Apple epoch + CSV UTC → ISO 8601 | ~150  | 339   |
+| [`src/normalize/path-validator.ts`](../../../chatline/src/normalize/path-validator.ts)           | Absolute path enforcement        | ~120  | 25    |
+| [`src/normalize/validate-normalized.ts`](../../../chatline/src/normalize/validate-normalized.ts) | Zod validation layer             | ~100  | 26    |
 
 **Key Features**: DST/leap second handling, multi-root path resolution, batch
 validation with error collection
@@ -59,14 +59,14 @@ validation with error collection
 
 | File                                                                                                | Purpose                            | Lines | Tests |
 | --------------------------------------------------------------------------------------------------- | ---------------------------------- | ----- | ----- |
-| [`src/enrich/image-analysis.ts`](../../../imessage-timeline/src/enrich/image-analysis.ts)           | HEIC/TIFF → JPG + Gemini Vision    | ~180  | 32    |
-| [`src/enrich/audio-transcription.ts`](../../../imessage-timeline/src/enrich/audio-transcription.ts) | Gemini Audio API transcription     | ~150  | 41    |
-| [`src/enrich/pdf-video-handling.ts`](../../../imessage-timeline/src/enrich/pdf-video-handling.ts)   | PDF summary + video metadata       | ~140  | 44    |
-| [`src/enrich/link-enrichment.ts`](../../../imessage-timeline/src/enrich/link-enrichment.ts)         | Firecrawl + social media fallbacks | ~280  | 88    |
-| [`src/enrich/idempotency.ts`](../../../imessage-timeline/src/enrich/idempotency.ts)                 | Skip enrichment if exists          | ~130  | 30    |
-| [`src/enrich/checkpoint.ts`](../../../imessage-timeline/src/enrich/checkpoint.ts)                   | State persistence + resume logic   | ~180  | 29    |
-| [`src/enrich/rate-limiting.ts`](../../../imessage-timeline/src/enrich/rate-limiting.ts)             | Delays, backoff, circuit breaker   | ~200  | 76    |
-| [`src/enrich/index.ts`](../../../imessage-timeline/src/enrich/index.ts)                             | Enrichment orchestrator            | ~120  | 36    |
+| [`src/enrich/image-analysis.ts`](../../../chatline/src/enrich/image-analysis.ts)           | HEIC/TIFF → JPG + Gemini Vision    | ~180  | 32    |
+| [`src/enrich/audio-transcription.ts`](../../../chatline/src/enrich/audio-transcription.ts) | Gemini Audio API transcription     | ~150  | 41    |
+| [`src/enrich/pdf-video-handling.ts`](../../../chatline/src/enrich/pdf-video-handling.ts)   | PDF summary + video metadata       | ~140  | 44    |
+| [`src/enrich/link-enrichment.ts`](../../../chatline/src/enrich/link-enrichment.ts)         | Firecrawl + social media fallbacks | ~280  | 88    |
+| [`src/enrich/idempotency.ts`](../../../chatline/src/enrich/idempotency.ts)                 | Skip enrichment if exists          | ~130  | 30    |
+| [`src/enrich/checkpoint.ts`](../../../chatline/src/enrich/checkpoint.ts)                   | State persistence + resume logic   | ~180  | 29    |
+| [`src/enrich/rate-limiting.ts`](../../../chatline/src/enrich/rate-limiting.ts)             | Delays, backoff, circuit breaker   | ~200  | 76    |
+| [`src/enrich/index.ts`](../../../chatline/src/enrich/index.ts)                             | Enrichment orchestrator            | ~120  | 36    |
 
 **Key Features**: Preview caching (≥90% quality), speaker labels,
 YouTube/Spotify/Twitter/Instagram providers, exponential backoff with jitter,
@@ -78,10 +78,10 @@ config hash verification
 
 | File                                                                                              | Purpose                         | Lines | Tests |
 | ------------------------------------------------------------------------------------------------- | ------------------------------- | ----- | ----- |
-| [`src/render/grouping.ts`](../../../imessage-timeline/src/render/grouping.ts)                     | Date + time-of-day grouping     | ~150  | 30    |
-| [`src/render/reply-rendering.ts`](../../../imessage-timeline/src/render/reply-rendering.ts)       | Nested replies + tapback emojis | ~180  | 37    |
-| [`src/render/embeds-blockquotes.ts`](../../../imessage-timeline/src/render/embeds-blockquotes.ts) | Images, transcriptions, links   | ~200  | 56    |
-| [`src/render/index.ts`](../../../imessage-timeline/src/render/index.ts)                           | Render pipeline orchestrator    | ~140  | 31    |
+| [`src/render/grouping.ts`](../../../chatline/src/render/grouping.ts)                     | Date + time-of-day grouping     | ~150  | 30    |
+| [`src/render/reply-rendering.ts`](../../../chatline/src/render/reply-rendering.ts)       | Nested replies + tapback emojis | ~180  | 37    |
+| [`src/render/embeds-blockquotes.ts`](../../../chatline/src/render/embeds-blockquotes.ts) | Images, transcriptions, links   | ~200  | 56    |
+| [`src/render/index.ts`](../../../chatline/src/render/index.ts)                           | Render pipeline orchestrator    | ~140  | 31    |
 
 **Key Features**: Obsidian `![[path]]` syntax, emoji mapping (❤️😍😂‼️❓👎),
 circular reference prevention, deterministic sorting with SHA-256 hashing
@@ -92,14 +92,14 @@ circular reference prevention, deterministic sorting with SHA-256 hashing
 
 | File                                                                                                                      | Purpose                  | Lines | Tests |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ----- | ----- |
-| [`tests/vitest/vitest-setup.ts`](../../../imessage-timeline/tests/vitest/vitest-setup.ts)                                 | Global test setup        | ~20   | N/A   |
-| [`tests/helpers/mock-providers.ts`](../../../imessage-timeline/tests/helpers/mock-providers.ts)                           | AI service mocks         | ~250  | N/A   |
-| [`tests/helpers/fixture-loaders.ts`](../../../imessage-timeline/tests/helpers/fixture-loaders.ts)                         | Test data factories      | ~280  | N/A   |
-| [`tests/helpers/schema-assertions.ts`](../../../imessage-timeline/tests/helpers/schema-assertions.ts)                     | Validation helpers       | ~300  | N/A   |
-| [`tests/helpers/test-data-builders.ts`](../../../imessage-timeline/tests/helpers/test-data-builders.ts)                   | Fluent MessageBuilder    | ~280  | N/A   |
-| [`tests/helpers/index.ts`](../../../imessage-timeline/tests/helpers/index.ts)                                             | Main export file         | ~15   | N/A   |
-| [`tests/helpers/__tests__/test-helpers.test.ts`](../../../imessage-timeline/tests/helpers/__tests__/test-helpers.test.ts) | Helper utilities tests   | ~200  | 33    |
-| [`tests/helpers/README.md`](../../../imessage-timeline/tests/helpers/README.md)                                           | Comprehensive test guide | ~850  | N/A   |
+| [`tests/vitest/vitest-setup.ts`](../../../chatline/tests/vitest/vitest-setup.ts)                                 | Global test setup        | ~20   | N/A   |
+| [`tests/helpers/mock-providers.ts`](../../../chatline/tests/helpers/mock-providers.ts)                           | AI service mocks         | ~250  | N/A   |
+| [`tests/helpers/fixture-loaders.ts`](../../../chatline/tests/helpers/fixture-loaders.ts)                         | Test data factories      | ~280  | N/A   |
+| [`tests/helpers/schema-assertions.ts`](../../../chatline/tests/helpers/schema-assertions.ts)                     | Validation helpers       | ~300  | N/A   |
+| [`tests/helpers/test-data-builders.ts`](../../../chatline/tests/helpers/test-data-builders.ts)                   | Fluent MessageBuilder    | ~280  | N/A   |
+| [`tests/helpers/index.ts`](../../../chatline/tests/helpers/index.ts)                                             | Main export file         | ~15   | N/A   |
+| [`tests/helpers/__tests__/test-helpers.test.ts`](../../../chatline/tests/helpers/__tests__/test-helpers.test.ts) | Helper utilities tests   | ~200  | 33    |
+| [`tests/helpers/README.md`](../../../chatline/tests/helpers/README.md)                                           | Comprehensive test guide | ~850  | N/A   |
 
 **Key Features**: 8 mock provider factories, fixture loaders with type safety,
 fluent builder API, comprehensive assertions, 33 dedicated tests
@@ -110,9 +110,9 @@ fluent builder API, comprehensive assertions, 33 dedicated tests
 
 | File                                                              | Purpose                    |
 | ----------------------------------------------------------------- | -------------------------- |
-| [`vitest.config.ts`](../../../imessage-timeline/vitest.config.ts) | Test runner configuration  |
-| [`tsconfig.json`](../../../imessage-timeline/tsconfig.json)       | TypeScript compiler config |
-| [`package.json`](../../../imessage-timeline/package.json)         | Dependencies + scripts     |
+| [`vitest.config.ts`](../../../chatline/vitest.config.ts) | Test runner configuration  |
+| [`tsconfig.json`](../../../chatline/tsconfig.json)       | TypeScript compiler config |
+| [`package.json`](../../../chatline/package.json)         | Dependencies + scripts     |
 
 **Test Scripts Added**:
 
@@ -270,7 +270,7 @@ links).
 
 - **[Full Refactor Report](./imessage-pipeline-refactor-report.md)** - Original
   plan + implementation notes
-- **[Test Helpers README](../../../imessage-timeline/tests/helpers/README.md)** -
+- **[Test Helpers README](../../../chatline/tests/helpers/README.md)** -
   Complete testing guide
 - **[Task State JSON](./imessage-pipeline-task-state.json)** - Machine-readable
   progress

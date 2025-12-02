@@ -1,7 +1,7 @@
 # NPM Automation Token Setup Guide
 
 > **TL;DR:** Use granular automation tokens with read/write permissions for
-> `imessage-timeline` only.
+> `chatline` only.
 
 ## Why Automation Tokens?
 
@@ -35,7 +35,7 @@ Choose: **Automation**
 **Package permissions:**
 
 - Select: "Read and write"
-- Package: `imessage-timeline`
+- Package: `chatline`
 
 **IP Allowlist:** Leave empty (GitHub Actions IPs rotate)
 
@@ -53,7 +53,7 @@ Format: `npm_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
 ### 6. Add to GitHub Secrets
 
 1. Go to:
-   `https://github.com/nathanvale/imessage-timeline/settings/secrets/actions`
+   `https://github.com/nathanvale/chatline/settings/secrets/actions`
 2. Click "New repository secret"
 3. Name: `NPM_TOKEN`
 4. Value: Paste the token
@@ -100,7 +100,7 @@ Next time you merge a "Version Packages" PR, it will use this token to publish.
 **Solution:**
 
 1. Check token has "Read and write" permission
-2. Verify package name is `imessage-timeline`
+2. Verify package name is `chatline`
 3. Make sure you're an owner/maintainer of the package
 
 ### "401 Unauthorized" Error

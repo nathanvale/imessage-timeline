@@ -3,7 +3,7 @@
 ## Overview
 
 This document provides comprehensive guidance on distributing
-**imessage-timeline** as both a **CLI tool** and a **library package**. It
+**chatline** as both a **CLI tool** and a **library package**. It
 synthesizes research from official TypeScript and Node.js documentation to
 ensure best practices for dual-mode packages.
 
@@ -29,20 +29,20 @@ The package provides **two distinct entry points**:
 1. **CLI Entry Point**: Executable binary for command-line usage
    - **Field**: `bin`
    - **Target**: `./dist/cli.js`
-   - **Usage**: `npx imessage-timeline` or `imessage-timeline` (when installed
+   - **Usage**: `npx chatline` or `chatline` (when installed
      globally)
 
 2. **Library Entry Point**: Module exports for programmatic usage
    - **Fields**: `main`, `exports`, `types`
    - **Target**: `./dist/index.js` (runtime), `./dist/index.d.ts` (types)
-   - **Usage**: `import { loadConfig } from 'imessage-timeline'`
+   - **Usage**: `import { loadConfig } from 'chatline'`
 
 ### Current Configuration Analysis
 
 ```json
 {
   "bin": {
-    "imessage-timeline": "./dist/cli.js"
+    "chatline": "./dist/cli.js"
   },
   "exports": {
     ".": {
@@ -52,7 +52,7 @@ The package provides **two distinct entry points**:
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
-  "name": "imessage-timeline",
+  "name": "chatline",
   "type": "module",
   "types": "./dist/index.d.ts"
 }
@@ -210,7 +210,7 @@ entry file for maximum compatibility.
 ```json
 {
   "bin": {
-    "imessage-timeline": "./dist/cli.js"
+    "chatline": "./dist/cli.js"
   }
 }
 ```
@@ -229,7 +229,7 @@ entry file for maximum compatibility.
 ```json
 {
   "bin": {
-    "imessage-timeline": "./dist/cli.js",
+    "chatline": "./dist/cli.js",
     "imt": "./dist/cli.js"
   }
 }
@@ -386,7 +386,7 @@ package name:
 
 ```typescript
 // Inside src/some-module.ts
-import { loadConfig } from 'imessage-timeline'
+import { loadConfig } from 'chatline'
 ```
 
 Instead of relative imports:
@@ -454,11 +454,11 @@ import { loadConfig } from '../config/loader.js'
 
 ```typescript
 /**
- * Public API for imessage-timeline library
+ * Public API for chatline library
  *
  * This package can be used both as:
- * 1. CLI tool: `npx imessage-timeline --help`
- * 2. Library: `import { loadConfig } from 'imessage-timeline'`
+ * 1. CLI tool: `npx chatline --help`
+ * 2. Library: `import { loadConfig } from 'chatline'`
  */
 
 // Export only public APIs
@@ -525,14 +525,14 @@ bun src/cli.ts --help
 node dist/cli.js --help
 
 # As installed package
-npx imessage-timeline --help
+npx chatline --help
 ```
 
 ### 2. Test Library Import
 
 ```typescript
 // test-library-import.ts
-import { loadConfig } from 'imessage-timeline'
+import { loadConfig } from 'chatline'
 
 const config = loadConfig('path/to/config.yaml')
 console.log('Config loaded:', config)
@@ -548,9 +548,9 @@ bun test-library-import.ts
 
 ```bash
 # Ensure only exported paths work
-node -e "import('imessage-timeline').then(console.log)"           # ✅ Should work
-node -e "import('imessage-timeline/config').then(console.log)"    # ❌ Should fail (not exported)
-node -e "import('imessage-timeline/package.json').then(console.log)" # ✅ Should work (explicitly exported)
+node -e "import('chatline').then(console.log)"           # ✅ Should work
+node -e "import('chatline/config').then(console.log)"    # ❌ Should fail (not exported)
+node -e "import('chatline/package.json').then(console.log)" # ✅ Should work (explicitly exported)
 ```
 
 ---
@@ -586,14 +586,14 @@ node -e "import('imessage-timeline/package.json').then(console.log)" # ✅ Shoul
 
 5. **Exports Validation**:
    ```bash
-   node --input-type=module -e "import('imessage-timeline').then(m => console.log(Object.keys(m)))"
+   node --input-type=module -e "import('chatline').then(m => console.log(Object.keys(m)))"
    ```
 
 ### Package.json Final Check
 
 ```json
 {
-  "bin": { "imessage-timeline": "./dist/cli.js" },
+  "bin": { "chatline": "./dist/cli.js" },
   "engines": { "node": ">=22.20" },
   "exports": {
     ".": {
@@ -605,7 +605,7 @@ node -e "import('imessage-timeline/package.json').then(console.log)" # ✅ Shoul
 
   "files": ["dist/**", "README.md", "LICENSE"],
   "main": "./dist/index.js",
-  "name": "imessage-timeline",
+  "name": "chatline",
   "type": "module",
 
   "types": "./dist/index.d.ts",
@@ -620,7 +620,7 @@ node -e "import('imessage-timeline/package.json').then(console.log)" # ✅ Shoul
 
 ### Issue 1: CLI Not Executable After Install
 
-**Symptom**: `command not found: imessage-timeline` after `npm install -g`
+**Symptom**: `command not found: chatline` after `npm install -g`
 
 **Solution**:
 
@@ -645,7 +645,7 @@ node -e "import('imessage-timeline/package.json').then(console.log)" # ✅ Shoul
 
 ### Issue 3: TypeScript Types Not Found
 
-**Symptom**: `Could not find a declaration file for module 'imessage-timeline'`
+**Symptom**: `Could not find a declaration file for module 'chatline'`
 
 **Solution**:
 
@@ -664,7 +664,7 @@ node -e "import('imessage-timeline/package.json').then(console.log)" # ✅ Shoul
 
 1. Use `exports` field to restrict paths
 2. Do NOT include `"./internal/*"` in exports
-3. Test with: `node -e "import('imessage-timeline/internal/file.js')"`
+3. Test with: `node -e "import('chatline/internal/file.js')"`
    - Should throw `ERR_PACKAGE_PATH_NOT_EXPORTED`
 
 ---

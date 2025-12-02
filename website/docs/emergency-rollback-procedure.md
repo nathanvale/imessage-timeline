@@ -21,7 +21,7 @@ action:
 ## Quick Start
 
 1. Go to:
-   https://github.com/nathanvale/imessage-timeline/actions/workflows/emergency-rollback.yml
+   https://github.com/nathanvale/chatline/actions/workflows/emergency-rollback.yml
 2. Click "Run workflow"
 3. Fill in:
    - **Version:** The broken version (e.g., `1.2.3`)
@@ -47,7 +47,7 @@ action:
 When they try to install the bad version:
 
 ```
-npm WARN deprecated imessage-timeline@1.2.3: This version has critical issues. Please upgrade.
+npm WARN deprecated chatline@1.2.3: This version has critical issues. Please upgrade.
 ```
 
 ### 2. Fix the Issue
@@ -107,7 +107,7 @@ npm WARN deprecated imessage-timeline@1.2.3: This version has critical issues. P
 **To unpublish:**
 
 ```bash
-npm unpublish imessage-timeline@1.2.3
+npm unpublish chatline@1.2.3
 ```
 
 **WARNING:** This breaks projects that depend on this exact version. Use
@@ -121,7 +121,7 @@ deprecate instead whenever possible.
 
 - Check spelling
 - Verify version was actually published
-- Check npm registry: `npm view imessage-timeline versions`
+- Check npm registry: `npm view chatline versions`
 
 ### "401 Unauthorized"
 
@@ -132,7 +132,7 @@ deprecate instead whenever possible.
 
 - You don't have permission to deprecate
 - Must be package maintainer/owner
-- Check: `npm owner ls imessage-timeline`
+- Check: `npm owner ls chatline`
 
 ---
 

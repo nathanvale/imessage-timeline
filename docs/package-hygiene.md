@@ -1,7 +1,7 @@
 # Package Hygiene & Metadata Quality
 
 This guide documents the metadata, packaging rules, and validation checks that
-keep `imessage-timeline` high-quality, predictable, and easy to consume.
+keep `chatline` high-quality, predictable, and easy to consume.
 
 ## Objectives
 

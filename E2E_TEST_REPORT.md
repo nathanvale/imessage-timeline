@@ -40,7 +40,7 @@
 {
   "changesets": [],
   "initialVersions": {
-    "imessage-timeline": "0.0.1"
+    "chatline": "0.0.1"
   },
   "mode": "pre",
   "tag": "next"

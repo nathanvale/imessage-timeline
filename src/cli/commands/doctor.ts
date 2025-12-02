@@ -68,7 +68,7 @@ export async function executeDoctor(
 		pass: Boolean(foundConfig),
 		message: foundConfig
 			? `Found: ${foundConfig}`
-			: 'Not found (run: imessage-timeline init)',
+			: 'Not found (run: chatline init)',
 	})
 
 	// Check 4: API Keys
@@ -153,7 +153,7 @@ export async function executeDoctor(
 		humanInfo('\n💡 Recommendations:')
 		failures.forEach((check) => {
 			if (check.name === 'Config file') {
-				humanInfo('   • Run: imessage-timeline init')
+				humanInfo('   • Run: chatline init')
 			} else if (check.name === 'GEMINI_API_KEY') {
 				humanInfo(
 					'   • Get API key from: https://ai.google.dev/tutorials/setup',

@@ -52,8 +52,8 @@ pnpm dev render-markdown --input enriched.json --output-dir ./timeline
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/imessage-timeline.git
-cd imessage-timeline
+git clone https://github.com/yourusername/chatline.git
+cd chatline
 
 # Install dependencies
 pnpm install
@@ -69,10 +69,10 @@ pnpm test
 
 ```bash
 # Via npm
-npm install -g imessage-timeline
+npm install -g chatline
 
 # Via pnpm
-pnpm add -g imessage-timeline
+pnpm add -g chatline
 ```
 
 ---
@@ -218,8 +218,8 @@ This example demonstrates processing 3 months of iMessage history.
 mkdir imessage-analysis
 cd imessage-analysis
 
-# Install imessage-timeline
-pnpm add imessage-timeline
+# Install chatline
+pnpm add chatline
 
 # Setup environment variables
 cat > .env << EOF
@@ -231,7 +231,7 @@ EOF
 #### 3. Run Ingest Stage
 
 ```bash
-pnpm imessage-timeline ingest-csv \
+pnpm chatline ingest-csv \
   --input melanie-messages.csv \
   --output ingested.json \
   --attachment-roots ~/Library/Messages/Attachments
@@ -250,7 +250,7 @@ pnpm imessage-timeline ingest-csv \
 #### 4. Run Normalize-Link Stage
 
 ```bash
-pnpm imessage-timeline normalize-link \
+pnpm chatline normalize-link \
   --input ingested.json \
   --output normalized.json \
   --verbose
@@ -270,7 +270,7 @@ pnpm imessage-timeline normalize-link \
 #### 5. Run Enrich-AI Stage
 
 ```bash
-pnpm imessage-timeline enrich-ai \
+pnpm chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --checkpoint-interval 50 \
@@ -301,7 +301,7 @@ command with `--resume` to continue from the last checkpoint.
 #### 6. Run Render-Markdown Stage
 
 ```bash
-pnpm imessage-timeline render-markdown \
+pnpm chatline render-markdown \
   --input enriched.json \
   --output-dir ./timeline \
   --date-range 2024-10-01:2024-12-31
@@ -406,7 +406,7 @@ Import messages from iMazing CSV export.
 **Syntax**:
 
 ```bash
-imessage-timeline ingest-csv [options]
+chatline ingest-csv [options]
 ```
 
 **Options**:
@@ -421,7 +421,7 @@ imessage-timeline ingest-csv [options]
 **Example**:
 
 ```bash
-imessage-timeline ingest-csv \
+chatline ingest-csv \
   --input ~/Desktop/export.csv \
   --output ./data/ingested.json \
   --attachment-roots ~/Library/Messages/Attachments /Volumes/Backup/attachments \
@@ -464,7 +464,7 @@ Import messages from macOS Messages.app database.
 **Syntax**:
 
 ```bash
-imessage-timeline ingest-db [options]
+chatline ingest-db [options]
 ```
 
 **Options**:
@@ -480,7 +480,7 @@ imessage-timeline ingest-db [options]
 **Example**:
 
 ```bash
-imessage-timeline ingest-db \
+chatline ingest-db \
   --db-path ~/Library/Messages/chat.db \
   --output ./data/ingested-db.json \
   --contact "+61412345678" \
@@ -499,7 +499,7 @@ Deduplicate messages and link replies/tapbacks.
 **Syntax**:
 
 ```bash
-imessage-timeline normalize-link [options]
+chatline normalize-link [options]
 ```
 
 **Options**:
@@ -516,7 +516,7 @@ imessage-timeline normalize-link [options]
 **Example (single source)**:
 
 ```bash
-imessage-timeline normalize-link \
+chatline normalize-link \
   --input ingested.json \
   --output normalized.json
 ```
@@ -524,7 +524,7 @@ imessage-timeline normalize-link \
 **Example (merge CSV + DB)**:
 
 ```bash
-imessage-timeline normalize-link \
+chatline normalize-link \
   --merge-csv-db \
   --csv-input ingested-csv.json \
   --db-input ingested-db.json \
@@ -571,7 +571,7 @@ Add AI-powered analysis to media messages.
 **Syntax**:
 
 ```bash
-imessage-timeline enrich-ai [options]
+chatline enrich-ai [options]
 ```
 
 **Options**:
@@ -594,7 +594,7 @@ imessage-timeline enrich-ai [options]
 **Example (standard run)**:
 
 ```bash
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --checkpoint-interval 50 \
@@ -604,7 +604,7 @@ imessage-timeline enrich-ai \
 **Example (resume after interruption)**:
 
 ```bash
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --resume
@@ -613,7 +613,7 @@ imessage-timeline enrich-ai \
 **Example (disable certain enrichments)**:
 
 ```bash
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input normalized.json \
   --output enriched.json \
   --enable-audio false \
@@ -635,7 +635,7 @@ Generate Obsidian-compatible markdown timeline files.
 **Syntax**:
 
 ```bash
-imessage-timeline render-markdown [options]
+chatline render-markdown [options]
 ```
 
 **Options**:
@@ -652,7 +652,7 @@ imessage-timeline render-markdown [options]
 **Example**:
 
 ```bash
-imessage-timeline render-markdown \
+chatline render-markdown \
   --input enriched.json \
   --output-dir ./timeline \
   --date-range 2024-10-01:2024-10-31
@@ -732,23 +732,23 @@ for contact_pair in "${CONTACTS[@]}"; do
   echo "Processing $name ($contact)..."
 
   # Ingest from DB
-  imessage-timeline ingest-db \
+  chatline ingest-db \
     --contact "$contact" \
     --output "data/${name}-ingested.json"
 
   # Normalize
-  imessage-timeline normalize-link \
+  chatline normalize-link \
     --input "data/${name}-ingested.json" \
     --output "data/${name}-normalized.json"
 
   # Enrich
-  imessage-timeline enrich-ai \
+  chatline enrich-ai \
     --input "data/${name}-normalized.json" \
     --output "data/${name}-enriched.json" \
     --checkpoint-interval 50
 
   # Render
-  imessage-timeline render-markdown \
+  chatline render-markdown \
     --input "data/${name}-enriched.json" \
     --output-dir "timeline/${name}"
 
@@ -768,24 +768,24 @@ DATE=$(date +%Y-%m-%d)
 YESTERDAY=$(date -d "yesterday" +%Y-%m-%d)
 
 # Export yesterday's messages only
-imessage-timeline ingest-db \
+chatline ingest-db \
   --date-range "$YESTERDAY:$DATE" \
   --output "data/daily-$DATE.json"
 
 # Merge with existing normalized data
-imessage-timeline normalize-link \
+chatline normalize-link \
   --merge-csv-db \
   --csv-input "data/normalized-master.json" \
   --db-input "data/daily-$DATE.json" \
   --output "data/normalized-master.json"
 
 # Enrich new messages only (idempotency handles duplicates)
-imessage-timeline enrich-ai \
+chatline enrich-ai \
   --input "data/normalized-master.json" \
   --output "data/enriched-master.json"
 
 # Render updated timeline
-imessage-timeline render-markdown \
+chatline render-markdown \
   --input "data/enriched-master.json" \
   --output-dir "./timeline" \
   --date-range "$YESTERDAY:$DATE"
@@ -799,7 +799,7 @@ You can extend enrichment with custom providers:
 
 ```typescript
 // custom-provider.ts
-import type { MediaEnrichment } from 'imessage-timeline'
+import type { MediaEnrichment } from 'chatline'
 
 export async function enrichWithCustomAPI(
   mediaPath: string,
@@ -825,7 +825,7 @@ export async function enrichWithCustomAPI(
 Then integrate in your workflow:
 
 ```typescript
-import { renderMessages } from 'imessage-timeline'
+import { renderMessages } from 'chatline'
 import { enrichWithCustomAPI } from './custom-provider'
 
 // Load normalized messages
