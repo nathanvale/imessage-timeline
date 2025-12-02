@@ -26,6 +26,11 @@ jobs:
         uses: ./.github/actions/setup-bun
         with:
           registry-url: 'https://registry.npmjs.org'
+      - name: Setup Node for npm publish
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'  # Node 24 includes npm 11.6+ (required for OIDC trusted publishing)
+          registry-url: 'https://registry.npmjs.org/'
       - run: bun install --frozen-lockfile
       - name: Code quality (safe fixes)
         run: bun run quality-check:ci

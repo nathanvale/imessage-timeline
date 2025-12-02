@@ -34,15 +34,23 @@ jobs:
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
 
+      - name: Setup Node for npm publish
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'  # Node 24 includes npm 11.6+ (required for OIDC trusted publishing)
+          registry-url: 'https://registry.npmjs.org/'
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Publish readiness
         run: |
+          echo "npm version: $(npm --version)"
           if [ -z "${NPM_TOKEN:-}" ]; then
-            echo "::warning::NPM_TOKEN not set; publish will be skipped. Configure repository secret 'NPM_TOKEN' to enable publishing."
+            echo "::notice::No NPM_TOKEN; will use OIDC trusted publishing if configured."
+            echo "::notice::First publish requires NPM_TOKEN. After that, configure trusted publisher at npmjs.com → package Settings."
           else
-            echo "::notice::NPM_TOKEN detected; publish enabled."
+            echo "::notice::NPM_TOKEN detected; using token auth (fallback mode)."
           fi
 
       - name: Disable git hooks for CI commits
