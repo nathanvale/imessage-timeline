@@ -89,6 +89,9 @@
 		"timeline",
 		"ai-enrichment"
 	],
+	"overrides": {
+		"express": "4.22.0"
+	},
 	"license": "MIT",
 	"lint-staged": {
 		"*.{ts,tsx,js,jsx,mts,cts,json}": [
