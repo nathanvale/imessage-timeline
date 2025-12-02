@@ -99,7 +99,7 @@
 		]
 	},
 	"main": "./dist/index.js",
-	"name": "chatline",
+	"name": "@nathanvale/chatline",
 	"publishConfig": {
 		"access": "public",
 		"provenance": true
