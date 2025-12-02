@@ -70,8 +70,10 @@ Three workflows handle releases. Pick based on your intent:
 1. Create feature branch, add changesets: `bunx changeset`
 2. Push and merge PR to `main`
 3. Bot creates "Version Packages" PR automatically
-4. Review and merge "Version Packages" PR
-5. Bot publishes to npm (uses OIDC trusted publishing)
+4. Auto-merge enabled by `version-packages-auto-merge.yml` workflow
+5. **If PR is stuck**: Required status checks may block merge (see [Troubleshooting](#troubleshooting))
+6. Review and merge "Version Packages" PR (or manually merge if blocked)
+7. Bot publishes to npm (uses OIDC trusted publishing)
 
 **When to use**: Default workflow for stable releases. Fully automated after initial changeset.
 
@@ -79,6 +81,8 @@ Three workflows handle releases. Pick based on your intent:
 - Runs quality checks (`bun run quality-check:ci`) before versioning
 - Uses Node 24 for npm 11.6+ (OIDC support)
 - Skips publish if no NPM_TOKEN and OIDC not configured (safety guard)
+- Companion workflow `version-packages-auto-merge.yml` enables auto-merge on bot PRs
+- **Known limitation**: Bot PRs don't trigger required status check workflows - see Troubleshooting
 
 ---
 
@@ -170,7 +174,8 @@ Troubleshooting
 - “Checks pending” on automation PRs: run `bun run lint` and `bun run test:ci` locally before pushing.
 - Quick status: `git status --short --branch`; auth: `gh auth status`, `npm whoami`.
 - “PR checks never started” (automation PRs): push an empty commit to trigger PR workflows: `git commit --allow-empty -m "chore: trigger checks" && git push`.
-- “Repo quality failed on .changeset/pre.json”: format locally and push: `bunx biome format .changeset/pre.json` (or `npx biome format …`), then commit and push.
+- "Repo quality failed on .changeset/pre.json": format locally and push: `bunx biome format .changeset/pre.json` (or `npx biome format …`), then commit and push.
+- "Version Packages" PR stuck (no status checks running): Bot PRs don't trigger workflows due to GitHub security. The `version-packages-auto-merge.yml` workflow enables auto-merge, but required status checks (`commitlint`, `lint`, `All checks passed`) still block the merge. **Solutions**: (1) Remove these checks from branch protection for bot PRs, (2) Manually approve: `gh pr review 51 --approve && gh pr merge 51 --squash`, or (3) Use a PAT with `workflow` scope instead of `GITHUB_TOKEN` in changesets-manage-publish.yml.
 
 Suggested defaults
 - Day-to-day: stay in `next` pre-mode; use `changeset version` + `changeset publish --tag next`.
