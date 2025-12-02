@@ -269,7 +269,7 @@ import { enrichAiCommand } from './cli/commands/enrich-ai'
 const program = new Command()
 
 program
-  .name('chatline')
+  .name('@nathanvale/chatline')
   .version('1.0.0')
   .description('Extract, transform, and analyze iMessage conversations')
   .option('-c, --config <path>', 'config file path', 'imessage-config.json')

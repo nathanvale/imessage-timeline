@@ -25,7 +25,7 @@ iMessage Timeline is a command-line tool and library that:
 ### Installation
 
 ```bash
-npm install -g chatline
+npm install -g /chatline
 ```
 
 ### Basic Usage

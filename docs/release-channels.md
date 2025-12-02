@@ -139,19 +139,19 @@ future enhancement: add SBOM generation step into channel workflow for parity
 Downstream project wanting latest beta:
 
 ```
-pnpm add chatline@beta
+pnpm add /chatline@beta
 ```
 
 For rc testing:
 
 ```
-pnpm add chatline@rc
+pnpm add /chatline@rc
 ```
 
 For canary snapshot pin:
 
 ```
-pnpm add chatline@1.2.0-canary-20250101123045
+pnpm add /chatline@1.2.0-canary-20250101123045
 ```
 
 ## Risks & Mitigations

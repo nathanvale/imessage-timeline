@@ -1,4 +1,4 @@
-# iMessage Timeline
+# Chatline
 
 > Extract, enrich, and render your iMessage conversations into beautiful,
 > AI-powered markdown timelines with full conversation threading and deep media
@@ -165,7 +165,7 @@ Pass arguments after `--` when using `pnpm dev` or `pnpm cli`.
 #### Install Global CLI
 
 ```bash
-npm install -g chatline
+npm install -g /chatline
 ```
 
 This installs the `chatline` command globally, available from any
@@ -233,11 +233,11 @@ Output: A `timeline/` directory with daily markdown files, one per date.
 Install as a library in your Node.js/TypeScript project:
 
 ```bash
-npm install chatline
+npm install /chatline
 # or
-pnpm add chatline
+pnpm add /chatline
 # or
-yarn add chatline
+yarn add /chatline
 ```
 
 ### TypeScript/JavaScript Import
@@ -264,13 +264,13 @@ import {
   type Message,
   type Config,
   type DeltaResult,
-} from 'chatline'
+} from '@nathanvale/chatline'
 ```
 
 ### Example: Load and Validate Config
 
 ```typescript
-import { loadConfig, validateConfig } from 'chatline'
+import { loadConfig, validateConfig } from '@nathanvale/chatline'
 
 // Load config with auto-discovery (looks for imessage-config.yaml/json)
 const config = await loadConfig()
@@ -288,8 +288,8 @@ const validated = validateConfig({
 ### Example: Ingest Messages from CSV
 
 ```typescript
-import { ingestCSV, createExportEnvelope } from 'chatline'
-import type { Message, IngestOptions } from 'chatline'
+import { ingestCSV, createExportEnvelope } from '@nathanvale/chatline'
+import type { Message, IngestOptions } from '@nathanvale/chatline'
 
 const options: IngestOptions = {
   attachmentDir: '/path/to/attachments',
@@ -306,8 +306,8 @@ console.log(`Ingested ${envelope.totalMessages} messages`)
 ### Example: Deduplicate and Merge Sources
 
 ```typescript
-import { dedupAndMerge } from 'chatline'
-import type { Message } from 'chatline'
+import { dedupAndMerge } from '@nathanvale/chatline'
+import type { Message } from '@nathanvale/chatline'
 
 const csvMessages: Message[] = ingestCSV('./messages.csv', options)
 const dbMessages: Message[] = JSON.parse(
@@ -324,8 +324,8 @@ console.log(`Deduped ${result.stats.duplicatesRemoved} duplicates`)
 ### Example: Detect New Messages (Incremental Processing)
 
 ```typescript
-import { detectDelta, extractGuidsFromMessages } from 'chatline'
-import type { Message, DeltaResult } from 'chatline'
+import { detectDelta, extractGuidsFromMessages } from '@nathanvale/chatline'
+import type { Message, DeltaResult } from '@nathanvale/chatline'
 
 const currentMessages: Message[] = loadCurrentMessages()
 const previousMessages: Message[] = loadPreviousCheckpoint()
@@ -344,8 +344,8 @@ await enrichOnlyNew(newGuids)
 ### Example: Rate Limiting for API Calls
 
 ```typescript
-import { createRateLimiter } from 'chatline'
-import type { RateLimitConfig } from 'chatline'
+import { createRateLimiter } from '@nathanvale/chatline'
+import type { RateLimitConfig } from '@nathanvale/chatline'
 
 const limiter = createRateLimiter({
   requestsPerSecond: 10,
@@ -364,7 +364,7 @@ console.log(`Status: ${response.status}`)
 ### Example: Generate Config Programmatically
 
 ```typescript
-import { generateConfigContent, getDefaultConfigPath } from 'chatline'
+import { generateConfigContent, getDefaultConfigPath } from '@nathanvale/chatline'
 import fs from 'node:fs/promises'
 
 // Generate YAML config with defaults
@@ -407,7 +407,7 @@ import type {
   RateLimitConfig,
   RateLimitState,
   ApiResponse,
-} from 'chatline'
+} from '@nathanvale/chatline'
 ```
 
 ### Advanced: Custom Pipeline
@@ -420,8 +420,8 @@ import {
   detectDelta,
   mergeEnrichments,
   createRateLimiter,
-} from 'chatline'
-import type { Message, Config } from 'chatline'
+} from '@nathanvale/chatline'
+import type { Message, Config } from '@nathanvale/chatline'
 
 async function runCustomPipeline() {
   // 1. Load configuration

@@ -4,7 +4,7 @@
 	"baseBranch": "main",
 	"changelog": [
 		"@changesets/changelog-github",
-		{ "repo": "nathanvale/imessage-timeline" }
+		{ "repo": "nathanvale/chatline" }
 	],
 	"commit": false,
 	"packages": [".", "website"],

@@ -29,13 +29,13 @@ The package provides **two distinct entry points**:
 1. **CLI Entry Point**: Executable binary for command-line usage
    - **Field**: `bin`
    - **Target**: `./dist/cli.js`
-   - **Usage**: `npx chatline` or `chatline` (when installed
+   - **Usage**: `npx /chatline` or `chatline` (when installed
      globally)
 
 2. **Library Entry Point**: Module exports for programmatic usage
    - **Fields**: `main`, `exports`, `types`
    - **Target**: `./dist/index.js` (runtime), `./dist/index.d.ts` (types)
-   - **Usage**: `import { loadConfig } from 'chatline'`
+   - **Usage**: `import { loadConfig } from '@nathanvale/chatline'`
 
 ### Current Configuration Analysis
 
@@ -386,7 +386,7 @@ package name:
 
 ```typescript
 // Inside src/some-module.ts
-import { loadConfig } from 'chatline'
+import { loadConfig } from '@nathanvale/chatline'
 ```
 
 Instead of relative imports:
@@ -457,8 +457,8 @@ import { loadConfig } from '../config/loader.js'
  * Public API for chatline library
  *
  * This package can be used both as:
- * 1. CLI tool: `npx chatline --help`
- * 2. Library: `import { loadConfig } from 'chatline'`
+ * 1. CLI tool: `npx /chatline --help`
+ * 2. Library: `import { loadConfig } from '@nathanvale/chatline'`
  */
 
 // Export only public APIs
@@ -525,14 +525,14 @@ bun src/cli.ts --help
 node dist/cli.js --help
 
 # As installed package
-npx chatline --help
+npx /chatline --help
 ```
 
 ### 2. Test Library Import
 
 ```typescript
 // test-library-import.ts
-import { loadConfig } from 'chatline'
+import { loadConfig } from '@nathanvale/chatline'
 
 const config = loadConfig('path/to/config.yaml')
 console.log('Config loaded:', config)
@@ -548,7 +548,7 @@ bun test-library-import.ts
 
 ```bash
 # Ensure only exported paths work
-node -e "import('chatline').then(console.log)"           # ✅ Should work
+node -e "import('@nathanvale/chatline').then(console.log)"           # ✅ Should work
 node -e "import('chatline/config').then(console.log)"    # ❌ Should fail (not exported)
 node -e "import('chatline/package.json').then(console.log)" # ✅ Should work (explicitly exported)
 ```
@@ -586,7 +586,7 @@ node -e "import('chatline/package.json').then(console.log)" # ✅ Should work (e
 
 5. **Exports Validation**:
    ```bash
-   node --input-type=module -e "import('chatline').then(m => console.log(Object.keys(m)))"
+   node --input-type=module -e "import('@nathanvale/chatline').then(m => console.log(Object.keys(m)))"
    ```
 
 ### Package.json Final Check
@@ -645,7 +645,7 @@ node -e "import('chatline/package.json').then(console.log)" # ✅ Should work (e
 
 ### Issue 3: TypeScript Types Not Found
 
-**Symptom**: `Could not find a declaration file for module 'chatline'`
+**Symptom**: `Could not find a declaration file for module '@nathanvale/chatline'`
 
 **Solution**:
 

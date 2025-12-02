@@ -814,7 +814,7 @@ chatline enrich-ai \
 
 ```typescript
 // Clear only image_analysis, keep others
-import { clearEnrichmentByKind } from 'chatline'
+import { clearEnrichmentByKind } from '@nathanvale/chatline'
 
 for (const msg of messages) {
   if (msg.messageKind === 'media') {

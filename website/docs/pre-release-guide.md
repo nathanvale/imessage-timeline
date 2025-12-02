@@ -53,12 +53,12 @@ publishing. This allows you to:
 NORMAL MODE (OFF):
 ├─ Changesets create: 0.0.1, 0.0.2, 0.0.3
 ├─ Published with tag: @latest
-└─ Users install: npm install chatline
+└─ Users install: npm install /chatline
 
 PRE-RELEASE MODE (ON - next channel):
 ├─ Changesets create: 0.0.1-next.0, 0.0.1-next.1, 0.0.1-next.2
 ├─ Published with tag: @next
-└─ Users install: npm install chatline@next
+└─ Users install: npm install /chatline@next
 ```
 
 ### When Pre-Release Mode is On
@@ -218,9 +218,9 @@ pnpm release:snapshot:canary
 **Users install:**
 
 ```bash
-npm install chatline@canary
+npm install /chatline@canary
 # or pin specific version:
-npm install chatline@0.0.1-canary-20251116001234
+npm install /chatline@0.0.1-canary-20251116001234
 ```
 
 **When to use:**
@@ -283,9 +283,9 @@ Exit pre-mode:      0.0.1 (stable)
 **Users install:**
 
 ```bash
-npm install chatline@next
+npm install /chatline@next
 # or pin specific version:
-npm install chatline@0.0.1-next.0
+npm install /chatline@0.0.1-next.0
 ```
 
 **When to use:**
@@ -321,7 +321,7 @@ npm install chatline@0.0.1-next.0
 **Users install:**
 
 ```bash
-npm install chatline@alpha
+npm install /chatline@alpha
 ```
 
 **When to use:**
@@ -364,7 +364,7 @@ git push origin main
 pnpm publish:pre
 
 # 6. Test it
-npm install chatline@next
+npm install /chatline@next
 # Run your tests...
 ```
 
@@ -380,7 +380,7 @@ git commit -am "fix: resolve critical bug"
 pnpm release:snapshot:canary
 
 # 3. Test it
-npm install chatline@canary
+npm install /chatline@canary
 ```
 
 ---
