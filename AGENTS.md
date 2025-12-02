@@ -1,32 +1,44 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
-- Core TypeScript source lives in `src/` (pipelines, normalization, enrichment, rendering). The CLI entrypoint is `src/cli/index.ts` and bundles to `dist/bin/index.js` via Bunup.
-- Tests sit beside code under `src/**/__tests__` plus shared fixtures in `tests/helpers/` (fixtures, builders, mocks) and snapshots in `src/render/__tests__/__snapshots__/`.
-- Generated artifacts land in `dist/`; docs and the website live under `docs/` and `website/` (workspace).
-- Path aliases mirror the domain areas (e.g., `#ingest/*`, `#enrich/*`, `#render/*`) and are defined in `package.json`.
+## Project Structure & Modules
+- `src/` holds the Bun/TypeScript CLI source; `src/cli.ts` is the entry.  
+- Build artifacts land in `dist/` (CLI bundle at `dist/bin/index.js`, types at `dist/index.d.ts`).  
+- Tests live alongside code in `src/__tests__/`; fixtures go in `src/__fixtures__/`.  
+- Docs live in `website/`; automation and release logic sit in `.github/` and `.changeset/`.
 
 ## Build, Test, and Development Commands
-- `bun run dev` — run the CLI entry directly from source (fast feedback).
-- `bun run cli` — execute the built CLI bundle at `dist/bin/index.js` (after `build`).
-- `bun run build` — bundle library + CLI with Bunup into `dist/`.
-- `bun run test` / `bun run test:ci` — run the test suite recursively (CI sets `TF_BUILD=true`); `bun run test:coverage` or `bun run coverage` gathers coverage.
-- `bun run lint` / `bun run format` — Biome linting and formatting; `bun run typecheck` runs TypeScript.
-- `bun run validate` — convenience pipeline: lint → typecheck → build → tests (CI-mode).
+- `bun run build` — bundle the CLI with bunup into `dist/`.  
+- `bun run dev` — run the CLI from source for fast iteration.  
+- `bun run start` — run the built CLI (`dist/bin/index.js`).  
+- `bun test` / `bun test --coverage` — run the Vitest suite (recursive by default).  
+- `bun run lint`, `bun run format`, `bun run typecheck` — static checks (Biome + TypeScript).  
+- `bun run validate` — lint + typecheck + build + tests, mirroring CI.
 
-## Coding Style & Naming Conventions
-- TypeScript + ESM; prefer named exports and domain-oriented modules (`ingest`, `normalize`, `enrich`, `render`).
-- Biome enforces formatting (2-space indent) and lint rules; run `bun run format` before committing.
-- Tests follow `*.test.ts` naming and colocate with implementation; snapshots live under `__snapshots__`.
-- Use the established path aliases instead of relative `../../../` chains.
+## Coding Style & Naming
+- TypeScript + ESM only; prefer explicit exports and typed inputs/outputs.  
+- Use Biome defaults (2-space indent, semicolons off, single quotes).  
+- Keep functions small; favor pure helpers in `src/utils/`.  
+- Names: commands/kebab (`extract-imessages`), constants SCREAMING_SNAKE, types `PascalCase`.
 
 ## Testing Guidelines
-- Tests use the Vitest API; keep imports from `vitest` consistent.
-- Aim to maintain coverage when adding code; use `bun run test:coverage` locally.
-- Reuse fixtures/builders in `tests/helpers/` and prefer deterministic data (UTC dates where relevant).
-- For CLI behavior, add smoke coverage via `tests/smoke-test-scripts.sh` when changing commands.
+- Framework: Vitest (via Bun). Import from `vitest` and keep tests colocated under `__tests__`.  
+- Name tests after behavior: `cli.test.ts`, `timeline-merge.test.ts`, etc.  
+- Use `bun test --runInBand` if interacting with the filesystem.  
+- Add fixtures under `src/__fixtures__/` and clean up temp files in `afterEach`.  
+- Aim for coverage on new code paths; add regression tests for every bug fix.
 
-## Commit & Pull Request Guidelines
-- Follow Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, etc.); commitlint enforces this.
-- PRs should include: a concise summary of the change, linked issue (if any), testing performed (commands run), and screenshots/output for user-facing changes.
-- Keep diffs focused; update docs when interfaces, flags, or CLI output change.
+## Commit & PR Workflow
+- Commits should follow Conventional Commits (`feat:`, `fix:`, `chore:`, etc.) to satisfy commitlint.  
+- Before pushing: `bun run validate`. Stage only purposeful changes.  
+- PRs: clearly state intent, link issues, and note testing performed. Screenshots or CLI logs help for UX/output changes.  
+- Rebase or merge `origin/main` before requesting review; resolve conversations and ensure required checks are green.
+
+## Releases & Changesets
+- Changesets drive versioning and changelog entries; run `bun changeset` (or `bun run version:gen`) for every user-facing change.  
+- Pre-releases (alpha/beta/canary) rely on Changesets pre mode; exit pre mode before final release.  
+- Tagging: use `changeset publish --tag canary` for canaries; normal releases use `bun run release` with provenance enabled.
+
+## Security & Configuration
+- Keep secrets out of the repo; rely on GitHub Secrets for tokens (e.g., `NPM_TOKEN`).  
+- Prefer signed commits if available; never bypass CI checks.  
+- Use `bun pm ls` to spot dependency issues and `npm audit` for quick scans.
