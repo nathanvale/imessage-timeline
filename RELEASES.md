@@ -63,29 +63,38 @@ Suggested defaults
 **How it works:** GitHub Actions sends a cryptographically-signed OIDC token to npm. npm verifies it's really your repo/workflow, then grants temporary publish access.
 
 **Requirements:**
-- npm CLI v11.5.1+ (workflows already use this)
+- Node 24+ (includes npm 11.6+ required for OIDC)
 - GitHub-hosted runners (not self-hosted)
 - Package must exist on npm before configuring OIDC
 
-### First-time setup (bootstrap)
+### Current status
 
-1. **Create the package on npm** (one-time, use token):
-   - Generate a classic **Automation** token at: `npmjs.com/settings/<user>/tokens`
-   - Set it as `NPM_TOKEN` secret in GitHub repo settings
-   - Run the Channel Release workflow to create the package
-   - After first successful publish, proceed to step 2
+| Workflow | Trusted Publisher | Notes |
+|----------|-------------------|-------|
+| `channel-release.yml` | ✅ Configured | Manual channel releases (next/beta/rc/canary) |
+| `changesets-manage-publish.yml` | ⏳ Add when needed | Auto-publish on main merge |
+| `release.yml` | ⏳ Add when needed | Manual stable releases |
+| `alpha-snapshot.yml` | ⏳ Add when needed | Daily alpha snapshots |
 
-2. **Configure trusted publisher on npmjs.com:**
-   - Go to: `npmjs.com/package/@<scope>/<package>/access`
-   - Find "Trusted Publishers" section
-   - Add GitHub Actions with:
+To add more workflows: npmjs.com → package Settings → Trusted Publisher → Add another connection.
+
+### First-time setup (bootstrap) ✅ DONE
+
+1. **Create the package on npm** ✅:
+   - Package `@nathanvale/chatline` created via local `npm publish --tag canary`
+   - Bootstrap publish used NPM_TOKEN (one-time)
+
+2. **Configure trusted publisher on npmjs.com** ✅:
+   - Go to: [npmjs.com/package/@nathanvale/chatline/access](https://www.npmjs.com/package/@nathanvale/chatline/access)
+   - Settings → Trusted Publisher section
+   - Added GitHub Actions with:
      - **Owner:** `nathanvale`
      - **Repository:** `chatline`
-     - **Workflow filename:** `channel-release.yml` (exact match, case-sensitive!)
-     - **Environment:** leave blank
+     - **Workflow filename:** `channel-release.yml`
+     - **Environment:** (blank)
 
 3. **Delete NPM_TOKEN secret** (optional but recommended):
-   - Once OIDC is working, remove the token from GitHub secrets
+   - Once OIDC is verified working, remove the token from GitHub secrets
    - Workflows auto-detect OIDC and use it before falling back to tokens
 
 ### How workflows handle auth

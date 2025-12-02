@@ -39,14 +39,22 @@ jobs:
         uses: ./.github/actions/setup-bun
         with:
           registry-url: 'https://registry.npmjs.org'
+      - name: Setup Node for npm publish
+        if: ${{ inputs.intent == 'publish' || inputs.intent == 'snapshot' }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'  # Node 24 includes npm 11.6+ (required for OIDC trusted publishing)
+          registry-url: 'https://registry.npmjs.org/'
+
       - name: Configure npm auth for publish
         if: ${{ inputs.intent == 'publish' || inputs.intent == 'snapshot' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # npm CLI v11.5.1+ auto-detects OIDC from GitHub Actions (id-token: write permission).
+          # npm 11.6+ (Node 24) auto-detects OIDC from GitHub Actions (id-token: write permission).
           # When trusted publishing is configured on npmjs.com, no NPM_TOKEN is needed.
           # We keep NPM_TOKEN as fallback for bootstrap (first publish) or if OIDC isn't configured.
+          echo "npm version: $(npm --version)"
           if [ -n "${NPM_TOKEN:-}" ]; then
             echo "::notice::NPM_TOKEN detected; using token auth (fallback mode)."
             cat <<'EOF' > ~/.npmrc
@@ -56,7 +64,7 @@ jobs:
           EOF
           else
             echo "::notice::No NPM_TOKEN; relying on OIDC trusted publishing."
-            echo "::notice::Ensure trusted publisher is configured at npmjs.com/package/<pkg>/access"
+            echo "::notice::Ensure trusted publisher is configured at: npmjs.com → package Settings → Trusted Publisher"
           fi
       - run: bun install --frozen-lockfile
       - name: Code quality (safe fixes)

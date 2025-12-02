@@ -2,7 +2,7 @@
 # Purpose: Safely invoke `changeset publish` via `bun run release`.
 #
 # Authentication modes (in order of preference):
-# 1. OIDC Trusted Publishing (recommended) - npm CLI v11.5.1+ auto-detects OIDC from GitHub Actions
+# 1. OIDC Trusted Publishing (recommended) - npm 11.6+ (Node 24) auto-detects OIDC from GitHub Actions
 #    when `id-token: write` permission is set and trusted publisher is configured on npmjs.com.
 #    No NPM_TOKEN needed!
 # 2. NPM_TOKEN fallback - for bootstrap (first publish) or if OIDC isn't configured yet.
@@ -54,7 +54,7 @@ else
   # Primary: OIDC trusted publishing (no token needed)
   # npm CLI auto-detects OIDC from GitHub Actions when id-token: write is set
   annotate notice "No NPM_TOKEN; relying on OIDC trusted publishing."
-  annotate notice "Ensure trusted publisher is configured at: npmjs.com/package/<pkg>/access"
+  annotate notice "Ensure trusted publisher is configured at: npmjs.com → package Settings → Trusted Publisher"
 fi
 
 annotate notice "Attempting publish via 'bun run release'."
