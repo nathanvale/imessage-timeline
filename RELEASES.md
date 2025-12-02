@@ -12,6 +12,7 @@ Pre-mode switch
 
 Before you start (90 seconds)
 - Auth check: `gh auth status`; `npm whoami`.
+- CI auth: ensure repo has `NPM_TOKEN` secret and Actions can publish. Manual channel releases now write `~/.npmrc` automatically.
 - Clean branch: `git status --short --branch`.
 - On the right branch? stay on your feature branch until stable release time.
 
@@ -38,6 +39,7 @@ Stable release
 3) Publish to `latest`: `bunx changeset publish`
 
 Troubleshooting
+- “npm ERR! code ENEEDAUTH” during channel release: confirm `NPM_TOKEN` (automation scope) is set in repo secrets; the Channel Release workflow now writes `~/.npmrc` and exports `NODE_AUTH_TOKEN`, but it will still fail if the token is missing/expired.
 - “Snapshot release is not allowed in pre mode”: exit pre-mode, rerun.
 - “Commit must have verified signatures”: signatures are optional now; if re-enabled later, sign locally and push.
 - “Checks pending” on automation PRs: run `bun run lint` and `bun run test:ci` locally before pushing.

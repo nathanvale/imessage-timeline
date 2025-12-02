@@ -39,6 +39,23 @@ jobs:
         uses: ./.github/actions/setup-bun
         with:
           registry-url: 'https://registry.npmjs.org'
+      - name: Configure npm auth for publish
+        if: ${{ inputs.intent == 'publish' || inputs.intent == 'snapshot' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          TOKEN="${NODE_AUTH_TOKEN:-$NPM_TOKEN}"
+          if [ -z "$TOKEN" ]; then
+            echo "::error::NPM_TOKEN is not set; add it as a repo secret before publishing."
+            exit 1
+          fi
+          cat <<'EOF' > ~/.npmrc
+          //registry.npmjs.org/:_authToken=${TOKEN}
+          registry=https://registry.npmjs.org
+          always-auth=true
+          provenance=true
+          EOF
       - run: bun install --frozen-lockfile
       - name: Code quality (safe fixes)
         run: bun run quality-check:ci
@@ -67,6 +84,7 @@ jobs:
         if: ${{ inputs.intent == 'publish' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bun run publish:pre
@@ -74,6 +92,7 @@ jobs:
         if: ${{ inputs.intent == 'snapshot' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bun run release:snapshot:canary
