@@ -1,0 +1,56 @@
+---
+title: Release Flows
+config:
+  flowchart:
+    useMaxWidth: true
+    curve: basis
+---
+flowchart TD
+    start(("Plan release intent"))
+    checks("`Run pre-publish checks:\n- bun run build\n- bun run test:ci\n- bun run quality-check:ci\n- bun run check:types\n- bun run check:publint\n- bunx changeset status`")
+    path{"`Which release path?`"}
+
+    start --> checks --> path
+
+    path -->|"Canary experiment"| canaryStart
+    path -->|"Prerelease (next/beta/rc)"| preStart
+    path -->|"Stable (latest)"| stableStart
+
+    subgraph CANARY["Canary Snapshot (tag canary)"]
+        direction TB
+        canaryStart["Exit pre-mode\nbunx changeset pre exit"]
+        canaryVersion["Snapshot version + publish\nbunx changeset version --snapshot canary\nbunx changeset publish --tag canary"]
+        canaryOptional["Optional: re-enter pre-mode\nbunx changeset pre enter next/beta/rc"]
+        canaryWorkflow["Use channel-release.yml\nintent=snapshot (OIDC publish)"]
+        canaryStart --> canaryVersion --> canaryWorkflow
+        canaryVersion --> canaryOptional
+    end
+    canaryWorkflow --> done
+
+    subgraph PRERELEASE["Prerelease Channel (next/beta/rc)"]
+        direction TB
+        preStart["Enter channel pre-mode\nbunx changeset pre enter <channel>"]
+        preChangeset["Add/curate changesets\nbunx changeset"]
+        preVersion["Version with suffix\nbun run version:pre OR bunx changeset version"]
+        preCommit["Commit + push\n(e.g., chore: version packages)"]
+        prePublish["Publish with dist-tag\nbun run publish:pre OR bunx changeset publish --tag <channel>"]
+        preWorkflow["channel-release.yml\nintent=version/publish (manual)"]
+        preStart --> preChangeset --> preVersion --> preCommit --> prePublish --> preWorkflow
+    end
+    preWorkflow --> done
+
+    subgraph STABLE["Stable Release (latest)"]
+        direction TB
+        stableStart["Exit pre-mode\nbunx changeset pre exit"]
+        stableChangeset["Ensure pending changesets merged"]
+        stableVersion["Version packages\nbunx changeset version"]
+        stableAuto["Automation: changesets-manage-publish.yml\ncreates Version Packages PR + publish"]
+        stableManual["Manual fallback: release.yml\nquality-check + publish latest"]
+        stablePublish["Publish to npm latest\nbunx changeset publish (or via workflows)"]
+        stableStart --> stableChangeset --> stableVersion --> stablePublish
+        stableVersion --> stableAuto --> stablePublish
+        stableVersion --> stableManual --> stablePublish
+    end
+    stablePublish --> done
+
+    done(("Release complete\npackages + dist-tags updated"))
