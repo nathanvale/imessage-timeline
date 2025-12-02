@@ -7,6 +7,7 @@
 		{ "repo": "nathanvale/imessage-timeline" }
 	],
 	"commit": false,
+	"packages": [".", "website"],
 	"fixed": [],
 	"ignore": [],
 	"linked": [],
