@@ -20,9 +20,27 @@ jobs:
         uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
         with:
           egress-policy: audit
+
+      - name: Load secrets from 1Password
+        uses: 1password/load-secrets-action@581a835fb51b8e7ec56b71cf2ffddd7e68bb25e0 # v2.0.0
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          GITHUB_APP_ID: op://API Credentials/chatline-changesets-bot/App ID
+          GITHUB_APP_PRIVATE_KEY: op://API Credentials/chatline-changesets-bot/credential
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: tibdex/github-app-token@5d52bfa8d8a42cf09fcbdf4464759bda4d5f5f5c # v2.2.0
+        with:
+          app_id: ${{ env.GITHUB_APP_ID }}
+          private_key: ${{ env.GITHUB_APP_PRIVATE_KEY }}
+
       - name: Enable PR auto-merge (squash)
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const pr = context.payload.pull_request
             const res = await github.graphql(`

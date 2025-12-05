@@ -43,6 +43,22 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Load secrets from 1Password
+        uses: 1password/load-secrets-action@581a835fb51b8e7ec56b71cf2ffddd7e68bb25e0 # v2.0.0
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          GITHUB_APP_ID: op://API Credentials/chatline-changesets-bot/App ID
+          GITHUB_APP_PRIVATE_KEY: op://API Credentials/chatline-changesets-bot/credential
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: tibdex/github-app-token@5d52bfa8d8a42cf09fcbdf4464759bda4d5f5f5c # v2.2.0
+        with:
+          app_id: ${{ env.GITHUB_APP_ID }}
+          private_key: ${{ env.GITHUB_APP_PRIVATE_KEY }}
+
       - name: Publish readiness
         run: |
           echo "npm version: $(npm --version)"
@@ -60,12 +76,25 @@ jobs:
       # - open/update the "Version Packages" PR when there are pending changesets
       # - OR if this commit is the merged version commit, run the publish command
       - name: Changesets - open PR or publish
+        id: changesets
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           # Guard publish to avoid failing main when NPM_TOKEN isn't configured
           publish: bash .github/scripts/changesets-publish.sh
           commit: 'chore: version packages'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0
+
+      - name: Create GitHub Release
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Creating GitHub release for v${VERSION}"
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes-file CHANGELOG.md \
+            --verify-tag
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
