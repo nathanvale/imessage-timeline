@@ -21,6 +21,7 @@ Quick rules:
 - [Security Workflows](#security-workflows)
 - [Automation & Maintenance](#automation--maintenance)
 - [Branch Protection Strategy](#branch-protection-strategy)
+- [GitHub App Authentication](#github-app-authentication)
 - [Common Patterns](#common-patterns)
 - [Troubleshooting](#troubleshooting)
 - [Best Practices](#best-practices)
@@ -41,6 +42,7 @@ Quick rules:
 | Quality check (CI) | `bun run quality-check:ci` |
 | Trigger PR checks | Push to PR branch |
 | Create release | See [RELEASES.md](./RELEASES.md) |
+| Bot PR stuck? | See [GitHub App Authentication](#github-app-authentication) |
 
 ---
 
@@ -251,7 +253,7 @@ See [RELEASES.md](./RELEASES.md) for complete release workflow documentation.
 - **Auto-creates "Version Packages" PR** when changesets exist
 - **Auto-publishes to npm** when Version Packages PR is merged
 - **Uses OIDC trusted publishing** (no NPM_TOKEN needed)
-- **Limitation**: Bot PRs don't trigger required checks ([see Troubleshooting](#bot-prs-stuck))
+- **Uses GitHub App authentication** to trigger workflows on bot PRs ([see GitHub App Authentication](#github-app-authentication))
 
 ### Channel Release (channel-release.yml)
 - **Manual workflow** for prerelease channels (next/beta/rc/canary)
@@ -366,7 +368,7 @@ See [RELEASES.md](./RELEASES.md) for complete release workflow documentation.
 
 **Action**: Enable auto-merge with squash method
 
-**Known issue**: Required status checks block merge ([see Troubleshooting](#bot-prs-stuck))
+**Uses GitHub App authentication** to trigger workflows ([see GitHub App Authentication](#github-app-authentication))
 
 ---
 
@@ -402,22 +404,109 @@ See [RELEASES.md](./RELEASES.md) for complete release workflow documentation.
 
 **Why**: [GitHub security feature](https://github.com/changesets/action/issues/187) prevents recursive workflow runs
 
-**Solutions**:
+**✅ Current Solution: GitHub App Authentication**
 
-1. **Use only gate job** (current approach) ✅
+We use GitHub App tokens instead of `GITHUB_TOKEN` to trigger workflows on bot PRs. See [GitHub App Authentication](#github-app-authentication) for complete details.
+
+**Alternative Solutions** (not currently used):
+
+1. **Use only gate job**
    - Gate job doesn't need to run on bot PRs
    - Bot PRs are auto-generated, don't need validation
+   - Less consistent (special case handling)
 
-2. **GitHub App Token** (long-term solution)
-   - Use `tibdex/github-app-token` instead of `GITHUB_TOKEN`
-   - Triggers all workflows normally
-   - [Reference](https://github.com/marketplace/actions/github-app-token)
-
-3. **Ruleset Exemptions** (alternative)
+2. **Ruleset Exemptions**
    - Exempt `github-actions[bot]` from required checks
    - [New GitHub feature](https://github.blog/changelog/2025-09-10-github-ruleset-exemptions-and-repository-insights-updates/)
+   - Not as clean as GitHub App approach
 
 **Cross-reference**: [RELEASES.md Troubleshooting](./RELEASES.md#troubleshooting) for detailed solutions
+
+---
+
+## GitHub App Authentication
+
+### Why GitHub App Instead of GITHUB_TOKEN?
+
+**Problem**: `GITHUB_TOKEN` can't trigger workflows on bot-created PRs due to GitHub's security model preventing recursive workflow runs.
+
+**Specific Issue**: The "Version Packages" PR created by changesets doesn't trigger required status checks, leaving the PR stuck "waiting for status" and blocking auto-merge.
+
+**Solution**: GitHub App acts like a "robot account" with these advantages:
+- ✅ Can trigger workflows normally (not subject to bot restrictions)
+- ✅ Scoped permissions (only what's needed: Contents, Pull requests, Workflows)
+- ✅ Better audit trail (all actions logged as "chatline-changesets-bot[bot]")
+- ✅ One app per repo (isolated, easier to revoke)
+
+### Current Setup
+
+**App Details**:
+- **Name**: chatline-changesets-bot
+- **App ID**: 2399601 (stored in 1Password `API Credentials/chatline-changesets-bot`)
+- **Private Key**: Stored in 1Password (PEM format in credential field)
+- **Permissions**: Contents (RW), Pull requests (RW), Workflows (RW)
+- **Installed on**: nathanvale/chatline
+
+**CI/CD Access**:
+- **Method**: 1Password Service Account (`GitHub Actions - chatline`)
+- **Token**: `OP_SERVICE_ACCOUNT_TOKEN` (GitHub repository secret)
+- **Vault Access**: Read-only access to `API Credentials` vault
+- **Workflows**: Load secrets from 1Password → Generate app token → Use in workflows
+
+**Workflow Integration**:
+```yaml
+- name: Load secrets from 1Password
+  uses: 1password/load-secrets-action@v2.0.0
+  with:
+    export-env: true
+  env:
+    OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    GITHUB_APP_ID: op://API Credentials/chatline-changesets-bot/App ID
+    GITHUB_APP_PRIVATE_KEY: op://API Credentials/chatline-changesets-bot/credential
+
+- name: Generate GitHub App token
+  id: app-token
+  uses: tibdex/github-app-token@v2.2.0
+  with:
+    app_id: ${{ env.GITHUB_APP_ID }}
+    private_key: ${{ env.GITHUB_APP_PRIVATE_KEY }}
+
+# Then use the token in place of secrets.GITHUB_TOKEN:
+env:
+  GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+```
+
+**Workflows Using GitHub App**:
+1. `changesets-manage-publish.yml` - Creates/updates Version Packages PR and publishes
+2. `version-packages-auto-merge.yml` - Enables auto-merge on Version Packages PR
+3. `channel-release.yml` - Pre-release channel management
+4. `release.yml` - Manual stable releases
+
+### Security Considerations
+
+**What's Protected**:
+- ✅ PEM private key encrypted in 1Password (API Credentials vault)
+- ✅ Service account token encrypted in GitHub Secrets
+- ✅ App permissions scoped (can't access other repos)
+- ✅ Audit trail: All actions logged with bot identity
+
+**Public Information** (not secret):
+- App ID: 2399601
+- Client ID: Visible in GitHub UI
+
+**Credential Rotation**:
+- 📅 PEM key: Rotate annually (set reminder in 1Password)
+- 📅 Service account token: Rotate annually or if compromised
+- 📅 Expires: 2026-12-03 (1 year from creation)
+
+**Emergency Revocation**:
+1. Suspend app: https://github.com/settings/apps/chatline-changesets-bot
+2. Revoke service account: 1Password → Developer → Service Accounts
+3. Delete GitHub secret: `gh secret delete OP_SERVICE_ACCOUNT_TOKEN`
+
+### Setting Up for Another Repo
+
+See: [docs/GITHUB_APP_SETUP_TEMPLATE.md](./docs/GITHUB_APP_SETUP_TEMPLATE.md) for reusable setup instructions.
 
 ---
 
@@ -517,10 +606,16 @@ permissions:
 
 **Cause**: `GITHUB_TOKEN` doesn't trigger workflows ([GitHub limitation](https://github.com/changesets/action/issues/187))
 
-**Solutions**:
-1. **Manually merge**: `gh pr review 51 --approve && gh pr merge 51 --squash`
-2. **Update branch protection**: Remove individual required checks, keep only gate job
-3. **Use GitHub App token**: Update `changesets-manage-publish.yml` ([guide](https://github.com/marketplace/actions/github-app-token))
+**✅ Solution**: This repo uses GitHub App authentication to solve this problem. See [GitHub App Authentication](#github-app-authentication).
+
+**If workflows still don't trigger**:
+1. Verify `OP_SERVICE_ACCOUNT_TOKEN` is set in GitHub Secrets
+2. Check workflow logs for "Load secrets from 1Password" and "Generate GitHub App token" steps
+3. Verify GitHub App has Workflows permission
+4. See [GitHub App Authentication → Troubleshooting](#troubleshooting)
+
+**Emergency fallback**:
+- **Manually merge**: `gh pr review <PR#> --approve && gh pr merge <PR#> --squash`
 
 **Cross-reference**: [RELEASES.md Troubleshooting](./RELEASES.md#troubleshooting)
 

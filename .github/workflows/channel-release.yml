@@ -46,6 +46,22 @@ jobs:
           node-version: '24'  # Node 24 includes npm 11.6+ (required for OIDC trusted publishing)
           registry-url: 'https://registry.npmjs.org/'
 
+      - name: Load secrets from 1Password
+        uses: 1password/load-secrets-action@581a835fb51b8e7ec56b71cf2ffddd7e68bb25e0 # v2.0.0
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          GITHUB_APP_ID: op://API Credentials/chatline-changesets-bot/App ID
+          GITHUB_APP_PRIVATE_KEY: op://API Credentials/chatline-changesets-bot/credential
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: tibdex/github-app-token@5d52bfa8d8a42cf09fcbdf4464759bda4d5f5f5c # v2.2.0
+        with:
+          app_id: ${{ env.GITHUB_APP_ID }}
+          private_key: ${{ env.GITHUB_APP_PRIVATE_KEY }}
+
       - name: Configure npm auth for publish
         if: ${{ inputs.intent == 'publish' || inputs.intent == 'snapshot' }}
         env:
@@ -95,7 +111,7 @@ jobs:
         env:
           # NPM_TOKEN only needed if OIDC trusted publishing not configured
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           bun run publish:pre
 
@@ -110,12 +126,12 @@ jobs:
             --prerelease \
             --verify-tag
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Canary snapshot publish
         if: ${{ inputs.intent == 'snapshot' }}
         env:
           # NPM_TOKEN only needed if OIDC trusted publishing not configured
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           bun run release:snapshot:canary
